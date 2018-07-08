@@ -19,13 +19,13 @@ public class ObservationDataDeserializer implements Deserializer<KafkaObservatio
      * Default constructor
      */
     public ObservationDataDeserializer() {
-    	
+    	this.logger = LoggerFactory.getLogger(ObservationDataDeserializer.class);
     }
 
     /**
      * Documents the deserialization of our objects
      */
-    private static Logger logger = LoggerFactory.getLogger(ObservationDataDeserializer.class);
+    private Logger logger = null;
 
     /**
      * Closes this object
