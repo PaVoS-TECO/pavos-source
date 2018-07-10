@@ -39,7 +39,6 @@ public class ObservationDataDeserializer implements Deserializer<KafkaObservatio
      * @param configs The Configuration
      * @param isKey A variable, telling us whether we want to configure the key or the value
      */
-	@Override
 	public void configure(Map<String, ?> configs, boolean isKey) {
 		// TODO Auto-generated method stub
 	}
@@ -50,7 +49,6 @@ public class ObservationDataDeserializer implements Deserializer<KafkaObservatio
      * @param data These are our serialized bytes
      * @return A serializable object that contains the observed data from kafka
      */
-	@Override
 	public KafkaObservationData deserialize(String topic, byte[] data) {
 		KafkaObservationData observationData = null;
 
