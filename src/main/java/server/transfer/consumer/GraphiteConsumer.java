@@ -13,20 +13,20 @@ import org.apache.kafka.common.errors.WakeupException;
 import server.transfer.config.GraphiteConfig;
 import server.transfer.config.KafkaConfig;
 import server.transfer.send.Sender;
-import server.transfer.serialization.KafkaObservationData;
+import server.transfer.serialization.ObservationData;
 import server.transfer.serialization.ObservationDataDeserializer;
 
 /**
  * Receives the data from Kafka and sends it to Graphite
  */
-public class KafkaToGraphiteConsumer extends Consumer {
+public class GraphiteConsumer extends Consumer {
 	
 	private boolean sendLoop = true;
 
     /**
      * Default constructor
      */
-	public KafkaToGraphiteConsumer(List<String> topics, Sender sender) {
+	public GraphiteConsumer(List<String> topics, Sender sender) {
     	this.topics = topics;
     	this.sender = sender;
     }
@@ -36,7 +36,7 @@ public class KafkaToGraphiteConsumer extends Consumer {
      */
     public void run() {
     	Properties consumerProperties = getConsumerProperties();
-        consumer = new KafkaConsumer<String, KafkaObservationData>(consumerProperties);
+        consumer = new KafkaConsumer<String, ObservationData>(consumerProperties);
         consumer.subscribe(topics);
 
         if (GraphiteConfig.getStartFromBeginning()) {
@@ -46,7 +46,7 @@ public class KafkaToGraphiteConsumer extends Consumer {
 
         try {
             while (sendLoop) {
-                ConsumerRecords<String, KafkaObservationData> records = consumer.poll(100);
+                ConsumerRecords<String, ObservationData> records = consumer.poll(100);
 
                 if (!records.isEmpty()) {
                     sender.send(records);
@@ -83,7 +83,7 @@ public class KafkaToGraphiteConsumer extends Consumer {
      * Gathers the nessecary properties, that are required for data-reception and data-processing
      * @return The nessecary properties, that are required for data-reception and data-processing
      */
-    private Properties getConsumerProperties() {
+    public Properties getConsumerProperties() {
     	Properties configProperties = new Properties();
         configProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfig.getKafkaHostName());
         configProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");

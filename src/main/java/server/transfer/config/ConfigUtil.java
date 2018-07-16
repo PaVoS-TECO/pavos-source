@@ -3,7 +3,11 @@ package server.transfer.config;
 /**
  * A utility class with all sorts of useful features for Config classes in this package.
  */
-public class ConfigUtil {
+public final class ConfigUtil {
+	
+	private ConfigUtil() {
+		
+	}
 	
 	/**
      * Returns an environment-variable

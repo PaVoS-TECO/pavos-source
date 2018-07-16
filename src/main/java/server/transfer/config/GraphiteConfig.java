@@ -3,14 +3,18 @@ package server.transfer.config;
 /**
  * The specified configuration-object that stores all needed configurations for the connection from Kafka to Graphite
  */
-public class GraphiteConfig {
+public final class GraphiteConfig {
+	
+	private GraphiteConfig() {
+		
+	}
 	
     /**
      * Returns whether a start from the beginning is required
      * @return startFromBeginning Tells us whether a start from the beginning is required
      */
     public static boolean getStartFromBeginning() {
-    	return "true".equals(System.getenv("WM_GRAPHITE_FROM_BEGINNING"));
+    	return "true".equals(ConfigUtil.getEnvironmentVariable("WM_GRAPHITE_FROM_BEGINNING", "false"));
     }
     
     /**

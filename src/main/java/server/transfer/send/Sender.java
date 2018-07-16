@@ -4,7 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import server.transfer.serialization.KafkaObservationData;
+import server.transfer.serialization.ObservationData;
 
 /**
  * Reformats the data and sends it to another component
@@ -20,6 +20,6 @@ public abstract class Sender {
      * Sends the resulting data to the specified component
      * @param records Multiple records of data from Kafka
      */
-    public abstract void send(ConsumerRecords<String, KafkaObservationData> records);
+    public abstract void send(ConsumerRecords<String, ObservationData> records);
 
 }

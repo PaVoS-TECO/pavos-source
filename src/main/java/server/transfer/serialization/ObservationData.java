@@ -3,7 +3,7 @@ package server.transfer.serialization;
 /**
  * A serializable object that contains the observed data from kafka
  */
-public class KafkaObservationData implements java.io.Serializable {
+public class ObservationData implements java.io.Serializable {
 
     /**
 	 * The unique identifier of this object
@@ -13,7 +13,7 @@ public class KafkaObservationData implements java.io.Serializable {
 	/**
      * Default constructor
      */
-    public KafkaObservationData() {
+    public ObservationData() {
     }
 
     /**

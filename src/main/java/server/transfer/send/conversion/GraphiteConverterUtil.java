@@ -11,12 +11,16 @@ import org.python.core.PyString;
 import org.python.core.PyTuple;
 import org.slf4j.Logger;
 
-import server.transfer.serialization.KafkaObservationData;
+import server.transfer.serialization.ObservationData;
 
 /**
  * Provides the functionality to create python metrics and log the results
  */
-public class GraphiteConverterUtil {
+public final class GraphiteConverterUtil {
+	
+	private GraphiteConverterUtil() {
+		
+	}
 	
     /**
      * Transforms a property into a Graphite-readable format with python
@@ -25,7 +29,7 @@ public class GraphiteConverterUtil {
      * @param name The name of the observed property
      * @param value The value the sensor registrated to the specified property
      */
-    protected static void addFloatMetric(ConsumerRecord<String, KafkaObservationData> record, PyList list, String name, String value, Logger logger) {
+    protected static void addFloatMetric(ConsumerRecord<String, ObservationData> record, PyList list, String name, String value, Logger logger) {
     	if (value == null) {
             // Some values are optional or not giving data due to broken sensors etc
             return;

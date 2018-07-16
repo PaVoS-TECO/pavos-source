@@ -12,7 +12,7 @@ import org.python.modules.cPickle;
 
 import server.transfer.config.GraphiteConfig;
 import server.transfer.send.conversion.GraphiteConverter;
-import server.transfer.serialization.KafkaObservationData;
+import server.transfer.serialization.ObservationData;
 
 /**
  * Reformats the data and sends it to Graphite
@@ -26,7 +26,7 @@ public class GraphiteSender extends Sender {
     }
 
     @Override
-    public void send(ConsumerRecords<String, KafkaObservationData> records) {
+    public void send(ConsumerRecords<String, ObservationData> records) {
         try (Socket socket = new Socket(GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort()))  {
             PyList list = new PyList();
 

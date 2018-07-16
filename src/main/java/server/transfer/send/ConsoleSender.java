@@ -6,7 +6,7 @@ import org.python.core.PyString;
 import org.python.modules.cPickle;
 
 import server.transfer.send.conversion.GraphiteConverter;
-import server.transfer.serialization.KafkaObservationData;
+import server.transfer.serialization.ObservationData;
 
 
 /**
@@ -15,7 +15,7 @@ import server.transfer.serialization.KafkaObservationData;
 public class ConsoleSender extends Sender {
 
 	@Override
-	public void send(ConsumerRecords<String, KafkaObservationData> records) {
+	public void send(ConsumerRecords<String, ObservationData> records) {
 		PyList list = new PyList();
 
 		records.forEach(record -> {
