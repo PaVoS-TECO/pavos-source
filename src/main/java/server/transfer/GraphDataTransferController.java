@@ -3,7 +3,8 @@ package server.transfer;
 import java.util.Collection;
 
 /**
- * The Control-Unit in charge of creating and destroying KafkaToGraphiteConsumer as well as passing on the users request.
+ * The Control-Unit in charge of creating and destroying KafkaToGraphiteConsumer
+ *  as well as passing on the users request.
  */
 public class GraphDataTransferController {
 
@@ -17,17 +18,19 @@ public class GraphDataTransferController {
     /**
      * Starts data-transfer
      * @param topics Kafka-Topics that should be subscribed
-     * @param UIDS The unique identifiers, that tell us which data should be transfered. Everything else will be ignored.
+     * @param uids The unique identifiers, that tell us which data
+     *  should be transfered. Everything else will be ignored.
      */
-    public void startDataTransfer(Collection<String> topics, Collection<String> UIDS) {
+    public void startDataTransfer(Collection<String> topics, Collection<String> uids) {
         // TODO implement here
     }
 
     /**
      * Stoppt den Datentransfer.
-     * @param UIDS The unique identifiers, that tell us which data should no longer be transfered. Everything else will be ignored.
+     * @param uids The unique identifiers, that tell us which data should
+     *  no longer be transfered. Everything else will be ignored.
      */
-    public void stopDataTransfer(Collection<String> UIDS) {
+    public void stopDataTransfer(Collection<String> uids) {
         // TODO implement here
     }
 

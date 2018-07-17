@@ -28,8 +28,10 @@ public final class GraphiteConverterUtil {
      * @param list The list of metrics that were created from our data with python
      * @param name The name of the observed property
      * @param value The value the sensor registrated to the specified property
+     * @param logger The logger documents 
      */
-    protected static void addFloatMetric(ConsumerRecord<String, ObservationData> record, PyList list, String name, String value, Logger logger) {
+    protected static void addFloatMetric(ConsumerRecord<String, ObservationData> record, 
+    		PyList list, String name, String value, Logger logger) {
     	if (value == null) {
             // Some values are optional or not giving data due to broken sensors etc
             return;

@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ObservationDataDeserializerTests {
 
-	private static boolean print = false;
+	private static boolean print = true;
 	
 	@Test
 	public void deserialize_serializedObjectCheck_returnKafkaObservationData() {

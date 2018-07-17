@@ -19,9 +19,11 @@ public final class GraphiteConverter {
      * Adds the sensor-observed property 'particulate matter' to the collection of properties that will be sent
      * @param record The record of data that will be sent
      * @param list The list of metrics that were created from our data with python
+     * @param logger Documents the metrics created by the {@link GraphiteConverterUtil}
      */
     public static void addPM(ConsumerRecord<String, ObservationData> record, PyList list, Logger logger) {
-    	GraphiteConverterUtil.addFloatMetric(record, list, "particulateMatter", record.value().particulateMatter, logger);
+    	GraphiteConverterUtil.addFloatMetric(record, list, "particulateMatter", 
+    			record.value().particulateMatter, logger);
     }
 	
 }

@@ -25,6 +25,8 @@ public class GraphiteConsumer extends Consumer {
 
     /**
      * Default constructor
+     * @param topics The topics that the consumer should subscribe to
+     * @param sender Sends the data to a specified component, normally a {@link GraphiteSender}
      */
 	public GraphiteConsumer(List<String> topics, Sender sender) {
     	this.topics = topics;
@@ -52,11 +54,9 @@ public class GraphiteConsumer extends Consumer {
                     sender.send(records);
                 }
             }
-        }
-        catch(WakeupException ex) {
+        } catch (WakeupException ex) {
             logger.info("Consumer has received instruction to wake up");
-        }
-        finally {
+        } finally {
             logger.info("Consumer closing...");
             consumer.close();
             shutdownLatch.countDown();
@@ -86,8 +86,10 @@ public class GraphiteConsumer extends Consumer {
     public Properties getConsumerProperties() {
     	Properties configProperties = new Properties();
         configProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfig.getKafkaHostName());
-        configProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-        configProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ObservationDataDeserializer.class.getName());
+        configProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, 
+        		"org.apache.kafka.common.serialization.StringDeserializer");
+        configProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, 
+        		ObservationDataDeserializer.class.getName());
         configProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "GraphiteConsumers");
         configProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, "GraphiteConsumer");
         configProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

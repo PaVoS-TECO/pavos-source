@@ -19,32 +19,32 @@ import server.transfer.serialization.ObservationData;
  */
 public class GraphiteSender extends Sender {
 
-    /**
-     * Default constructor
-     */
-    public GraphiteSender() {
-    }
+	/**
+	 * Default constructor
+	 */
+	public GraphiteSender() {
+	}
 
-    @Override
-    public void send(ConsumerRecords<String, ObservationData> records) {
-        try (Socket socket = new Socket(GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort()))  {
-            PyList list = new PyList();
+	@Override
+	public void send(ConsumerRecords<String, ObservationData> records) {
+		try (Socket socket = new Socket(GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort())) {
+			PyList list = new PyList();
 
-            records.forEach(record -> {
-                GraphiteConverter.addPM(record, list, logger);
-            });
+			records.forEach(record -> {
+				GraphiteConverter.addPM(record, list, logger);
+			});
 
-            PyString payload = cPickle.dumps(list);
-            byte[] header = ByteBuffer.allocate(4).putInt(payload.__len__()).array();
+			PyString payload = cPickle.dumps(list);
+			byte[] header = ByteBuffer.allocate(4).putInt(payload.__len__()).array();
 
-            OutputStream outputStream = socket.getOutputStream();
-            outputStream.write(header);
-            outputStream.write(payload.toBytes());
-            outputStream.flush();
+			OutputStream outputStream = socket.getOutputStream();
+			outputStream.write(header);
+			outputStream.write(payload.toBytes());
+			outputStream.flush();
 
-        } catch (IOException e) {
-            logger.error("Exception thrown writing data to graphite: " + e);
-        }
-    }
+		} catch (IOException e) {
+			logger.error("Exception thrown writing data to graphite: " + e);
+		}
+	}
 
 }

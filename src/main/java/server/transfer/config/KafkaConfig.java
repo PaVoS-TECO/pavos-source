@@ -1,7 +1,8 @@
 package server.transfer.config;
 
 /**
- * The specified configuration-object that stores all needed configurations for the connection from Kafka to another specified component
+ * The specified configuration-object that stores all needed configurations
+ *  for the connection from Kafka to another specified component
  */
 public final class KafkaConfig {
 	

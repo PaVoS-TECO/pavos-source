@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Deserializes KafkaObservationData objects
- * @param <T>
  */
 public class ObservationDataDeserializer implements Deserializer<ObservationData> {
 
