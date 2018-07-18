@@ -43,8 +43,8 @@ public final class GraphiteConverterUtil {
         PyInteger timestamp = new PyInteger((int) dateTime.toEpochSecond(ZoneOffset.UTC));
         PyFloat metricValue = new PyFloat(Double.parseDouble(value));
         PyTuple metric = new PyTuple(metricName, new PyTuple(timestamp, metricValue));
+        list.append(metric);
         logMetric(logger, metric);
-        list.add(metric);
     }
 
     /**

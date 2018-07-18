@@ -1,5 +1,6 @@
 package server.transfer.send;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,15 +12,18 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import server.transfer.serialization.ObservationData;
 
 public class GraphiteSenderTests {
 	
-	//private static boolean print = false;
+	private static boolean print = true;
 	private static final String topic = "GraphiteSenderTest";
 	
 	@Test
-	public void test() {
+	public void connectAndSendData_connectionIsReady_sendDataToGraphite() {
 		Map<TopicPartition, List<ConsumerRecord<String, ObservationData>>> recordsMap 
 		= new HashMap<TopicPartition, List<ConsumerRecord<String, ObservationData>>>();
 		List<ConsumerRecord<String, ObservationData>> recordList = new ArrayList<ConsumerRecord<String, ObservationData>>();
@@ -30,13 +34,43 @@ public class GraphiteSenderTests {
 		recordList.add(record);
 		recordsMap.put(new TopicPartition(topic, 0), recordList);
 		ConsumerRecords<String, ObservationData> records = new ConsumerRecords<String, ObservationData>(recordsMap);
+		
+		if (print) {
+			ObjectMapper mapper = new ObjectMapper();
+			String sData = null;
+			try {
+				sData = mapper.writeValueAsString(data);
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Serialized data as String: " + sData);
+		}
+		
 		GraphiteSender sender = new GraphiteSender();
 		sender.send(records);
 	}
 	
 	private ObservationData setupCorrectData(ObservationData data) {
-		return setupData(data, "8848", "Mt.Everest_27-59-16_86-55-29", "Mt.Everest"
-				, LocalDateTime.now().toString(), "0");
+		int i = (int) (Math.random() * 4);
+		if (print) System.out.println(i);
+		switch (i) {
+		case 0:
+			return setupData(data, "8848", "Mt.Everest_27-59-16_86-55-29", "Mt.Everest", getDateString(), "0");
+		case 1:
+			return setupData(data, "96", "Mannheim_49-29-15_8-27-58", "Mannheim", getDateString(), "5");
+		case 2:
+			return setupData(data, "115", "Karlsruhe_49-0-25_8-24-13", "Karlsruhe", getDateString(), "6");
+		case 3:
+			return setupData(data, "96", "Berlin_52-31-12_13-24-18", "Berlin", getDateString(), "15");
+		case 4:
+			return setupData(data, "56", "Hannover_52-22-33_9-43-55", "Hannover", getDateString(), "3");
+		default:
+			return null;
+		}
+	}
+	
+	private String getDateString() {
+		return LocalDateTime.now(Clock.systemUTC()).toString();
 	}
 	
 	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String particulateMatter) {
