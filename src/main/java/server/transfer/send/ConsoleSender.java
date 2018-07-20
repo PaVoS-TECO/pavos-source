@@ -5,8 +5,8 @@ import org.python.core.PyList;
 import org.python.core.PyString;
 import org.python.modules.cPickle;
 
-import server.transfer.send.conversion.GraphiteConverter;
-import server.transfer.serialization.ObservationData;
+import server.transfer.convert.GraphiteConverter;
+import server.transfer.data.ObservationData;
 
 
 /**

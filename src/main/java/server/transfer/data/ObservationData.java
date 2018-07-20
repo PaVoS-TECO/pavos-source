@@ -1,4 +1,4 @@
-package server.transfer.serialization;
+package server.transfer.data;
 
 /**
  * A serializable object that contains the observed data from kafka

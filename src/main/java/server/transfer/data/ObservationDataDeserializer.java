@@ -1,4 +1,4 @@
-package server.transfer.serialization;
+package server.transfer.data;
 
 import java.io.IOException;
 import java.util.Map;

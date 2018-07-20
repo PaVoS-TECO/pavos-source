@@ -12,9 +12,9 @@ import org.apache.kafka.common.errors.WakeupException;
 
 import server.transfer.config.GraphiteConfig;
 import server.transfer.config.KafkaConfig;
+import server.transfer.data.ObservationData;
+import server.transfer.data.ObservationDataDeserializer;
 import server.transfer.send.Sender;
-import server.transfer.serialization.ObservationData;
-import server.transfer.serialization.ObservationDataDeserializer;
 
 /**
  * Receives the data from Kafka and sends it to Graphite

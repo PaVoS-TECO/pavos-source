@@ -1,4 +1,4 @@
-package server.transfer.send.conversion;
+package server.transfer.convert.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -11,14 +11,14 @@ import org.python.core.PyString;
 import org.python.core.PyTuple;
 import org.slf4j.Logger;
 
-import server.transfer.serialization.ObservationData;
+import server.transfer.data.ObservationData;
 
 /**
  * Provides the functionality to create python metrics and log the results
  */
-public final class GraphiteConverterUtil {
+public final class PythonMetricUtil {
 	
-	private GraphiteConverterUtil() {
+	private PythonMetricUtil() {
 		
 	}
 	
@@ -30,7 +30,7 @@ public final class GraphiteConverterUtil {
      * @param value The value the sensor registrated to the specified property
      * @param logger The logger documents 
      */
-    protected static void addFloatMetric(ConsumerRecord<String, ObservationData> record, 
+    public static void addFloatMetric(ConsumerRecord<String, ObservationData> record, 
     		PyList list, String name, String value, Logger logger) {
     	if (value == null) {
             // Some values are optional or not giving data due to broken sensors etc

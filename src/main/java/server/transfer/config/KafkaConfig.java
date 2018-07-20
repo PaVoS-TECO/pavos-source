@@ -1,5 +1,7 @@
 package server.transfer.config;
 
+import server.transfer.config.util.EnvironmentUtil;
+
 /**
  * The specified configuration-object that stores all needed configurations
  *  for the connection from Kafka to another specified component
@@ -15,7 +17,7 @@ public final class KafkaConfig {
      * @return name The host-name of Kafka
      */
     public static String getKafkaHostName() {
-    	return ConfigUtil.getEnvironmentVariable("WM_KAFKA_HOST", "localhost:9092");
+    	return EnvironmentUtil.getEnvironmentVariable("WM_KAFKA_HOST", "localhost:9092");
     }
 
 }

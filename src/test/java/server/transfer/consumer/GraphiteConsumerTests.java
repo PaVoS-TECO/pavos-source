@@ -16,8 +16,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.transfer.config.KafkaConfig;
+import server.transfer.data.ObservationData;
 import server.transfer.send.ConsoleSender;
-import server.transfer.serialization.ObservationData;
 
 public class GraphiteConsumerTests {
 

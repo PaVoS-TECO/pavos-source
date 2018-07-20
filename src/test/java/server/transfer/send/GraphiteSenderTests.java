@@ -15,7 +15,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import server.transfer.serialization.ObservationData;
+import server.transfer.data.ObservationData;
 
 public class GraphiteSenderTests {
 	
