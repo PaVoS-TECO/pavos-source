@@ -39,8 +39,13 @@ public class ObservationData implements java.io.Serializable {
     // Attributes listed below here are observed properties //
     
     /**
-     * The particulate matter (PM) value that was registered by the sensor.
+     * The particulate matter (PM) value that was registered by the sensor in the PM10 format.
      */
-    public String particulateMatter;
+    public String particulateMatter_PM10;
+    
+    /**
+     * The particulate matter (PM) value that was registered by the sensor in the PM2.5 format.
+     */
+    public String particulateMatter_PM2p5;
 
 }

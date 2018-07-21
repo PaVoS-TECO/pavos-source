@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
 import server.transfer.data.ObservationData;
-import server.transfer.data.util.ObservationDataUtil;
 import server.transfer.send.GraphiteSender;
 import server.transfer.send.util.TimeUtil;
 
@@ -27,7 +26,7 @@ public class RandomValueGraphiteSender {
 						data = generateRandomData(data, MAX_VALUE);
 						
 						try {
-							TimeUnit.SECONDS.sleep(9);
+							TimeUnit.MILLISECONDS.sleep(9900);;
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -47,9 +46,16 @@ public class RandomValueGraphiteSender {
 			}
 			
 			private ObservationData generateRandomData(ObservationData data, int maxValue) {
-				int value = (int) (Math.random() * maxValue);
+				int value_PM10 = (int) (Math.random() * maxValue);
+				int value_PM2p5 = (int) (Math.random() * maxValue);
 				data = new ObservationData();
-				return ObservationDataUtil.setupData(data, "", "", "", TimeUtil.getDateTimeString(), String.valueOf(value));
+				data.locationElevation = "";
+				data.locationID = "";
+				data.locationName = "";
+				data.observationDate = TimeUtil.getDateTimeString();
+				data.particulateMatter_PM10 = String.valueOf(value_PM10);
+				data.particulateMatter_PM2p5 = String.valueOf(value_PM2p5);
+				return data;
 			}
 			
 		});
