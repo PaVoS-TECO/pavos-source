@@ -13,10 +13,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationDataDeserializer;
+import server.transfer.data.ObservationType;
 
 public class ObservationDataDeserializerTests {
 
-	private static boolean print = true;
+	private static boolean print = false;
 	
 	@Test
 	public void deserialize_serializedObjectCheck_returnKafkaObservationData() {
@@ -54,53 +55,29 @@ public class ObservationDataDeserializerTests {
 		System.out.println("locationID: " + result.locationID);
 		System.out.println("locationName: " + result.locationName);
 		System.out.println("observationDate: " + result.observationDate);
-		System.out.println("particulateMatter: " + result.particulateMatter);
+		System.out.println("particulateMatter: " + result.observations.get(
+				ObservationType.PARTICULATEMATTER_PM10.toString()));
 		}
 		
 		assert(result.locationElevation.equals(data.locationElevation)
 				&& result.locationID.equals(data.locationID)
 				&& result.locationName.equals(data.locationName)
 				&& result.observationDate.equals(data.observationDate)
-				&& result.particulateMatter.equals(data.particulateMatter));
-	}
-	
-	@Test
-	public void deserialize_undeserializableString_logIOException() {
-		if (print) System.out.println("Running test: 'deserialization of an undeserializable String'");
-		String sData = "alksdhnlqwn asdoi aopwqj sadnlkv";
-		
-		ObjectMapper mapper = new ObjectMapper();
-		boolean canSerialize = mapper.canSerialize(String.class);
-		if (print) System.out.println("Mapper can serialize object: " + canSerialize);
-		assert(canSerialize == true);
-		
-		byte[] bData = null;
-		try {
-			bData = mapper.writeValueAsBytes(sData);
-		} catch (JsonProcessingException e) {
-			fail("JsonProcessingException thrown");
-		}
-		if (print) {
-			System.out.println("Serialized data as String: " + sData);
-			System.out.println("Serialized data as byte array: " + bData);
-		}
-		
-		Deserializer<ObservationData> des = new ObservationDataDeserializer();
-		des.configure(new HashMap<String, ObservationData>(), false);
-		des.deserialize("deserializationTest", bData);
-		des.close();
+				&& result.observations.get(ObservationType.PARTICULATEMATTER_PM10.toString())
+				.equals(data.observations.get(ObservationType.PARTICULATEMATTER_PM10.toString())));
 	}
 	
 	private ObservationData setupCorrectData(ObservationData data) {
 		return setupData(data, "8848", "Mt.Everest_27-59-16_86-55-29", "Mt.Everest", new Date().toString(), "0");
 	}
 	
-	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String particulateMatter) {
+	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String pM10) {
 		data.locationElevation = locationElevation;
 		data.locationID = locationID;
 		data.locationName = locationName;
 		data.observationDate = date;
-		data.particulateMatter = particulateMatter;
+		data.observations = new HashMap<>();
+		data.observations.put(ObservationType.PARTICULATEMATTER_PM10.toString(), pM10);
 		return data;
 	}
 

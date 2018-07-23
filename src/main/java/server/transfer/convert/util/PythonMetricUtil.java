@@ -2,6 +2,7 @@ package server.transfer.convert.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.python.core.PyFloat;
@@ -10,13 +11,17 @@ import org.python.core.PyList;
 import org.python.core.PyString;
 import org.python.core.PyTuple;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import server.transfer.convert.GraphiteConverter;
 import server.transfer.data.ObservationData;
 
 /**
  * Provides the functionality to create python metrics and log the results
  */
 public final class PythonMetricUtil {
+	
+	private static final Logger logger = LoggerFactory.getLogger(GraphiteConverter.class);
 	
 	private PythonMetricUtil() {
 		
@@ -26,32 +31,33 @@ public final class PythonMetricUtil {
      * Transforms a property into a Graphite-readable format with python
      * @param record The record of data that will be sent
      * @param list The list of metrics that were created from our data with python
-     * @param name The name of the observed property
-     * @param value The value the sensor registrated to the specified property
+     * @param observations Maps each set observed property to a value
      * @param logger The logger documents 
      */
     public static void addFloatMetric(ConsumerRecord<String, ObservationData> record, 
-    		PyList list, String name, String value, Logger logger) {
-    	if (value == null) {
-            // Some values are optional or not giving data due to broken sensors etc
-            return;
-        }
-    	
-        LocalDateTime dateTime = LocalDateTime.parse(record.value().observationDate);
-        
-        PyString metricName = new PyString(record.topic() + "." + name);
-        PyInteger timestamp = new PyInteger((int) dateTime.toEpochSecond(ZoneOffset.UTC));
-        PyFloat metricValue = new PyFloat(Double.parseDouble(value));
-        PyTuple metric = new PyTuple(metricName, new PyTuple(timestamp, metricValue));
-        list.append(metric);
-        logMetric(logger, metric);
+    		PyList list, Map<String, String> observations) {
+		for (Map.Entry<String, String> entry : observations.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			if (key != null && value != null) {
+				
+				LocalDateTime dateTime = LocalDateTime.parse(record.value().observationDate);
+
+				PyString metricName = new PyString(record.topic() + "." + key);
+				PyInteger timestamp = new PyInteger((int) dateTime.toEpochSecond(ZoneOffset.UTC));
+				PyFloat metricValue = new PyFloat(Double.parseDouble(value));
+				PyTuple metric = new PyTuple(metricName, new PyTuple(timestamp, metricValue));
+				list.append(metric);
+				logMetric(metric);
+			}
+		}
     }
 
     /**
      * Documents our result-matrics
      * @param metric The metric formed from our original data value of a certain property
      */
-    private static void logMetric(Logger logger, PyTuple metric) {
+    private static void logMetric(PyTuple metric) {
     	if (logger != null) {
     		logger.info("Added metric: " + metric.toString());
     	}

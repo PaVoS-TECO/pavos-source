@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.transfer.data.ObservationData;
+import server.transfer.data.ObservationType;
 
 public class GraphiteSenderTests {
 	
@@ -23,7 +24,7 @@ public class GraphiteSenderTests {
 	private static final String topic = "GraphiteSenderTest";
 	
 	@Test
-	public void connectAndSendData_connectionIsReady_sendDataToGraphite() {
+	public void connectAndSendData_multipleRecords_sendDataToGraphite() {
 		Map<TopicPartition, List<ConsumerRecord<String, ObservationData>>> recordsMap 
 		= new HashMap<TopicPartition, List<ConsumerRecord<String, ObservationData>>>();
 		List<ConsumerRecord<String, ObservationData>> recordList = new ArrayList<ConsumerRecord<String, ObservationData>>();
@@ -50,6 +51,25 @@ public class GraphiteSenderTests {
 		sender.send(records);
 	}
 	
+	@Test
+	public void connectAndSendData_singleRecord_sendDataToGraphite() {
+		ObservationData data = setupCorrectData(new ObservationData());
+		
+		if (print) {
+			ObjectMapper mapper = new ObjectMapper();
+			String sData = null;
+			try {
+				sData = mapper.writeValueAsString(data);
+			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			}
+			System.out.println("Serialized data as String: " + sData);
+		}
+		
+		GraphiteSender sender = new GraphiteSender();
+		sender.send(topic, data);
+	}
+	
 	private ObservationData setupCorrectData(ObservationData data) {
 		int i = (int) (Math.random() * 4);
 		if (print) System.out.println(i);
@@ -73,12 +93,13 @@ public class GraphiteSenderTests {
 		return LocalDateTime.now(Clock.systemUTC()).toString();
 	}
 	
-	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String particulateMatter) {
+	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String pM10) {
 		data.locationElevation = locationElevation;
 		data.locationID = locationID;
 		data.locationName = locationName;
 		data.observationDate = date;
-		data.particulateMatter = particulateMatter;
+		data.observations = new HashMap<>();
+		data.observations.put(ObservationType.PARTICULATEMATTER_PM10.toString(), pM10);
 		return data;
 	}
 

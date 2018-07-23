@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.transfer.config.KafkaConfig;
 import server.transfer.data.ObservationData;
+import server.transfer.data.ObservationType;
 import server.transfer.send.ConsoleSender;
 
 public class GraphiteConsumerTests {
@@ -28,7 +30,7 @@ public class GraphiteConsumerTests {
 	public void consume_preproducedMessage_sendConvertedResultToConsole() throws InterruptedException {
 		if (print) System.out.println("Running test: 'consume a preproduced Kafka-message"
 				+ ", convert it and output the result in the console'");
-		ObservationData data = setupCorrectData(new ObservationData());
+		ObservationData data = new ObservationData();
 		setupCorrectData(data);
 		
 		ObjectMapper mapper = new ObjectMapper();
@@ -48,7 +50,7 @@ public class GraphiteConsumerTests {
 		topics.add(topic);
 		final GraphiteConsumer consumer = new GraphiteConsumer(topics, new ConsoleSender());
 		
-		KafkaProducer<String, String> producer = new KafkaProducer<>(getConsumerProperties());
+		KafkaProducer<String, String> producer = new KafkaProducer<>(getProducerProperties());
 		producer.send(new ProducerRecord<String, String>(topic, sData));
 		producer.close();
 		
@@ -63,7 +65,7 @@ public class GraphiteConsumerTests {
 		t.join();
 	}
 	
-	private Properties getConsumerProperties() {
+	private Properties getProducerProperties() {
     	Properties configProperties = new Properties();
     	configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfig.getKafkaHostName());
         configProperties.put(ProducerConfig.ACKS_CONFIG, "all");
@@ -75,15 +77,18 @@ public class GraphiteConsumerTests {
 	
 	private ObservationData setupCorrectData(ObservationData data) {
 		return setupData(data, "8848", "Mt.Everest_27-59-16_86-55-29", "Mt.Everest"
-				, LocalDateTime.now().toString(), "0");
+				, LocalDateTime.now().toString(), "0", "0");
 	}
 	
-	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String particulateMatter) {
+	private ObservationData setupData(ObservationData data, String locationElevation
+			, String locationID, String locationName, String date, String pM10, String pM2p5) {
 		data.locationElevation = locationElevation;
 		data.locationID = locationID;
 		data.locationName = locationName;
 		data.observationDate = date;
-		data.particulateMatter = particulateMatter;
+		data.observations = new HashMap<>();
+		data.observations.put(ObservationType.PARTICULATEMATTER_PM10.toString(), pM10);
+		data.observations.put(ObservationType.PARTICULATEMATTER_PM2P5.toString(), pM2p5);
 		return data;
 	}
 	

@@ -19,7 +19,7 @@ public class ConsoleSender extends Sender {
 		PyList list = new PyList();
 
 		records.forEach(record -> {
-			GraphiteConverter.addPM10(record, list, logger);
+			GraphiteConverter.addObservations(record, list);
 		});
 
 		PyString payload = cPickle.dumps(list);

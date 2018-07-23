@@ -53,8 +53,8 @@ public class RandomValueGraphiteSender {
 				data.locationID = "";
 				data.locationName = "";
 				data.observationDate = TimeUtil.getDateTimeString();
-				data.particulateMatter_PM10 = String.valueOf(value_PM10);
-				data.particulateMatter_PM2p5 = String.valueOf(value_PM2p5);
+				data.observations.put("particulateMatter_PM10", String.valueOf(value_PM10));
+				data.observations.put("particulateMatter_PM2p5", String.valueOf(value_PM2p5));
 				return data;
 			}
 			
