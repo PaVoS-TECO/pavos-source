@@ -14,21 +14,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ObservationDataDeserializer implements Deserializer<ObservationData> {
 
+	private Logger logger = null;
+	
     /**
      * Default constructor
      */
     public ObservationDataDeserializer() {
     	this.logger = LoggerFactory.getLogger(this.getClass());
     }
-
-    /**
-     * Documents the deserialization of our objects
-     */
-    private Logger logger = null;
-
-    /**
-     * Closes this object
-     */
+    
     public void close() {
         // TODO implement here
     }

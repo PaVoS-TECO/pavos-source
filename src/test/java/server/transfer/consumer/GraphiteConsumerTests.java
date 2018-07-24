@@ -4,7 +4,6 @@ import static org.junit.Assert.fail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -86,9 +85,8 @@ public class GraphiteConsumerTests {
 		data.locationID = locationID;
 		data.locationName = locationName;
 		data.observationDate = date;
-		data.observations = new HashMap<>();
-		data.observations.put(ObservationType.PARTICULATEMATTER_PM10.toString(), pM10);
-		data.observations.put(ObservationType.PARTICULATEMATTER_PM2P5.toString(), pM2p5);
+		data.observations.put(ObservationType.PARTICULATE_MATTER_PM10.toString(), pM10);
+		data.observations.put(ObservationType.PARTICULATE_MATTER_PM2P5.toString(), pM2p5);
 		return data;
 	}
 	

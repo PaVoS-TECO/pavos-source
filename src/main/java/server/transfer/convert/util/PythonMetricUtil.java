@@ -53,10 +53,6 @@ public final class PythonMetricUtil {
 		}
     }
 
-    /**
-     * Documents our result-matrics
-     * @param metric The metric formed from our original data value of a certain property
-     */
     private static void logMetric(PyTuple metric) {
     	if (logger != null) {
     		logger.info("Added metric: " + metric.toString());

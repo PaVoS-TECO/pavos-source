@@ -10,12 +10,12 @@ import server.transfer.data.ObservationData;
 
 
 /**
- * Reformats the data and outputs it into the console
+ * Sends data to the console in a readable format.
  */
 public class ConsoleSender extends Sender {
 
 	@Override
-	public void send(ConsumerRecords<String, ObservationData> records) {
+	public void sendToGraphite(ConsumerRecords<String, ObservationData> records) {
 		PyList list = new PyList();
 
 		records.forEach(record -> {

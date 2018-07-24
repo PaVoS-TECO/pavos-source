@@ -1,7 +1,7 @@
 package server.transfer.config.util;
 
 /**
- * A utility class with all sorts of useful features for Config classes in this package.
+ * A utility class, providing information about the system environment.
  */
 public final class EnvironmentUtil {
 	

@@ -8,8 +8,16 @@ import server.transfer.data.ObservationData;
 import server.transfer.send.GraphiteSender;
 import server.transfer.send.util.TimeUtil;
 
-public class RandomValueGraphiteSender {
+/**
+ * Generates random values and sends them to Graphite.
+ * Use to quickly check the appearance of data in Graphite and Grafana.
+ */
+public final class RandomValueGraphiteSender {
 
+	private RandomValueGraphiteSender() {
+		
+	}
+	
 	private static final int MAX_VALUE = 30;
 	private static final String TOPIC = "RandomGraphiteSenderTest";
 	private static boolean loop = true;
@@ -52,7 +60,7 @@ public class RandomValueGraphiteSender {
 				data.locationElevation = "";
 				data.locationID = "";
 				data.locationName = "";
-				data.observationDate = TimeUtil.getDateTimeString();
+				data.observationDate = TimeUtil.getUTCDateTimeString();
 				data.observations.put("particulateMatter_PM10", String.valueOf(value_PM10));
 				data.observations.put("particulateMatter_PM2p5", String.valueOf(value_PM2p5));
 				return data;

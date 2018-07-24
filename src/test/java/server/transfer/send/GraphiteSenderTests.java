@@ -48,7 +48,7 @@ public class GraphiteSenderTests {
 		}
 		
 		GraphiteSender sender = new GraphiteSender();
-		sender.send(records);
+		sender.sendToGraphite(records);
 	}
 	
 	@Test
@@ -98,8 +98,7 @@ public class GraphiteSenderTests {
 		data.locationID = locationID;
 		data.locationName = locationName;
 		data.observationDate = date;
-		data.observations = new HashMap<>();
-		data.observations.put(ObservationType.PARTICULATEMATTER_PM10.toString(), pM10);
+		data.observations.put(ObservationType.PARTICULATE_MATTER_PM10.toString(), pM10);
 		return data;
 	}
 

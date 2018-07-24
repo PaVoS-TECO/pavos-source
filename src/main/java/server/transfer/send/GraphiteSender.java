@@ -21,7 +21,7 @@ import server.transfer.convert.GraphiteConverter;
 import server.transfer.data.ObservationData;
 
 /**
- * Reformats the data and sends it to Graphite
+ * Sends data to Graphite
  */
 public class GraphiteSender extends Sender {
 
@@ -43,11 +43,13 @@ public class GraphiteSender extends Sender {
 	}
 
 	/**
-	 * Sends the data to Graphite. Accepts data in this format: <p>
+	 * Sends the recorded data to Graphite.
+	 * Uses a record of multiple data objects.
+	 * <p>
 	 * {@link ConsumerRecords}<{@link String}, {@link ObservationData}> records
 	 */
 	@Override
-	public void send(ConsumerRecords<String, ObservationData> records) {
+	public void sendToGraphite(ConsumerRecords<String, ObservationData> records) {
 		PyList list = new PyList();
 
 		records.forEach(record -> {
@@ -63,12 +65,13 @@ public class GraphiteSender extends Sender {
 			outputStream.write(payload.toBytes());
 			outputStream.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Failed writing to Graphite.", e);
 		}
 	}
 
 	/**
-	 * Sends the data to Graphite. Accepts data in this format:
+	 * Sends the recorded data to Graphite.
+	 * Uses a single data object.
 	 * <p>
 	 * {@link String} topic, {@link ObservationData} data
 	 * 
@@ -84,7 +87,7 @@ public class GraphiteSender extends Sender {
 		recordsMap.put(new TopicPartition(topic, 0), recordList);
 		records = new ConsumerRecords<String, ObservationData>(recordsMap);
 
-		this.send(records);
+		this.sendToGraphite(records);
 	}
 
 }

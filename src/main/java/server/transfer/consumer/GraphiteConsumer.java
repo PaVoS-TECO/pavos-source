@@ -17,7 +17,7 @@ import server.transfer.data.ObservationDataDeserializer;
 import server.transfer.send.Sender;
 
 /**
- * Receives the data from Kafka and sends it to Graphite
+ * Consumes data from Kafka and sends it to Graphite
  */
 public class GraphiteConsumer extends Consumer {
 	
@@ -51,7 +51,7 @@ public class GraphiteConsumer extends Consumer {
                 ConsumerRecords<String, ObservationData> records = consumer.poll(100);
 
                 if (!records.isEmpty()) {
-                    sender.send(records);
+                    sender.sendToGraphite(records);
                 }
             }
         } catch (WakeupException ex) {
