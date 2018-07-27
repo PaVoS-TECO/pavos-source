@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
 import server.transfer.data.ObservationData;
+import server.transfer.data.ObservationType;
 import server.transfer.send.GraphiteSender;
 import server.transfer.send.util.TimeUtil;
 
@@ -61,8 +62,8 @@ public final class RandomValueGraphiteSender {
 				data.locationID = "";
 				data.locationName = "";
 				data.observationDate = TimeUtil.getUTCDateTimeString();
-				data.observations.put("particulateMatter_PM10", String.valueOf(value_PM10));
-				data.observations.put("particulateMatter_PM2p5", String.valueOf(value_PM2p5));
+				data.observations.put(ObservationType.PARTICULATE_MATTER_PM10.toString(), String.valueOf(value_PM10));
+				data.observations.put(ObservationType.PARTICULATE_MATTER_PM2P5.toString(), String.valueOf(value_PM2p5));
 				return data;
 			}
 			
