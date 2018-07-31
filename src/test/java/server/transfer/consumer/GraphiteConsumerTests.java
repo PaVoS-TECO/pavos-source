@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import server.transfer.config.KafkaConfig;
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationType;
-import server.transfer.send.ConsoleSender;
+import server.transfer.sender.ConsoleSender;
 
 public class GraphiteConsumerTests {
 

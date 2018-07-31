@@ -1,11 +1,11 @@
-package server.transfer.send;
+package server.transfer.sender;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.python.core.PyList;
 import org.python.core.PyString;
 import org.python.modules.cPickle;
 
-import server.transfer.convert.GraphiteConverter;
+import server.transfer.converter.GraphiteConverter;
 import server.transfer.data.ObservationData;
 
 

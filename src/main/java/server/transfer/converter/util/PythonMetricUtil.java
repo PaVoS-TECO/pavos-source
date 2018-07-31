@@ -1,4 +1,4 @@
-package server.transfer.convert.util;
+package server.transfer.converter.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -13,7 +13,7 @@ import org.python.core.PyTuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import server.transfer.convert.GraphiteConverter;
+import server.transfer.converter.GraphiteConverter;
 import server.transfer.data.ObservationData;
 
 /**

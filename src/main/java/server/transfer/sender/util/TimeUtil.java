@@ -1,4 +1,4 @@
-package server.transfer.send.util;
+package server.transfer.sender.util;
 
 import java.time.Clock;
 import java.time.LocalDateTime;

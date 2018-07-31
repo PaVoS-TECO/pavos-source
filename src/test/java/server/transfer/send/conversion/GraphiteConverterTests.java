@@ -2,7 +2,7 @@ package server.transfer.send.conversion;
 
 import org.junit.Test;
 
-import server.transfer.convert.GraphiteConverter;
+import server.transfer.converter.GraphiteConverter;
 
 public class GraphiteConverterTests {
 

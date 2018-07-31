@@ -1,4 +1,4 @@
-package server.transfer.send;
+package server.transfer.sender;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;

@@ -14,7 +14,7 @@ import server.transfer.config.GraphiteConfig;
 import server.transfer.config.KafkaConfig;
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationDataDeserializer;
-import server.transfer.send.Sender;
+import server.transfer.sender.Sender;
 
 /**
  * Consumes data from Kafka and sends it to Graphite

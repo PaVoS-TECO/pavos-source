@@ -1,4 +1,4 @@
-package server.transfer.send;
+package server.transfer.sender;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,7 +17,7 @@ import org.python.core.PyString;
 import org.python.modules.cPickle;
 
 import server.transfer.config.GraphiteConfig;
-import server.transfer.convert.GraphiteConverter;
+import server.transfer.converter.GraphiteConverter;
 import server.transfer.data.ObservationData;
 
 /**

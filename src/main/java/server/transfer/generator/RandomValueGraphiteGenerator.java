@@ -1,4 +1,4 @@
-package server.transfer.test;
+package server.transfer.generator;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -6,16 +6,16 @@ import java.util.concurrent.TimeUnit;
 
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationType;
-import server.transfer.send.GraphiteSender;
-import server.transfer.send.util.TimeUtil;
+import server.transfer.sender.GraphiteSender;
+import server.transfer.sender.util.TimeUtil;
 
 /**
  * Generates random values and sends them to Graphite.
  * Use to quickly check the appearance of data in Graphite and Grafana.
  */
-public final class RandomValueGraphiteSender {
+public final class RandomValueGraphiteGenerator {
 
-	private RandomValueGraphiteSender() {
+	private RandomValueGraphiteGenerator() {
 		
 	}
 	

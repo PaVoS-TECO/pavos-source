@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationType;
+import server.transfer.sender.GraphiteSender;
 
 public class GraphiteSenderTests {
 	
