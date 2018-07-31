@@ -1,5 +1,6 @@
 package server.transfer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import server.transfer.consumer.Consumer;
@@ -29,7 +30,19 @@ public class TransferManager {
     	if (consumer != null) stopDataTransfer();
         if (dest.equals(Destination.GRAPHITE)) startGraphiteTransfer(topics);
     }
-
+    
+    /**
+     * Starts data-transfer
+     * @param topic Kafka-Topic that should be subscribed
+     * @param dest The destination the data should be sent to
+     */
+    public void startDataTransfer(String topic, Destination dest) {
+    	List<String> topics = new ArrayList<>();
+    	topics.add(topic);
+    	if (consumer != null) stopDataTransfer();
+        if (dest.equals(Destination.GRAPHITE)) startGraphiteTransfer(topics);
+    }
+    
     /**
      * Stops the data-transfer.
      * @param topics Kafka-Topics that should no longer be subscribed
