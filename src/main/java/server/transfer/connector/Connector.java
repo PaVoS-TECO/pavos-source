@@ -1,7 +1,6 @@
-package server.transfer.consumer;
+package server.transfer.connector;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -14,7 +13,7 @@ import server.transfer.sender.Sender;
 /**
  * Consumes data from Kafka
  */
-public abstract class Consumer {
+public abstract class Connector {
 
     /**
      * Documents the activity of the Consumer
@@ -50,11 +49,5 @@ public abstract class Consumer {
      * Stops the transferring-process
      */
     public abstract void stop();
-    
-    /**
-     * Gathers the nessecary properties, that are required for data-reception and data-processing
-     * @return The nessecary properties, that are required for data-reception and data-processing
-     */
-    public abstract Properties getConsumerProperties();
 
 }

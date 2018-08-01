@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.transfer.config.KafkaConfig;
+import server.transfer.connector.GraphiteConnector;
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationType;
 import server.transfer.sender.ConsoleSender;
@@ -47,7 +48,7 @@ public class GraphiteConsumerTests {
 		
 		ArrayList<String> topics = new ArrayList<String>();
 		topics.add(topic);
-		final GraphiteConsumer consumer = new GraphiteConsumer(topics, new ConsoleSender());
+		final GraphiteConnector consumer = new GraphiteConnector(topics, new ConsoleSender());
 		
 		KafkaProducer<String, String> producer = new KafkaProducer<>(getProducerProperties());
 		producer.send(new ProducerRecord<String, String>(topic, sData));

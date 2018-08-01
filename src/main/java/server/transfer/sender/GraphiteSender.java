@@ -16,6 +16,7 @@ import org.python.core.PyList;
 import org.python.core.PyString;
 import org.python.modules.cPickle;
 
+import server.transfer.Destination;
 import server.transfer.config.GraphiteConfig;
 import server.transfer.converter.GraphiteConverter;
 import server.transfer.data.ObservationData;
@@ -30,16 +31,13 @@ public class GraphiteSender extends Sender {
 	private ConsumerRecord<String, ObservationData> record;
 	private ConsumerRecords<String, ObservationData> records;
 	private Socket socket;
+	private Destination dest;
 
 	/**
 	 * Default constructor
 	 */
 	public GraphiteSender() {
-		try {
-			this.socket = new Socket(GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		connect(Destination.GRAPHITE);
 	}
 
 	/**
@@ -49,7 +47,13 @@ public class GraphiteSender extends Sender {
 	 * {@link ConsumerRecords}<{@link String}, {@link ObservationData}> records
 	 */
 	@Override
-	public void sendToGraphite(ConsumerRecords<String, ObservationData> records) {
+	public void send(ConsumerRecords<String, ObservationData> records) {
+		if (socket == null) {
+			connect(Destination.GRAPHITE);
+		} else if (!socket.isConnected()) {
+			reconnect();
+		}
+		
 		PyList list = new PyList();
 
 		records.forEach(record -> {
@@ -87,7 +91,32 @@ public class GraphiteSender extends Sender {
 		recordsMap.put(new TopicPartition(topic, 0), recordList);
 		records = new ConsumerRecords<String, ObservationData>(recordsMap);
 
-		this.sendToGraphite(records);
+		this.send(records);
 	}
-
+	
+	private void connect(Destination d) {
+		String host = null;
+		int port = 0;
+		
+		if (d.equals(Destination.GRAPHITE)) {
+			host = GraphiteConfig.getGraphiteHostName();
+			port = GraphiteConfig.getGraphitePort();
+			dest = d;
+		}
+		
+		try {
+			this.socket = new Socket(host, port);
+		} catch (IOException e) {
+			logger.error("Could not initialize socket.", e);
+		}
+	}
+	
+	private void reconnect() {
+		if (socket != null && dest != null) {
+			connect(dest);
+		} else {
+			logger.error("Could not reconnect to socket. Socket is not initialized.");
+		}
+	}
+	
 }

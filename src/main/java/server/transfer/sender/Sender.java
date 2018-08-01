@@ -17,6 +17,6 @@ public abstract class Sender {
      * Sends the recorded data
      * @param records Multiple records of data from Kafka
      */
-    public abstract void sendToGraphite(ConsumerRecords<String, ObservationData> records);
+    public abstract void send(ConsumerRecords<String, ObservationData> records);
 
 }

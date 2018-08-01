@@ -1,4 +1,4 @@
-package server.transfer.consumer;
+package server.transfer.connector;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,7 @@ import server.transfer.sender.Sender;
 /**
  * Consumes data from Kafka and sends it to Graphite
  */
-public class GraphiteConsumer extends Consumer {
+public class GraphiteConnector extends Connector {
 	
 	private boolean sendLoop = true;
 
@@ -28,7 +28,7 @@ public class GraphiteConsumer extends Consumer {
      * @param topics The topics that the consumer should subscribe to
      * @param sender Sends the data to a specified component, normally a {@link GraphiteSender}
      */
-	public GraphiteConsumer(List<String> topics, Sender sender) {
+	public GraphiteConnector(List<String> topics, Sender sender) {
     	this.topics = topics;
     	this.sender = sender;
     }
@@ -51,16 +51,16 @@ public class GraphiteConsumer extends Consumer {
                 ConsumerRecords<String, ObservationData> records = consumer.poll(100);
 
                 if (!records.isEmpty()) {
-                    sender.sendToGraphite(records);
+                    sender.send(records);
                 }
             }
         } catch (WakeupException ex) {
-            logger.info("Consumer has received instruction to wake up");
+            logger.info("Connector has received instruction to wake up");
         } finally {
-            logger.info("Consumer closing...");
+            logger.info("Connector closing...");
             consumer.close();
             shutdownLatch.countDown();
-            logger.info("Consumer has closed successfully");
+            logger.info("Connector has closed successfully");
         }
     }
 
@@ -68,22 +68,18 @@ public class GraphiteConsumer extends Consumer {
      * Stops the process
      */
     public void stop() {
-    	logger.info("Waking up consumer...");
+    	logger.info("Waking up connector...");
         consumer.wakeup();
 
         try {
-            logger.info("Waiting for consumer to shutdown...");
+            logger.info("Waiting for connector to shutdown...");
             shutdownLatch.await();
         } catch (InterruptedException e) {
             logger.error("Exception thrown waiting for shutdown", e);
         }
     }
-
-    /**
-     * Gathers the nessecary properties, that are required for data-reception and data-processing
-     * @return The nessecary properties, that are required for data-reception and data-processing
-     */
-    public Properties getConsumerProperties() {
+    
+    private Properties getConsumerProperties() {
     	Properties configProperties = new Properties();
         configProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConfig.getKafkaHostName());
         configProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, 

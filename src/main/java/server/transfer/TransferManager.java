@@ -3,8 +3,8 @@ package server.transfer;
 import java.util.ArrayList;
 import java.util.List;
 
-import server.transfer.consumer.Consumer;
-import server.transfer.consumer.GraphiteConsumer;
+import server.transfer.connector.Connector;
+import server.transfer.connector.GraphiteConnector;
 import server.transfer.sender.GraphiteSender;
 
 /**
@@ -13,7 +13,7 @@ import server.transfer.sender.GraphiteSender;
  */
 public class TransferManager {
 	
-	private Consumer consumer;
+	private Connector connector;
 	
     /**
      * Default constructor
@@ -27,7 +27,7 @@ public class TransferManager {
      * @param dest The destination the data should be sent to
      */
     public void startDataTransfer(List<String> topics, Destination dest) {
-    	if (consumer != null) stopDataTransfer();
+    	if (connector != null) stopDataTransfer();
         if (dest.equals(Destination.GRAPHITE)) startGraphiteTransfer(topics);
     }
     
@@ -39,7 +39,7 @@ public class TransferManager {
     public void startDataTransfer(String topic, Destination dest) {
     	List<String> topics = new ArrayList<>();
     	topics.add(topic);
-    	if (consumer != null) stopDataTransfer();
+    	if (connector != null) stopDataTransfer();
         if (dest.equals(Destination.GRAPHITE)) startGraphiteTransfer(topics);
     }
     
@@ -48,13 +48,13 @@ public class TransferManager {
      * @param topics Kafka-Topics that should no longer be subscribed
      */
     public void stopDataTransfer() {
-    	if (consumer == null) return;
-    	consumer.stop();
+    	if (connector == null) return;
+    	connector.stop();
     }
 
 	private void startGraphiteTransfer(List<String> topics) {
-    	consumer = new GraphiteConsumer(topics, new GraphiteSender());
-    	consumer.run();
+    	connector = new GraphiteConnector(topics, new GraphiteSender());
+    	connector.run();
     }
     
 }

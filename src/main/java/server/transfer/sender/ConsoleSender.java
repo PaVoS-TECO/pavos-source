@@ -15,7 +15,7 @@ import server.transfer.data.ObservationData;
 public class ConsoleSender extends Sender {
 
 	@Override
-	public void sendToGraphite(ConsumerRecords<String, ObservationData> records) {
+	public void send(ConsumerRecords<String, ObservationData> records) {
 		PyList list = new PyList();
 
 		records.forEach(record -> {
