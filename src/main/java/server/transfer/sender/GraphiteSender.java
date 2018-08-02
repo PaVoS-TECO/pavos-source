@@ -16,7 +16,6 @@ import org.python.core.PyList;
 import org.python.core.PyString;
 import org.python.modules.cPickle;
 
-import server.transfer.Destination;
 import server.transfer.config.GraphiteConfig;
 import server.transfer.converter.GraphiteConverter;
 import server.transfer.data.ObservationData;
@@ -31,13 +30,14 @@ public class GraphiteSender extends Sender {
 	private ConsumerRecord<String, ObservationData> record;
 	private ConsumerRecords<String, ObservationData> records;
 	private Socket socket;
-	private Destination dest;
+	private SocketConnector sc;
 
 	/**
 	 * Default constructor
 	 */
 	public GraphiteSender() {
-		connect(Destination.GRAPHITE);
+		this.sc = new SocketConnector(); 
+		sc.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
 	}
 
 	/**
@@ -49,9 +49,9 @@ public class GraphiteSender extends Sender {
 	@Override
 	public void send(ConsumerRecords<String, ObservationData> records) {
 		if (socket == null) {
-			connect(Destination.GRAPHITE);
+			sc.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
 		} else if (!socket.isConnected()) {
-			reconnect();
+			sc.reconnect(this.socket);
 		}
 		
 		PyList list = new PyList();
@@ -92,31 +92,6 @@ public class GraphiteSender extends Sender {
 		records = new ConsumerRecords<String, ObservationData>(recordsMap);
 
 		this.send(records);
-	}
-	
-	private void connect(Destination d) {
-		String host = null;
-		int port = 0;
-		
-		if (d.equals(Destination.GRAPHITE)) {
-			host = GraphiteConfig.getGraphiteHostName();
-			port = GraphiteConfig.getGraphitePort();
-			dest = d;
-		}
-		
-		try {
-			this.socket = new Socket(host, port);
-		} catch (IOException e) {
-			logger.error("Could not initialize socket.", e);
-		}
-	}
-	
-	private void reconnect() {
-		if (socket != null && dest != null) {
-			connect(dest);
-		} else {
-			logger.error("Could not reconnect to socket. Socket is not initialized.");
-		}
 	}
 	
 }
