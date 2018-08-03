@@ -30,14 +30,14 @@ public class GraphiteSender extends Sender {
 	private ConsumerRecord<String, ObservationData> record;
 	private ConsumerRecords<String, ObservationData> records;
 	private Socket socket;
-	private SocketConnector sc;
+	private SocketManager som;
 
 	/**
 	 * Default constructor
 	 */
 	public GraphiteSender() {
-		this.sc = new SocketConnector(); 
-		sc.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
+		this.som = new SocketManager(); 
+		som.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
 	}
 
 	/**
@@ -49,9 +49,9 @@ public class GraphiteSender extends Sender {
 	@Override
 	public void send(ConsumerRecords<String, ObservationData> records) {
 		if (socket == null) {
-			sc.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
+			som.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
 		} else if (!socket.isConnected()) {
-			sc.reconnect(this.socket);
+			som.reconnect(this.socket);
 		}
 		
 		PyList list = new PyList();

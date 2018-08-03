@@ -6,9 +6,9 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SocketConnector {
+public class SocketManager {
 	
-	private Logger logger = LoggerFactory.getLogger(SocketConnector.class);
+	private Logger logger = LoggerFactory.getLogger(SocketManager.class);
 	private String host;
 	private int port;
 	
