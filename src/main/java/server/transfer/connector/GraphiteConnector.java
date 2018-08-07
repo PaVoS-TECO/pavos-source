@@ -33,7 +33,7 @@ public class GraphiteConnector extends Connector {
     }
 
     /**
-     * Starts the process of consumation and readying the sender object
+     * Starts the process of consumption and prepares the {@link Sender}, then starts to send data to Graphite.
      */
     public void run(Sender sender) {
     	this.sender = sender;
@@ -66,7 +66,7 @@ public class GraphiteConnector extends Connector {
     }
 
     /**
-     * Stops the process
+     * Stops the process of consumption and sending.
      */
     public void stop() {
     	

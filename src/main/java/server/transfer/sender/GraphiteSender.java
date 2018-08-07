@@ -2,7 +2,6 @@ package server.transfer.sender;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ public class GraphiteSender extends Sender {
 	private List<ConsumerRecord<String, ObservationData>> recordList;
 	private ConsumerRecord<String, ObservationData> record;
 	private ConsumerRecords<String, ObservationData> records;
-	private Socket socket;
 	private SocketManager som;
 
 	/**
@@ -38,7 +36,7 @@ public class GraphiteSender extends Sender {
 	 */
 	public GraphiteSender() {
 		this.som = new SocketManager(); 
-		som.connect(this.socket, GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
+		som.connect(GraphiteConfig.getGraphiteHostName(), GraphiteConfig.getGraphitePort());
 	}
 
 	/**
@@ -49,8 +47,8 @@ public class GraphiteSender extends Sender {
 	 */
 	@Override
 	public void send(ConsumerRecords<String, ObservationData> records) {
-		if (socket == null || socket.isClosed()) {
-			som.reconnect(this.socket);
+		if (som.isConnectionClosed()) {
+			som.reconnect();
 		}
 		
 		PyList list = new PyList();
@@ -63,7 +61,7 @@ public class GraphiteSender extends Sender {
 		byte[] header = ByteBuffer.allocate(4).putInt(payload.__len__()).array();
 
 		try {
-			OutputStream outputStream = socket.getOutputStream();
+			OutputStream outputStream = som.getOutputStream();
 			outputStream.write(header);
 			outputStream.write(payload.toBytes());
 			outputStream.flush();
@@ -95,11 +93,7 @@ public class GraphiteSender extends Sender {
 
 	@Override
 	public void close() {
-		try {
-			socket.close();
-		} catch (IOException e) {
-			logger.error("Could not close socket.", e);
-		}
+		som.closeSocket();
 	}
 	
 }
