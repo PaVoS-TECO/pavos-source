@@ -1,4 +1,4 @@
-package gui.importer;
+package edu.teco.pavos.importer;
 
 /**
  * Is like a chooser for the right FileReaderStrategy. If a new Strategy is added,
