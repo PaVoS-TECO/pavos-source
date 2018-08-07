@@ -34,11 +34,11 @@ public class DummyReaderStrategy implements FileReaderStrategy {
      */
 	public void sendFileData(File file) {
 		
-		this.createObservedProperties();
+		//this.createObservedProperties();
 		this.createSensors();
-		this.createThings();
-		this.createDataStreams();
-		this.createObservations();
+		//this.createThings();
+		//this.createDataStreams();
+		//this.createObservations();
 		
 	}
 	

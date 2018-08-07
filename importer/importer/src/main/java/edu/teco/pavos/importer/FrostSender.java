@@ -1,5 +1,6 @@
 package edu.teco.pavos.importer;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -38,8 +39,8 @@ public final class FrostSender {
                     http.setRequestProperty("Content-Encoding", "charset=UTF-8");
                     http.setRequestProperty("Accept", "application/json");
                     http.connect();
-                    try {
-                    	http.getOutputStream().write(bytes);
+                    try (DataOutputStream dos = new DataOutputStream(http.getOutputStream())) {
+                    	dos.write(bytes);
                     } catch (IOException e) {
                     	System.out.println(e.getLocalizedMessage());
                     }
