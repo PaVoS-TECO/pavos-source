@@ -10,7 +10,7 @@ public class AlterableDownloadState extends DownloadState {
     /**
      * Default constructor
      */
-    public AlterableDownloadState(DownloadID id) {
+    public AlterableDownloadState(String id) {
         super(id);
     }
 

@@ -10,14 +10,14 @@ public class DownloadState {
     /**
      * Is an Identifier for a specific Download.
      */
-    private DownloadID downloadID;
+    private String downloadID;
     protected File filePath;
     protected boolean ready;
 
     /**
      * Default constructor
      */
-    public DownloadState(DownloadID id) {
+    public DownloadState(String id) {
         this.downloadID = id;
         // Set filePath and ready
     }

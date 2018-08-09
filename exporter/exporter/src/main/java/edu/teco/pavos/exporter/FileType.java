@@ -6,23 +6,26 @@ package edu.teco.pavos.exporter;
 public class FileType {
 
     /**
-     * Default constructor
-     */
-    public FileType() {
-    }
-
-    /**
      * The FileExtension is defining the FileType.
      */
     private String extension;
+
+    /**
+     * Default constructor
+     * @param extension that defines this file type
+     */
+    public FileType(String extension) {
+    	this.extension = extension;
+    }
     
     /**
-     * Gives an instance of the implemented FileWriter that is associated with this FileType, thus this FileExtension. To do so it uses the static method getFileWriterForFileExtension from the FileTypesUtility class.
+     * Gives an instance of the implemented FileWriter that is associated with this FileType, thus this
+     * FileExtension. To do so it uses the static method getFileWriterForFileExtension from the FileTypesUtility class.
      * @return Is a new instance of an implementation of a FilWriterStrategy.
+     * @throws IllegalFileExtensionException 
      */
-    public FileWriterStrategy getFileWriter() {
-        // TODO implement here
-        return null;
+    public FileWriterStrategy getFileWriter() throws IllegalFileExtensionException {
+        return FileTypesUtility.getFileWriterForFileExtension(this.extension);
     }
 
 }

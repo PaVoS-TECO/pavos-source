@@ -6,15 +6,16 @@ package edu.teco.pavos.exporter;
 public class ExportStreamGenerator {
 
     /**
-     * Default constructor
-     */
-    public ExportStreamGenerator() {
-    }
-
-    /**
      * Contains the Properties of an Export Request.
      */
-    public ExportProperties properties;
+    private ExportProperties properties;
+
+    /**
+     * Default constructor
+     */
+    public ExportStreamGenerator(ExportProperties properties) {
+    	this.properties = properties;
+    }
 
 
     /**

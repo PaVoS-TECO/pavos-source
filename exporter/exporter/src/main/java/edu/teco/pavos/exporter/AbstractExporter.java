@@ -23,7 +23,7 @@ public class AbstractExporter {
      * Creates Information for that Export. These Information will be used to identifie a File for the WebGUI, that gets the created DownloadID.
      * @return Is the DownloadID for the started Export.
      */
-    public DownloadID createFileInformation() {
+    public String createFileInformation() {
         // TODO implement here
         return null;
     }
