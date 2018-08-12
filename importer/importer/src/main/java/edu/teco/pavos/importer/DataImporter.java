@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -36,6 +37,8 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
 	private ArrayList<File> files = new ArrayList<File>();
 	private TreeMap<File, Integer> fileProgress = new TreeMap<File, Integer>();
 
+	private JTextField urlField;
+
 
 	/**
      * Default constructor
@@ -55,7 +58,13 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         this.contentPane.setLayout(layout);
         
         int w = 180;
-        int h = 60;
+        int h = 80;
+        
+        this.urlField = new JTextField("http://pavos-master.teco.edu/8080/v1.0/");
+        contentPane.add(this.urlField);
+        layout.putConstraint(SpringLayout.WEST, this.urlField, 20, SpringLayout.WEST, this.contentPane);
+        layout.putConstraint(SpringLayout.EAST, this.urlField, -20, SpringLayout.EAST, this.contentPane);
+        layout.putConstraint(SpringLayout.NORTH, this.urlField, 20, SpringLayout.NORTH, this.contentPane);
         
         this.chooserButton = new JButton("Choose Files");
         chooserButton.setName("chooserButton");
@@ -65,7 +74,7 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         this.contentPane.add(chooserButton);
         this.layout.putConstraint(SpringLayout.WEST, chooserButton, 20, SpringLayout.WEST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, chooserButton, w + 20, SpringLayout.WEST, this.contentPane);
-        this.layout.putConstraint(SpringLayout.NORTH, chooserButton, 20, SpringLayout.NORTH, this.contentPane);
+        this.layout.putConstraint(SpringLayout.NORTH, chooserButton, 20, SpringLayout.SOUTH, this.urlField);
         this.layout.putConstraint(SpringLayout.SOUTH, chooserButton, h + 20, SpringLayout.NORTH, this.contentPane);
         chooserButton.addActionListener(this);
         
@@ -77,7 +86,7 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         this.contentPane.add(importButton);
         this.layout.putConstraint(SpringLayout.WEST, importButton, -(w + 20), SpringLayout.EAST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, importButton, -20, SpringLayout.EAST, this.contentPane);
-        this.layout.putConstraint(SpringLayout.NORTH, importButton, 20, SpringLayout.NORTH, this.contentPane);
+        this.layout.putConstraint(SpringLayout.NORTH, importButton, 20, SpringLayout.SOUTH, this.urlField);
         this.layout.putConstraint(SpringLayout.SOUTH, importButton, h + 20, SpringLayout.NORTH, this.contentPane);
         importButton.addActionListener(this);
         
@@ -86,7 +95,7 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         this.contentPane.add(scrollPane);
         this.layout.putConstraint(SpringLayout.WEST, scrollPane, 20, SpringLayout.WEST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, scrollPane, -20, SpringLayout.EAST, this.contentPane);
-        this.layout.putConstraint(SpringLayout.NORTH, scrollPane, 100, SpringLayout.NORTH, this.contentPane);
+        this.layout.putConstraint(SpringLayout.NORTH, scrollPane, 20, SpringLayout.SOUTH, this.importButton);
         this.layout.putConstraint(SpringLayout.SOUTH, scrollPane, -20, SpringLayout.SOUTH, this.contentPane);
         
         this.table.getColumnModel().getColumn(0).setMaxWidth(260);
@@ -96,7 +105,7 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         this.table.getColumnModel().getColumn(1).setCellRenderer(rendererC);
         this.table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         
-        this.frame.setSize(420, 300);
+        this.frame.setSize(420, 360);
         this.frame.setResizable(false);
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // überschreiben wenn der Import läuft
         this.frame.setLocationRelativeTo(null);
@@ -135,11 +144,11 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
 	private void startImporting() {
 		this.chooserButton.setEnabled(false);
 		this.importButton.setEnabled(false);
-		
+		final String url = this.urlField.getText();
 		for (final File file : this.files) {
 			Thread aThread = new Thread(new Runnable() {
 	            public void run() {
-	                FileImporter importer = new FileImporter();
+	                FileImporter importer = new FileImporter(url);
 	                importer.addFileData(file);
 	                /*synchronized(this) {
 	                	Zustand des Progress zurückgeben

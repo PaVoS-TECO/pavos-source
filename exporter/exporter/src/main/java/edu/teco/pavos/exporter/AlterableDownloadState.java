@@ -9,6 +9,7 @@ public class AlterableDownloadState extends DownloadState {
 
     /**
      * Default constructor
+     * @param id is the ID of that download
      */
     public AlterableDownloadState(String id) {
         super(id);

@@ -9,12 +9,13 @@ public class NetCDFReaderStrategy implements FileReaderStrategy {
 
     /**
      * Default constructor
+     * @param url is the destination server for the data.
      */
-    public NetCDFReaderStrategy() {
+    public NetCDFReaderStrategy(String url) {
     }
 
     /**
-     * Reades from a File as specified by the FilePath and sends the information
+     * Reads from a File as specified by the FilePath and sends the information
      * in it to the FROST-Server using the FrostSender that was provided.
      * @param file Is the File to Import.
      */

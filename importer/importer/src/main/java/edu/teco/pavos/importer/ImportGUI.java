@@ -22,19 +22,19 @@ public final class ImportGUI {
 	 * @param args of main
 	 */
 	public static void main(String[] args) {
-		//DataImporter importer = new DataImporter();
-        //importer.startImportingFileData();
+		DataImporter importer = new DataImporter();
+        importer.startImportingFileData();
     	
 		/*DummyReaderStrategy dummy = new DummyReaderStrategy();
 		File file = new File("");
 		dummy.sendFileData(file);*/
 		
-		String id = "pavos.teco.edu/ObservedProperties/TestProperty";
+		/*String id = "pavos.teco.edu/ObservedProperties/TestProperty";
 		String observedProperty = "{\"name\": \"TestProperty\", \"description\":  \"TestProperty"
 				+ "\", \"definition\": \"http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#Acceleration\","
 				+ "\"@iot.id\": \"" + id + "\"}";
 		String url = "http://pavos-01.teco.edu/8080/v1.0/ObservedProperties";
-		FrostSender.sendToFrostServer(url, observedProperty);
+		FrostSender.sendToFrostServer(url, observedProperty);*/
     	
     	/*ArrayList<String> things = getAllThingIotIds();
     	for (String thing : things) {

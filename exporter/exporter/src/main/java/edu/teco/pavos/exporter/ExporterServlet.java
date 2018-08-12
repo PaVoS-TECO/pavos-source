@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * HttpServlet to manage a Dataexport request from the WebGUI.
+ */
 public class ExporterServlet extends HttpServlet {
 	
 	/**
@@ -18,7 +21,7 @@ public class ExporterServlet extends HttpServlet {
 	private static final long serialVersionUID = -1222550742086272358L;
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse res) 
+	protected void doGet(HttpServletRequest req, HttpServletResponse res)
 			throws ServletException, IOException {
 		String type = req.getParameter("requestType");
 		if (type.equals("newExport")) {

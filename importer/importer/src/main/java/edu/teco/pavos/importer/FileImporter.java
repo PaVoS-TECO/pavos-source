@@ -7,10 +7,14 @@ import java.io.File;
  */
 public class FileImporter {
 
-    /**
+    private String url;
+
+	/**
      * Default constructor
+     * @param url is the destination server for the data.
      */
-    public FileImporter() {
+    public FileImporter(String url) {
+    	this.url = url;
     }
 
     /**
@@ -23,7 +27,7 @@ public class FileImporter {
     public void addFileData(File file) {
     	String extension = this.getFileExtension(file.getAbsolutePath());
 		try {
-			FileReaderStrategy reader = ReaderType.getFileReaderForFileExtension(extension);
+			FileReaderStrategy reader = ReaderType.getFileReaderForFileExtension(extension, url);
 			reader.sendFileData(file);
 		} catch (IllegalFileExtensionException e) {
         	System.out.println(e.getLocalizedMessage());
