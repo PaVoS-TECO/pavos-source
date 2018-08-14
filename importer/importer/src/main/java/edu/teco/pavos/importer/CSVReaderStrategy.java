@@ -22,10 +22,10 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 	private static String OBSERVED_PROPERTY = "observedProperty";
 	private static String SENSOR = "sensor";
 	private static String LOCATION = "location";
-	//private static String HISTORIC_LOCATION = "historicLocation";
 	private static String THING = "thing";
 	private static String DATASTREAM = "dataStream";
 	private static String OBSERVATION = "observation";
+	private static String TITLE = "title";
 
     /**
      * Default constructor
@@ -33,7 +33,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
      */
     public CSVReaderStrategy(String url) {
     	this.url = url;
-    	this.iotIDImport = ""; //import.date.YYYY/MM/DD.from.file.filename.csv/
+    	this.iotIDImport = "import/"; //import.date.YYYY/MM/DD.from.file.filename.csv/
     }
 
     /**
@@ -62,7 +62,9 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 					} else if (separated[0].equals(OBSERVATION) && separated.length >= 10) {
 						this.importObservation(separated);
 					} else {
-						this.errorlines++;
+						if (!separated[0].equals(TITLE)) {
+							this.errorlines++;
+						}
 					}
 				} else {
 					this.errorlines++;
@@ -142,20 +144,22 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 	        JSONArray locations = new JSONArray();
         	String[] ids = data[5].split(";");
         	for (String id : ids) {
-        		JSONObject iotID = new JSONObject();
-        		iotID.put("@iot.id", iotIDImport + id);
-        		locations.add(iotID);
+        		if (!id.equals("")) {
+        			JSONObject iotID = new JSONObject();
+            		iotID.put("@iot.id", iotIDImport + id);
+            		locations.add(iotID);
+        		}
         	}
         	obj.put("Locations", locations);
         	
-        	/*JSONArray histLocations = new JSONArray();
-        	ids = data[6].split(";");
-        	for (String id : ids) {
-        		JSONObject iotID = new JSONObject();
-        		iotID.put("@iot.id", iotIDImport + id);
-        		histLocations.add(iotID);
-        	}
-        	obj.put("HistoricalLocations", histLocations);*/
+//        	JSONArray histLocations = new JSONArray();
+//        	ids = data[6].split(";");
+//        	for (String id : ids) {
+//        		JSONObject iotID = new JSONObject();
+//        		iotID.put("@iot.id", iotIDImport + id);
+//        		histLocations.add(iotID);
+//        	}
+//        	obj.put("HistoricalLocations", histLocations);
         	
         	String json = obj.toJSONString();
             if (!FrostSender.sendSafeToFrostServer(url, json)) {
@@ -227,9 +231,11 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         
         JSONParser parser = new JSONParser();
 		try {
-			Object o = parser.parse(data[6]);
-			JSONObject foi = (JSONObject) o;
-	        obj.put("FeatureOfInterest", foi);
+			if (!data[6].equals("")) {
+				Object o = parser.parse(data[6]);
+				JSONObject foi = (JSONObject) o;
+		        obj.put("FeatureOfInterest", foi);
+			}
 	        
 	        if (!data[7].equals("")) {
 	        	obj.put("resultQuality", data[7]);
