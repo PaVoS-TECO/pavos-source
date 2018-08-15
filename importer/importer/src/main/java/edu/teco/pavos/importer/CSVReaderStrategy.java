@@ -22,6 +22,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 	private static String OBSERVED_PROPERTY = "observedProperty";
 	private static String SENSOR = "sensor";
 	private static String LOCATION = "location";
+	private static String FEATURE_OF_INTEREST = "featureOfInterest";
 	private static String THING = "thing";
 	private static String DATASTREAM = "dataStream";
 	private static String OBSERVATION = "observation";
@@ -55,6 +56,8 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 						this.importSensor(separated);
 					} else if (separated[0].equals(LOCATION) && separated.length >= 6) {
 						this.importLocation(separated);
+					} else if (separated[0].equals(FEATURE_OF_INTEREST) && separated.length >= 6) {
+						this.importFoI(separated);
 					} else if (separated[0].equals(THING) && separated.length >= 6) {
 						this.importThing(separated);
 					} else if (separated[0].equals(DATASTREAM) && separated.length >= 12) {
@@ -117,6 +120,28 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 			Object o = parser.parse(data[5]);
 			JSONObject location = (JSONObject) o;
 	        obj.put("location", location);
+	        String json = obj.toJSONString();
+	        if (!FrostSender.sendSafeToFrostServer(url, json)) {
+	        	this.errorlines++;
+	        }
+		} catch (ParseException e) {
+			this.errorlines++;
+			System.out.println(e.getLocalizedMessage());
+		}
+    }
+    
+    private void importFoI(String[] data) {
+    	JSONObject obj = new JSONObject();
+		obj.put("@iot.id", iotIDImport + data[1]);
+        obj.put("name", data[2]);
+        obj.put("description", data[3]);
+        obj.put("encodingType", data[4]);
+        
+        JSONParser parser = new JSONParser();
+		try {
+			Object o = parser.parse(data[5]);
+			JSONObject feature = (JSONObject) o;
+	        obj.put("feature", feature);
 	        String json = obj.toJSONString();
 	        if (!FrostSender.sendSafeToFrostServer(url, json)) {
 	        	this.errorlines++;
@@ -229,20 +254,19 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         dataStream.put("@iot.id", iotIDImport + data[5]);
         obj.put("Datastream", dataStream);
         
+        JSONObject featureOI = new JSONObject();
+        featureOI.put("@iot.id", iotIDImport + data[6]);
+        obj.put("FeatureOfInterest", featureOI);
+
+        if (!data[7].equals("")) {
+        	obj.put("resultQuality", data[7]);
+        }
+        if (!data[8].equals("")) {
+        	obj.put("validTime", data[8]);
+        }
+        
         JSONParser parser = new JSONParser();
 		try {
-			if (!data[6].equals("")) {
-				Object o = parser.parse(data[6]);
-				JSONObject foi = (JSONObject) o;
-		        obj.put("FeatureOfInterest", foi);
-			}
-	        
-	        if (!data[7].equals("")) {
-	        	obj.put("resultQuality", data[7]);
-	        }
-	        if (!data[8].equals("")) {
-	        	obj.put("validTime", data[8]);
-	        }
 	        if (!data[9].equals("")) {
 	        	Object ob = parser.parse(data[9]);
 				JSONObject param = (JSONObject) ob;
