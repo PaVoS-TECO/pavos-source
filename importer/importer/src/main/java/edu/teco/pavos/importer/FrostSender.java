@@ -19,9 +19,6 @@ public final class FrostSender {
      * Default constructor
      */
     private FrostSender() { }
-    
-    //TODO Create one with backchecking if really created
-
 
     /**
      * Sends the given JsonObject to the FROST-Server.
@@ -84,13 +81,14 @@ public final class FrostSender {
             	dos.write(bytes);
             	
             	BufferedReader in = new BufferedReader(new InputStreamReader(http.getInputStream()));
+            	String res = "";
 			    String inputLine;
-			    ArrayList<String> ids = new ArrayList<String>();
-
 			    while ((inputLine = in.readLine()) != null) {
-			    	System.out.println(inputLine);
+			    	res += inputLine;
 			    }
 			    in.close();
+			    System.out.println(res);
+			    //TODO check res for validity
             } catch (IOException e) {
             	System.out.println(e.getLocalizedMessage());
             }

@@ -68,9 +68,6 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         
         this.chooserButton = new JButton("Choose Files");
         chooserButton.setName("chooserButton");
-        /*chooserButton.setBackground(Static.tableHeaderBG);
-        chooserButton.setForeground(Color.white);
-        chooserButton.setFont(new Font("Calibri", Font.BOLD, 24));*/
         this.contentPane.add(chooserButton);
         this.layout.putConstraint(SpringLayout.WEST, chooserButton, 20, SpringLayout.WEST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, chooserButton, w + 20, SpringLayout.WEST, this.contentPane);
@@ -80,9 +77,6 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         
         this.importButton = new JButton("Import Files");
         importButton.setName("importButton");
-        /*importButton.setBackground(Static.tableHeaderBG);
-        importButton.setForeground(Color.white);
-        importButton.setFont(new Font("Calibri", Font.BOLD, 24));*/
         this.contentPane.add(importButton);
         this.layout.putConstraint(SpringLayout.WEST, importButton, -(w + 20), SpringLayout.EAST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, importButton, -20, SpringLayout.EAST, this.contentPane);

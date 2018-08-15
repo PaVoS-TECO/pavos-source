@@ -1,6 +1,7 @@
 package edu.teco.pavos.exporter;
 
 import java.io.File;
+import java.util.UUID;
 
 /**
  * Exporter of Data from Kafka to a File.
@@ -31,12 +32,8 @@ public class FileExporter extends AbstractExporter {
     }
     
     private static String createRandomDownloadID() {
-    	String output = "";
-    	char rndm = (char) (int) (Math.random() * 90 + 33);
-    	int i = 0;
-    	while (i++ < 20) {
-    		output += rndm;
-    	}
+    	String output = "pavos";
+    	output += UUID.randomUUID().toString().replace("-", "");
     	return output;
     }
 
@@ -47,18 +44,24 @@ public class FileExporter extends AbstractExporter {
     	//TODO get Stream
     	ExportStreamGenerator streamer = new ExportStreamGenerator(this.properties);
     	//KStream stream = streamer.createExportStream();
-    	FileType fileType = new FileType(this.properties.getFileExtension());
+    	String extension = this.properties.getFileExtension();
+    	FileType fileType = new FileType(extension);
     	try {
 			FileWriterStrategy fileWriter = fileType.getFileWriter();
-			//TODO determine Path for data
-	    	String path = "";
+			String filename = this.ads.getID() + "." + extension;
+			String dirPath = System.getProperty("user.dir") + File.separator + "exports";
+	    	String path = dirPath + File.separator + filename;
+	    	File directory = new File(dirPath);
+	    	if (!directory.exists()) {
+	    		directory.mkdir();
+	    	}
 	    	//fileWriter.saveToFile(stream, new File(path));
 	    	this.ads.setFilePath(new File(path));
 	    	this.ads.setFileReadyForDownload();
 	    	this.ads.savePersistent();
 		} catch (IllegalFileExtensionException e) {
-			// TODO Auto-generated catch block
-			// write error in DownloadState
+			this.ads.setFileHadError();
+			this.ads.savePersistent();
 		}
     }
 

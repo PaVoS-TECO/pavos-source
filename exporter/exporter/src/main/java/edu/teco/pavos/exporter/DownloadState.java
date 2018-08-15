@@ -1,25 +1,42 @@
 package edu.teco.pavos.exporter;
 
 import java.io.File;
+import java.util.prefs.Preferences;
 
 /**
  * Verifies for the State of a Download.
  */
 public class DownloadState {
 
-    /**
-     * Is an Identifier for a specific Download.
-     */
-    private String downloadID;
+    protected String downloadID;
     protected File filePath;
-    protected boolean ready;
+    protected String ready;
+    protected String save = "pavos-export-files";
 
     /**
      * Default constructor
+     * @param id of the Download
      */
     public DownloadState(String id) {
         this.downloadID = id;
-        // Set filePath and ready
+    	Preferences prefs = Preferences.userRoot().node(this.save);
+    	boolean exists = prefs.getBoolean(this.downloadID, false);
+    	if (exists) {
+    		String path = prefs.get(this.downloadID + "/Path", "");
+    		String ready = prefs.get(this.downloadID + "/Ready", "false");
+    		this.filePath = new File(path);
+    		this.ready = ready;
+    	} else {
+    		this.ready = "noID";
+    	}
+    }
+    
+    /**
+     * Gives the String ID associated with this DownloadID.
+     * @return The String ID of the File for the Download.
+     */
+    public String getID() {
+    	return this.downloadID;
     }
 
     /**
@@ -34,7 +51,7 @@ public class DownloadState {
      * Checks if a File is Ready to be downloaded.
      * @return A boolean whether the file is downloadable or not.
      */
-    public boolean isFileReadyForDownload() {
+    public String isFileReadyForDownload() {
         return this.ready;
     }
 

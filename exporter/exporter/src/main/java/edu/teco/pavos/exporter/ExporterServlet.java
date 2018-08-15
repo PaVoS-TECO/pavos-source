@@ -1,11 +1,17 @@
 package edu.teco.pavos.exporter;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,19 +51,26 @@ public class ExporterServlet extends HttpServlet {
 		ExportProperties props = new ExportProperties(ext, tf, ops, cIDs, sIDs);
 		FileExporter exporter = new FileExporter(props);
 		String dID = exporter.createFileInformation();
+		
+		//make sure this thread continues working, since the servlet is finished after sending back id
+		Thread aThread = new Thread(new Runnable() {
+            public void run() {
+            	exporter.createFile();
+            }
+        });
+        aThread.start();
+        
 		PrintWriter writer = res.getWriter();
 		writer.println(dID);
 		writer.close();
-		// Work this in a separate Thread since would be terminated otherwise?
-		exporter.createFile();
 	}
 	
 	private void status(HttpServletRequest req, HttpServletResponse res) 
 			throws IOException {
 		String dID = req.getParameter("downloadID");
-		Boolean ready = (new DownloadState(dID)).isFileReadyForDownload();
+		String ready = (new DownloadState(dID)).isFileReadyForDownload();
 		PrintWriter writer = res.getWriter();
-		writer.println(ready.toString());
+		writer.println(ready);
 		writer.close();
 	}
 	
@@ -65,15 +78,20 @@ public class ExporterServlet extends HttpServlet {
 			throws IOException {
 		String dID = req.getParameter("downloadID");
 		DownloadState ds = new DownloadState(dID);
-		boolean ready = ds.isFileReadyForDownload();
-		if (!ready) {
-			res.sendError(HttpServletResponse.SC_CONFLICT);
+		String ready = ds.isFileReadyForDownload();
+		if (!ready.equals("true")) {
+			PrintWriter writer = res.getWriter();
+			writer.println(ready);
+			writer.close();
 		} else {
 			File file = ds.getFilePath();
-			String path = file.getAbsolutePath();
-			//TODO find out location
-			String location = "";
-			res.sendRedirect(location);
+			byte[] zip = zipFile(file);
+            ServletOutputStream sos = res.getOutputStream();
+            res.setContentType("application/zip");
+            res.setHeader("Content-Disposition", "attachment; filename=" + ds.getID() + ".zip");
+            sos.write(zip);
+            sos.flush();
+            sos.close();
 		}
 	}
 	
@@ -88,5 +106,34 @@ public class ExporterServlet extends HttpServlet {
 		writer.println(output);
 		writer.close();
 	}
+
+    /**
+     * Compress the given directory with all its files.
+     */
+    private byte[] zipFile(File file)
+    		throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+        byte[] bytes = new byte[2048];
+
+        FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        
+        zos.putNextEntry(new ZipEntry(file.getName()));
+
+        int bytesRead;
+        while ((bytesRead = bis.read(bytes)) != -1) {
+            zos.write(bytes, 0, bytesRead);
+        }
+        zos.closeEntry();
+        bis.close();
+        fis.close();
+        zos.flush();
+        baos.flush();
+        zos.close();
+        baos.close();
+
+        return baos.toByteArray();
+    }
 	
 }

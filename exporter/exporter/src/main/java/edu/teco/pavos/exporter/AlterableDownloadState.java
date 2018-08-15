@@ -1,6 +1,7 @@
 package edu.teco.pavos.exporter;
 
 import java.io.File;
+import java.util.prefs.Preferences;
 
 /**
  * Verifies for the State of a Download. Can also change it.
@@ -27,14 +28,24 @@ public class AlterableDownloadState extends DownloadState {
      * Validate, that the File is ready to be downloaded.
      */
     public void setFileReadyForDownload() {
-        super.ready = true;
+        super.ready = "true";
+    }
+    
+    /**
+     * Validate, that the File had an error and can not be downloaded.
+     */
+    public void setFileHadError() {
+    	super.ready = "error";
     }
 
     /**
      * Save the changed Data persistently.
      */
     public void savePersistent() {
-        // TODO implement here
+    	Preferences prefs = Preferences.userRoot().node(super.save);
+    	prefs.putBoolean(super.downloadID, true);
+    	prefs.put(super.downloadID + "/Path", super.filePath.getAbsolutePath());
+    	prefs.put(super.downloadID + "/Ready", super.ready);
     }
 
 }
