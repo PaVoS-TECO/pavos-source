@@ -48,7 +48,7 @@ public class GraphiteConsumerTests {
 		
 		ArrayList<String> topics = new ArrayList<String>();
 		topics.add(topic);
-		final GraphiteConnector consumer = new GraphiteConnector(topics);
+		final GraphiteConnector consumer = new GraphiteConnector(topics, topic);
 		
 		KafkaProducer<String, String> producer = new KafkaProducer<>(getProducerProperties());
 		producer.send(new ProducerRecord<String, String>(topic, sData));

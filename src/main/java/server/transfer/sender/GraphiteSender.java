@@ -46,7 +46,7 @@ public class GraphiteSender extends Sender {
 	 * {@link ConsumerRecords}<{@link String}, {@link ObservationData}> records
 	 */
 	@Override
-	public void send(ConsumerRecords<String, ObservationData> records) {
+	public void send(ConsumerRecords<String, ObservationData> records, String graphTopic) {
 		if (som.isConnectionClosed()) {
 			som.reconnect();
 		}
@@ -54,7 +54,7 @@ public class GraphiteSender extends Sender {
 		PyList list = new PyList();
 
 		records.forEach(record -> {
-			GraphiteConverter.addObservations(record, list);
+			GraphiteConverter.addObservations(record, list, graphTopic);
 		});
 
 		PyString payload = cPickle.dumps(list);
@@ -79,16 +79,16 @@ public class GraphiteSender extends Sender {
 	 * @param topic The name of the topic that this data belongs to
 	 * @param data  The data that will be sent to Graphite
 	 */
-	public void send(String topic, ObservationData data) {
+	public void send(String singleTopic, ObservationData data) {
 		recordsMap = new HashMap<TopicPartition, List<ConsumerRecord<String, ObservationData>>>();
 		recordList = new ArrayList<ConsumerRecord<String, ObservationData>>();
-		record = new ConsumerRecord<String, ObservationData>(topic, 0, 0, null, data);
+		record = new ConsumerRecord<String, ObservationData>(singleTopic, 0, 0, null, data);
 
 		recordList.add(record);
-		recordsMap.put(new TopicPartition(topic, 0), recordList);
+		recordsMap.put(new TopicPartition(singleTopic, 0), recordList);
 		records = new ConsumerRecords<String, ObservationData>(recordsMap);
 
-		this.send(records);
+		this.send(records, singleTopic);
 	}
 
 	@Override

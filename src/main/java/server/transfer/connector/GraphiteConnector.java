@@ -26,10 +26,12 @@ public class GraphiteConnector extends Connector {
     /**
      * Default constructor
      * @param topics The topics that the consumer should subscribe to
+     * @param graphTopic The Graphite / Grafana topic name, where all data will be sent to
      * @param sender Sends the data to a specified component, normally a {@link GraphiteSender}
      */
-	public GraphiteConnector(List<String> topics) {
+	public GraphiteConnector(List<String> topics, String graphTopic) {
     	this.topics = topics;
+    	this.graphTopic = graphTopic;
     }
 
     /**
@@ -52,7 +54,7 @@ public class GraphiteConnector extends Connector {
                 ConsumerRecords<String, ObservationData> records = consumer.poll(100);
 
                 if (!records.isEmpty()) {
-                    sender.send(records);
+                    sender.send(records, graphTopic);
                 }
             }
         } catch (WakeupException ex) {
