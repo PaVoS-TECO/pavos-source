@@ -11,7 +11,7 @@ import server.transfer.data.ObservationData;
 import server.transfer.sender.Sender;
 
 /**
- * Consumes data from Kafka
+ * Connects Kafka to a specified Component.
  */
 public abstract class Connector {
 

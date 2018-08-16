@@ -17,7 +17,8 @@ import server.transfer.data.ObservationDataDeserializer;
 import server.transfer.sender.Sender;
 
 /**
- * Consumes data from Kafka and sends it to Graphite
+ * Connects Kafka to Graphite.
+ * Consumes data from Kafka and sends it to Graphite.
  */
 public class GraphiteConnector extends Connector {
 	
