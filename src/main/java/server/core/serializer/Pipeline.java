@@ -1,4 +1,4 @@
-package com.github.masterries.kafka.serializer;
+package server.core.serializer;
 
 public class Pipeline {
 }

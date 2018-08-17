@@ -1,4 +1,4 @@
-package com.github.masterries.kafka;
+package server.core.controller;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

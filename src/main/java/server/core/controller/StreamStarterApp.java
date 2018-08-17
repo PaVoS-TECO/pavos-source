@@ -1,4 +1,4 @@
-package com.github.masterries.kafka;
+package server.core.controller;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.*;

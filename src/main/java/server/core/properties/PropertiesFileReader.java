@@ -1,4 +1,4 @@
-package com.github.masterries.kafka.properties;
+package server.core.properties;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

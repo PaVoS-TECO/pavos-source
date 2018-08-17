@@ -1,4 +1,4 @@
-package com.github.masterries.kafka.model;
+package server.core.model;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;

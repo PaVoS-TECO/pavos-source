@@ -1,4 +1,4 @@
-package com.github.masterries.kafka.properties;
+package server.core.properties;
 
 public class PropertiesFile implements PropertiesFileInterface {
 

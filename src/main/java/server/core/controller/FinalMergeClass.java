@@ -1,8 +1,8 @@
-package com.github.masterries.kafka;
+package server.core.controller;
 
-import com.github.masterries.kafka.properties.KafkaUtils;
-import com.github.masterries.kafka.properties.PropertiesFile;
-import com.github.masterries.kafka.properties.PropertiesFileReader;
+import server.core.properties.KafkaUtils;
+import server.core.properties.PropertiesFile;
+import server.core.properties.PropertiesFileReader;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;

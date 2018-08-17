@@ -1,4 +1,4 @@
-package com.github.masterries.kafka.model;
+package server.core.model;
 
 public interface TimeValue {
     public String asISO8601();

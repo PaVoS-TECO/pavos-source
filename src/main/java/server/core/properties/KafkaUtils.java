@@ -1,4 +1,4 @@
-package com.github.masterries.kafka.properties;
+package server.core.properties;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;

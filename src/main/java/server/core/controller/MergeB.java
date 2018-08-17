@@ -1,4 +1,4 @@
-package com.github.masterries.kafka;
+package server.core.controller;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;

@@ -1,4 +1,4 @@
-package com.github.masterries.kafka;
+package server.core.controller;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
