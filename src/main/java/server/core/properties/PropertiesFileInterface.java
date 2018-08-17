@@ -1,4 +1,4 @@
-package server.core.properties;
+package com.github.masterries.kafka.properties;
 
 /**
  * The Properties Interface is a special form of associative memory in which key-value pairs are always of type string. Since the entries can be stored in a file and read out again, hardwired character strings can be externalized from the program text so that the values ​​can be easily changed without retranslation.
@@ -9,7 +9,7 @@ public interface PropertiesFileInterface {
     /**
      * This Methodes returns the requestet propertie Value
      * @param propertyName propertyName is the name of the Requested Property
-     * 
+     *
      * @return Return the Value to the Requested Property
      */
     public String getPropValues(String propertyName);
