@@ -23,9 +23,10 @@ public class PropertiesFileReader {
 
         // check if properties file is missing keys
         try {
-            FileInputStream file = new FileInputStream("./KafkaCore.properties");
+            FileInputStream file = new FileInputStream("src/main/resources/KafkaCore.properties");
             properties.load(file);
             file.close();
+            
             if (!properties.containsKey("BOOTSTRAP_SERVERS_CONFIG")
                     || !properties.containsKey("SCHEMA_REGISTRY_URL_CONFIG")
                     || !properties.containsKey("M_AUTO_OFFSET_RESET_CONFIG")

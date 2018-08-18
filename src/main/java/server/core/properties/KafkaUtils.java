@@ -2,19 +2,25 @@ package server.core.properties;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.KafkaAdminClient;
+import org.apache.kafka.clients.admin.TopicListing;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
-public class KafkaUtils {
+public final class KafkaUtils {
 
     private static Properties props;
     private static KafkaConsumer<String, String> consumer;
     private static AdminClient admin;
     private static int timeout = 2000;
-
+    
+    private KafkaUtils() {
+    	
+    }
 
     public static void init(){
         props = PropertiesFileReader.getStandartConsumerProperties();
@@ -24,34 +30,43 @@ public class KafkaUtils {
         consumer = new KafkaConsumer<String, String>(props);
     }
 
-
     public static boolean existsTopic(String topicname){
-        boolean exists = (consumer.listTopics().get(topicname)!=null);
-        consumer.poll(timeout);
-        return exists;
-
-
+    	Collection<TopicListing> topicListings = getExistingTopics();
+    	
+        return topicListings.contains(new TopicListing(topicname, false));
     }
-    public static boolean existsTopic(String topicname1,String topicname2){
-        boolean exists1 = (consumer.listTopics().get(topicname1)!=null);
-        boolean exists2 = (consumer.listTopics().get(topicname2)!=null);
-        consumer.poll(timeout);
-        return (exists1&&exists2);
-
-
+    
+    public static boolean existsTopic(String topicName1,String topicName2){
+    	Collection<TopicListing> topicListings = getExistingTopics();
+    	Collection<TopicListing> topicsToCheck = new ArrayList<TopicListing>();
+    	topicsToCheck.add(new TopicListing(topicName1, false));
+    	topicsToCheck.add(new TopicListing(topicName2, false));
+    	
+        return (topicListings.containsAll(topicsToCheck));
+    }
+    
+    private static Collection<TopicListing> getExistingTopics() {
+    	Collection<TopicListing> topicListings = new ArrayList<>();
+		try {
+			topicListings = admin.listTopics().listings().get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		return topicListings;
     }
 
-    //TODO
-/*
     public static boolean deleteTopic(String topic){
-        ArrayList<String> list = new ArrayList<>();
-        list.add(topic);
-        admin.deleteTopics(list);
-        return true;
-
-
-    }*/
-
-
+    	Collection<TopicListing> topicListings = getExistingTopics();
+    	TopicListing tl = new TopicListing(topic, false);
+    	if (!topicListings.contains(tl)) return true;
+    	
+    	Collection<String> topicsToRemove = new ArrayList<String>();
+    	topicsToRemove.add(topic);
+    	DeleteTopicsResult result = admin.deleteTopics(topicsToRemove);
+    	
+        return result.all().isDone();
+    }
 
 }
