@@ -11,12 +11,10 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import server.core.properties.KafkaAdmin;
 import server.core.properties.PropertiesFileManager;
 import server.transfer.data.ObservationData;
+import server.transfer.data.ObservationDataSerializer;
 import server.transfer.data.ObservationType;
 
 public class GraphitePClass {
@@ -53,16 +51,12 @@ public class GraphitePClass {
 			obs.observationDate = LocalDateTime.now().toString();
 			obs.observations.put(ObservationType.PARTICULATE_MATTER_PM10.toString(), "10000");
 			obs.observations.put(ObservationType.PARTICULATE_MATTER_PM2P5.toString(), "10000");
+			
+			ObservationDataSerializer ser = new ObservationDataSerializer();
+			String json = ser.convertToJson(obs);
+			ser.close();
 
-			ObjectMapper mapper = new ObjectMapper();
-			String sData = null;
-			try {
-				sData = mapper.writeValueAsString(obs);
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
-			}
-
-			return sData;
+			return json;
 
 		});
 
