@@ -1,11 +1,11 @@
 package server.core.controller;
 
-import server.core.properties.KafkaUtils;
+import server.core.properties.KafkaAdmin;
 
 public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
-		KafkaUtils.init();
+		KafkaAdmin kAdmin = KafkaAdmin.getInstance();
 		GraphitePClass pc = new GraphitePClass("test");
 		pc.start();
 

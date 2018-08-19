@@ -2,13 +2,13 @@ package server.core.controller;
 
 import org.junit.Test;
 
-import server.core.properties.KafkaUtils;
+import server.core.properties.KafkaAdmin;
 
 public class FinalMergeClassTest {
 
 	@Test
 	public void setupAndMerge() {
-		KafkaUtils.init();
+		KafkaAdmin.init();
 		System.out.println("[Test] KafkaUtils | init() | done!");
 		
 		FinalMergeClass fmc = new FinalMergeClass("mergeA", "mergeB", "mergeResult", "key");

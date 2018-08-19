@@ -14,13 +14,21 @@ import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
 
 public final class PropertiesFileReader {
 
-	private static Properties properties;
-
+	private Properties properties;
+	private static PropertiesFileReader instance;
+	
 	private PropertiesFileReader() {
-
+		init();
+	}
+	
+	public static PropertiesFileReader getInstance() {
+		if (instance == null) {
+			instance = new PropertiesFileReader();
+		}
+		return instance;
 	}
 
-	public static void init() {
+	public void init() {
 		properties = new Properties();
 
 		// check if properties file is missing keys
@@ -51,8 +59,7 @@ public final class PropertiesFileReader {
 		}
 	}
 
-	public static Properties getMergecStreamProperties() {
-		initProperties();
+	public Properties getMergecStreamProperties() {
 		Properties props = new Properties();
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
 		props.put(StreamsConfig.APPLICATION_ID_CONFIG, getProperty("M_APPLICATION_ID_CONFIG"));
@@ -64,8 +71,7 @@ public final class PropertiesFileReader {
 		return props;
 	}
 
-	public static Properties getGraphiteStreamProperties() {
-		initProperties();
+	public Properties getGraphiteStreamProperties() {
 		Properties props = new Properties();
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
 		props.put(StreamsConfig.APPLICATION_ID_CONFIG, getProperty("P_APPLICATION_ID_CONFIG"));
@@ -77,8 +83,7 @@ public final class PropertiesFileReader {
 		return props;
 	}
 
-	public static Properties getStandartConsumerProperties() {
-		initProperties();
+	public Properties getStandartConsumerProperties() {
 		Properties props = new Properties();
 		props.put("bootstrap.servers", getProperty("BOOTSTRAP_SERVERS_CONFIG"));
 		props.put("group.id", "test-consumer-group");
@@ -87,14 +92,8 @@ public final class PropertiesFileReader {
 		return props;
 	}
 
-	public static String getProperty(String keys) {
-		initProperties();
+	public String getProperty(String keys) {
 		return properties.getProperty(keys);
-	}
-
-	private static void initProperties() {
-		if (properties == null)
-			init();
 	}
 
 }

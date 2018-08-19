@@ -13,7 +13,7 @@ import org.apache.kafka.streams.kstream.Produced;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import server.core.properties.KafkaUtils;
+import server.core.properties.KafkaAdmin;
 import server.core.properties.PropertiesFileReader;
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationType;
@@ -26,18 +26,19 @@ public class GraphitePClass {
 	private KafkaStreams kafkaStreams;
 
 	public GraphitePClass(String topic, String iot) {
-		if (KafkaUtils.existsTopic(topic)) {
+		KafkaAdmin kAdmin = KafkaAdmin.getInstance();
+		
+		if (kAdmin.existsTopic(topic)) {
 			this.ObservationTopic = topic;
-
 			this.outputTopic = iot;
-			this.props = PropertiesFileReader.getGraphiteStreamProperties();
+			
+			PropertiesFileReader propReader = PropertiesFileReader.getInstance();
+			this.props = propReader.getGraphiteStreamProperties();
 		}
 	}
 
 	public GraphitePClass(String iot) {
-		this.ObservationTopic = "Observations";
-		this.outputTopic = iot;
-		this.props = PropertiesFileReader.getGraphiteStreamProperties();
+		this("Observations", iot);
 	}
 
 	public boolean start() {
