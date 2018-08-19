@@ -8,8 +8,8 @@ public class FinalMergeClassTest {
 
 	@Test
 	public void setupAndMerge() {
-		KafkaAdmin.init();
-		System.out.println("[Test] KafkaUtils | init() | done!");
+		KafkaAdmin.getInstance();
+		System.out.println("[Test] KafkaAdmin | init() | done!");
 		
 		FinalMergeClass fmc = new FinalMergeClass("mergeA", "mergeB", "mergeResult", "key");
 		System.out.println("[Test] FinalMergeClass | constructor() | done!");

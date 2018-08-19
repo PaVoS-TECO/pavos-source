@@ -51,20 +51,33 @@ public final class KafkaAdmin {
 	}
 
 	public boolean existsTopic(Collection<String> topicNames) {
-		Collection<TopicListing> topicListings = getExistingTopics();
-		Collection<TopicListing> topicsToCheck = new ArrayList<TopicListing>();
+		Collection<TopicListing> allListings = getExistingTopics();
+		Collection<TopicListing> listingsToCheck = new ArrayList<TopicListing>();
 
 		for (String topicName : topicNames) {
-			topicsToCheck.add(new TopicListing(topicName, false));
+			listingsToCheck.add(new TopicListing(topicName, false));
 		}
-		if (!topicListings.containsAll(topicsToCheck)) {
+		if (!containsAllTopicListings(allListings, listingsToCheck)) {
 			System.out.println("The chosen Input-Topics does not exits in Kafka");
 			return false;
 		} else {
 			return true;
 		}
 	}
-
+	
+	private boolean containsAllTopicListings(Collection<TopicListing> allListings, Collection<TopicListing> listingsToCheck) {
+		int num = 0;
+		for (TopicListing a : allListings) {
+			for (TopicListing b: listingsToCheck) {
+				if (a.name().equals(b.name())) {
+					num++;
+				}
+			}
+		}
+		if (num == listingsToCheck.size()) return true;
+		return false;
+	}
+	
 	private Collection<TopicListing> getExistingTopics() {
 		Collection<TopicListing> topicListings = new ArrayList<>();
 		try {
