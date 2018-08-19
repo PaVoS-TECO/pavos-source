@@ -1,7 +1,7 @@
 package server.core.properties;
 
 /**
- * The Properties Interface is a special form of associative memory in which
+ * The PropertyFileInterface is a special form of associative memory in which
  * key-value pairs are always of type string. Since the entries can be stored in
  * a file and read out again, hardwired character strings can be externalized
  * from the program text so that the values ​​can be easily changed without
@@ -10,13 +10,13 @@ package server.core.properties;
 public interface PropertiesFileInterface {
 
 	/**
-	 * This Methodes returns the requestet propertie Value
+	 * This method returns the requested property value
 	 * 
-	 * @param propertyName propertyName is the name of the Requested Property
+	 * @param propertyName propertyName is the name of the requested property
 	 *
-	 * @return Return the Value to the Requested Property
+	 * @return Return the value to the requested property
 	 */
-	public String getPropValues(String propertyName);
+	public String getValue(String propertyName);
 
 	/**
 	 * The Method adds a key-value pair to the Properties object. To get back to the

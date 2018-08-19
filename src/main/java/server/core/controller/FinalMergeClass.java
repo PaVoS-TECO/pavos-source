@@ -13,7 +13,7 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Produced;
 
 import server.core.properties.KafkaAdmin;
-import server.core.properties.PropertiesFileReader;
+import server.core.properties.PropertiesFileManager;
 
 public class FinalMergeClass {
 
@@ -33,8 +33,8 @@ public class FinalMergeClass {
 			this.outputTopic = outputTopic;
 			this.keyEqual = key;
 			
-			PropertiesFileReader propReader = PropertiesFileReader.getInstance();
-			this.props = propReader.getMergecStreamProperties();
+			PropertiesFileManager propManager = PropertiesFileManager.getInstance();
+			this.props = propManager.getMergecStreamProperties();
 		}
 
 	}

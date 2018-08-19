@@ -28,10 +28,10 @@ public final class KafkaAdmin {
 
 	private void init() {
 		Properties adminp = new Properties();
-		PropertiesFileReader propReader = PropertiesFileReader.getInstance();
+		PropertiesFileManager propManager = PropertiesFileManager.getInstance();
 		
 		adminp.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
-				propReader.getProperty("BOOTSTRAP_SERVERS_CONFIG"));
+				propManager.getProperty("BOOTSTRAP_SERVERS_CONFIG"));
 		admin = AdminClient.create(adminp);
 	}
 

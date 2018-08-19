@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import server.core.properties.KafkaAdmin;
-import server.core.properties.PropertiesFileReader;
+import server.core.properties.PropertiesFileManager;
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationType;
 
@@ -32,8 +32,8 @@ public class GraphitePClass {
 			this.ObservationTopic = topic;
 			this.outputTopic = iot;
 			
-			PropertiesFileReader propReader = PropertiesFileReader.getInstance();
-			this.props = propReader.getGraphiteStreamProperties();
+			PropertiesFileManager propManager = PropertiesFileManager.getInstance();
+			this.props = propManager.getGraphiteStreamProperties();
 		}
 	}
 
