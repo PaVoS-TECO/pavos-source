@@ -1,5 +1,6 @@
 package server.core.controller;
 
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 import org.apache.avro.generic.GenericRecord;
@@ -49,10 +50,7 @@ public class GraphitePClass {
 		KStream<String, String> iot = obsT.mapValues(value -> {
 			ObservationData obs = new ObservationData();
 			value.get("");
-			obs.locationElevation = "test";
-			obs.locationID = "test";
-			obs.locationName = "test";
-			obs.observationDate = "test";
+			obs.observationDate = LocalDateTime.now().toString();
 			obs.observations.put(ObservationType.PARTICULATE_MATTER_PM10.toString(), "10000");
 			obs.observations.put(ObservationType.PARTICULATE_MATTER_PM2P5.toString(), "10000");
 
