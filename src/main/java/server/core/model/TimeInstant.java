@@ -11,9 +11,6 @@ public class TimeInstant implements TimeValue {
 
 	private DateTime dateTime;
 
-	private TimeInstant() {
-	}
-
 	public TimeInstant(DateTime dateTime) {
 		this.dateTime = dateTime;
 	}
@@ -37,40 +34,44 @@ public class TimeInstant implements TimeValue {
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		}
-		if (obj == null) {
+		} else if (obj == null) {
 			return false;
-		}
-		if (getClass() != obj.getClass()) {
+		} else if (getClass() != obj.getClass()) {
 			return false;
 		}
 		final TimeInstant other = (TimeInstant) obj;
-		if (this.dateTime == null && other.dateTime == null) {
+		boolean tdtNull = this.dateTime == null;
+		boolean odtNull = other.dateTime == null;
+		if (tdtNull && odtNull) {
 			return true;
-		}
-		if (this.dateTime == null | other.dateTime == null) {
+		} else if (tdtNull | odtNull) {
 			return false;
-		}
-		if (!this.dateTime.isEqual(other.dateTime)) {
+		} else if (!this.dateTime.isEqual(other.dateTime)) {
 			return false;
 		}
 		return true;
 	}
 
 	public static TimeInstant parse(String value) {
-		return new TimeInstant(DateTime.parse(value));
+		return parse(value, null);
+	}
+	
+	public static TimeInstant parse(String value, DateTimeFormatter dtf) {
+		if (dtf == null) {
+			return new TimeInstant(DateTime.parse(value));
+		}
+		return new TimeInstant(DateTime.parse(value, dtf));
 	}
 
 	public static TimeInstant create(Long value) {
-		return new TimeInstant(new DateTime(value));
+		return create(value, null);
 	}
 
 	public static TimeInstant create(Long value, DateTimeZone timeZone) {
+		if (timeZone == null) {
+			return new TimeInstant(new DateTime(value));
+		}
 		return new TimeInstant(new DateTime(value, timeZone));
-	}
-
-	public static TimeInstant parse(String value, DateTimeFormatter dtf) {
-		return new TimeInstant(DateTime.parse(value, dtf));
 	}
 
 	public DateTime getDateTime() {
