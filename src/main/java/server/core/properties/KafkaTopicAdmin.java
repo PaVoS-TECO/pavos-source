@@ -13,18 +13,18 @@ import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicListing;
 
-public final class KafkaAdmin {
+public final class KafkaTopicAdmin {
 
 	private AdminClient admin;
-	private static KafkaAdmin instance;
+	private static KafkaTopicAdmin instance;
 
-	private KafkaAdmin() {
+	private KafkaTopicAdmin() {
 		init();
 	}
 	
-	public static KafkaAdmin getInstance() {
+	public static KafkaTopicAdmin getInstance() {
 		if (instance == null) {
-			instance = new KafkaAdmin();
+			instance = new KafkaTopicAdmin();
 		}
 		return instance;
 	}
@@ -61,7 +61,6 @@ public final class KafkaAdmin {
 			listingsToCheck.add(new TopicListing(topicName, false));
 		}
 		if (!containsAllTopicListings(allListings, listingsToCheck)) {
-			System.out.println("The chosen Input-Topics does not exits in Kafka");
 			return false;
 		} else {
 			return true;
@@ -103,6 +102,10 @@ public final class KafkaAdmin {
 		DeleteTopicsResult result = admin.deleteTopics(topicsToRemove);
 
 		return result.all().isDone();
+	}
+	
+	public boolean createTopic(String topic) {
+		return createTopic(topic, 1, (short) 1);
 	}
 	
 	public boolean createTopic(String topic, int partitions, short replicationFactor) {

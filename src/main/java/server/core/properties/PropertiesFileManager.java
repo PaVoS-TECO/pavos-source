@@ -27,7 +27,7 @@ public final class PropertiesFileManager {
 		return instance;
 	}
 
-	public Properties getMergecStreamProperties() {
+	public Properties getMergeStreamProperties() {
 		Properties props = new Properties();
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
 		props.put(StreamsConfig.APPLICATION_ID_CONFIG, getProperty("M_APPLICATION_ID_CONFIG"));
@@ -51,17 +51,8 @@ public final class PropertiesFileManager {
 		return props;
 	}
 
-	public Properties getStandartConsumerProperties() {
-		Properties props = new Properties();
-		props.put("bootstrap.servers", getProperty("BOOTSTRAP_SERVERS_CONFIG"));
-		props.put("group.id", "test-consumer-group");
-		props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-		return props;
-	}
-
-	public String getProperty(String keys) {
-		return properties.getProperty(keys);
+	public String getProperty(String key) {
+		return properties.getProperty(key);
 	}
 	
 	private void loadKafkaCoreProperties() {

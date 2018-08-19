@@ -12,7 +12,7 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Produced;
 
-import server.core.properties.KafkaAdmin;
+import server.core.properties.KafkaTopicAdmin;
 import server.core.properties.PropertiesFileManager;
 
 public class FinalMergeClass {
@@ -25,18 +25,20 @@ public class FinalMergeClass {
 	private KafkaStreams kafkaStreams;
 
 	public FinalMergeClass(String topic1, String topic2, String outputTopic, String key) {
-		KafkaAdmin kAdmin = KafkaAdmin.getInstance();
+		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
 		
-		if (kAdmin.existsTopic(topic1, topic2)) {
-			this.ObservationTopic = topic1;
-			this.FeatureOfIntresssTopic = topic2;
-			this.outputTopic = outputTopic;
-			this.keyEqual = key;
-			
-			PropertiesFileManager propManager = PropertiesFileManager.getInstance();
-			this.props = propManager.getMergecStreamProperties();
+		if (!kAdmin.existsTopic(topic1, topic2)) {
+			kAdmin.createTopic(topic1);
+			kAdmin.createTopic(topic2);
 		}
+		
+		this.ObservationTopic = topic1;
+		this.FeatureOfIntresssTopic = topic2;
+		this.outputTopic = outputTopic;
+		this.keyEqual = key;
 
+		PropertiesFileManager propManager = PropertiesFileManager.getInstance();
+		this.props = propManager.getMergeStreamProperties();
 	}
 
 	public FinalMergeClass() {
