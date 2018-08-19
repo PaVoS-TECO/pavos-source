@@ -2,12 +2,15 @@ package server.core.properties;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicListing;
 
 public final class KafkaAdmin {
@@ -93,8 +96,7 @@ public final class KafkaAdmin {
 	public boolean deleteTopic(String topic) {
 		Collection<TopicListing> topicListings = getExistingTopics();
 		TopicListing tl = new TopicListing(topic, false);
-		if (!topicListings.contains(tl))
-			return true;
+		if (!topicListings.contains(tl)) return true;
 
 		Collection<String> topicsToRemove = new ArrayList<String>();
 		topicsToRemove.add(topic);
@@ -102,5 +104,16 @@ public final class KafkaAdmin {
 
 		return result.all().isDone();
 	}
-
+	
+	public boolean createTopic(String topic, int partitions, short replicationFactor) {
+		if (existsTopic(topic)) return true;
+		
+		NewTopic newTopic = new NewTopic(topic, partitions, replicationFactor);
+		Collection<NewTopic> newTopics = new HashSet<>();
+		newTopics.add(newTopic);
+		CreateTopicsResult result = admin.createTopics(newTopics);
+		
+		return result.all().isDone();
+	}
+	
 }
