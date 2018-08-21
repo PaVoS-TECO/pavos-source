@@ -53,7 +53,7 @@ public class GeoRectangle extends GeoPolygon {
 				GeoRectangle subPolygon = new GeoRectangle(subXOffset, subYOffset, subWidth, subHeight
 						, ROWS, COLUMNS, (LEVELS_AFTER_THIS - 1)
 						, ID + Seperators.CLUSTER_SEPERATOR + subID);
-				subPolygons.put(subID, subPolygon);
+				subPolygons.add(subPolygon);
 			}
 		}
 	}

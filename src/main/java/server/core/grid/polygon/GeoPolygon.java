@@ -5,13 +5,11 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import server.core.grid.config.Seperators;
 import server.core.grid.converter.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
@@ -37,8 +35,8 @@ public abstract class GeoPolygon {
 	public final String ID;
 	public final int LEVELS_AFTER_THIS;
 	protected Path2D.Double path;
-	protected Map<String, GeoPolygon> subPolygons;
-	protected Set<ObservationData> sensorValues;
+	protected List<GeoPolygon> subPolygons;
+	protected List<ObservationData> sensorValues;
 	protected ObservationData observationData;
 	
 	/**
@@ -66,8 +64,9 @@ public abstract class GeoPolygon {
 		this.LEVELS_AFTER_THIS = Math.max(levelsAfterThis, 0);;
 		
 		this.path = new Path2D.Double();
-		this.subPolygons = new HashMap<>();
-		this.sensorValues = new HashSet<>();
+		this.subPolygons = new ArrayList<>();
+		this.sensorValues = new ArrayList<>();
+		this.observationData = new ObservationData();
 	}
 	
 	/**
@@ -93,24 +92,29 @@ public abstract class GeoPolygon {
 		this.LEVELS_AFTER_THIS = Math.max(levelsAfterThis, 0);
 		
 		this.path = new Path2D.Double();
-		this.subPolygons = new HashMap<>();
-		this.sensorValues = new HashSet<>();
+		this.subPolygons = new ArrayList<>();
+		this.sensorValues = new ArrayList<>();
+		this.observationData = new ObservationData();
 	} 
+	
+	public ObservationData cloneObservation() {
+		ObservationData result = new ObservationData();
+		result.observationDate = this.observationData.observationDate;
+		result.sensorID = this.observationData.sensorID;
+		result.clusterID = this.observationData.clusterID;
+		for (Map.Entry<String, String> entry : this.observationData.observations.entrySet()) {
+			result.observations.put(entry.getKey(), entry.getValue());
+		}
+		return result;
+	}
 	
 	/**
 	 * Returns the current {@link ObservationData} data as a {@link Set} over all sensors.
 	 * The new sensorID will consist of the {@link GeoPolygon}.ID and the original sensorID.
 	 * @return sensorDataSet {@code Set<ObservationData>}
 	 */
-	public Set<ObservationData> getSensorDataSet() {
-		Set<ObservationData> result = new HashSet<>();
-		
-		for (ObservationData data : this.sensorValues) {
-			data.sensorID = this.ID + Seperators.CLUSTER_SENSOR_SEPERATOR + data.sensorID;
-			result.add(data);
-		}
-		
-		return result;
+	public List<ObservationData> getSensorDataList() {
+		return this.sensorValues;
 	}
 	
 	/**
@@ -119,7 +123,7 @@ public abstract class GeoPolygon {
 	 * This method Produces recursively and starts with the smallest clusters.
 	 */
 	public void produceSensorDataMessage(String topic) {
-		for (GeoPolygon polygon : subPolygons.values()) {
+		for (GeoPolygon polygon : subPolygons) {
 			polygon.produceSensorDataMessage(topic);
 		}
 		GraphiteProducer producer = new GraphiteProducer();
@@ -132,6 +136,7 @@ public abstract class GeoPolygon {
 	 * @param observationData The {@link Double} value
 	 */
 	public void addObservation(ObservationData data) {
+		data.clusterID = this.ID;
 		this.sensorValues.add(data);
 	}
 	
@@ -142,8 +147,8 @@ public abstract class GeoPolygon {
 	public int getNumberOfSensors() {
 		int sum = 0;
 		
-		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
-			sum += entry.getValue().getNumberOfSensors();
+		for (GeoPolygon entry : this.subPolygons) {
+			sum += entry.getNumberOfSensors();
 		}
 		sum += this.sensorValues.size();
 		
@@ -157,8 +162,8 @@ public abstract class GeoPolygon {
 	public int getNumberOfSensors(String property) {
 		int sum = 0;
 		
-		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
-			sum += entry.getValue().getNumberOfSensors(property);
+		for (GeoPolygon entry : this.subPolygons) {
+			sum += entry.getNumberOfSensors(property);
 		}
 		for (ObservationData data : this.sensorValues) {
 			if (data.observations.containsKey(property)) {
@@ -176,8 +181,8 @@ public abstract class GeoPolygon {
 	public int getNumberOfSensors(Collection<String> properties) {
 		int sum = 0;
 		
-		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
-			sum += entry.getValue().getNumberOfSensors(properties);
+		for (GeoPolygon entry : this.subPolygons) {
+			sum += entry.getNumberOfSensors(properties);
 		}
 		for (ObservationData data : this.sensorValues) {
 			boolean containsAll = true;
@@ -203,8 +208,8 @@ public abstract class GeoPolygon {
 	public void updateObservations() {
 		
 		//create entries for sub-polygons & sensors
-		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
-			entry.getValue().updateObservations();
+		for (GeoPolygon entry : this.subPolygons) {
+			entry.updateObservations();
 		}
 		
 		ObservationData obs = new ObservationData();
@@ -213,12 +218,11 @@ public abstract class GeoPolygon {
 		Set<String> properties = new HashSet<>();
 		
 		// save properties found in sub-GeoPolygons and sensors
-		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
-			GeoPolygon poly = entry.getValue();
-			Map<String, String> obsTemp = poly.observationData.observations;
+		for (GeoPolygon entry : this.subPolygons) {
+			Map<String, String> obsTemp = entry.observationData.observations;
 			for (String property : obsTemp.keySet()) {
 				values.add(new Tuple3D<String, Integer, Double>(property
-						, Integer.valueOf(poly.getNumberOfSensors(property)), Double.valueOf(obsTemp.get(property))));
+						, Integer.valueOf(entry.getNumberOfSensors(property)), Double.valueOf(obsTemp.get(property))));
 				properties.add(property);
 			}
 		}
@@ -246,6 +250,7 @@ public abstract class GeoPolygon {
 			value = value / (double) totalSensors;
 			obs.observations.put(property, String.valueOf(value));
 		}
+		obs.clusterID = this.ID;
 		this.observationData = obs;
 	}
 	
@@ -329,7 +334,7 @@ public abstract class GeoPolygon {
 	 * @return subPolygons {@code Set<Entry<String, GeoPolygon>>}
 	 */
 	public Collection<GeoPolygon> getSubPolygons() {
-		return subPolygons.values();
+		return subPolygons;
 	}
 	
 }

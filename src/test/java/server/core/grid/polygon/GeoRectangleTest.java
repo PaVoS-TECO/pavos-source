@@ -32,7 +32,7 @@ public class GeoRectangleTest {
 		data.observationDate = TimeUtil.getUTCDateTimeString();
 		data.sensorID = "testSensorID";
 		String property = "temperature_celsius";
-		data.observations.put(property, "28");
+		data.observations.put(property, "28.0");
 		rect.addObservation(data);
 		int numTotal = rect.getNumberOfSensors();
 		int numBla = rect.getNumberOfSensors("bla");

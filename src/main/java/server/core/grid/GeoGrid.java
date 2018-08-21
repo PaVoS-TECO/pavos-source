@@ -2,9 +2,9 @@ package server.core.grid;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public abstract class GeoGrid {
 	public final int COLUMNS;
 	public final int MAX_LEVEL;
 	public final String GRID_ID;
-	protected Map<String, GeoPolygon> polygons;
+	protected List<GeoPolygon> polygons;
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public GeoGrid(Point2D.Double mapBounds, int rows, int columns, int maxLevel, String gridID) {
@@ -31,7 +31,21 @@ public abstract class GeoGrid {
 		this.MAX_LEVEL = maxLevel;
 		this.GRID_ID = gridID;
 		
-		this.polygons = new HashMap<>();
+		this.polygons = new ArrayList<>();
+	}
+	
+	/**
+	 * Updates all values of this {@link GeoGrid} and it's {@link GeoPolygon}s.<p>
+	 * The process takes into account that {@link GeoPolygon} may have more or less data
+	 * about a certain property.
+	 * It sums up all values (that were factored by the amount of data) and finally divides it
+	 * by the total amount of data.
+	 * This way, we achieve the most realistic representation of our data.
+	 */
+	public void updateObservations() {
+		for (GeoPolygon polygon : polygons) {
+			polygon.updateObservations();
+		}
 	}
 	
 	/**
@@ -53,7 +67,7 @@ public abstract class GeoGrid {
 		if (!kAdmin.existsTopic(topic)) {
 			kAdmin.createTopic(topic);
 		}
-		for (GeoPolygon polygon : polygons.values()) {
+		for (GeoPolygon polygon : polygons) {
 			polygon.produceSensorDataMessage(topic);
 		}
 	}
@@ -86,7 +100,7 @@ public abstract class GeoGrid {
 	 * @return id The cluster id
 	 */
 	public GeoPolygon getPolygonContaining(Point2D.Double point, int level) throws PointNotOnMapException {
-		GeoPolygon targetPolygon = getPolygonContainingPointFromCollection(point, polygons.values());
+		GeoPolygon targetPolygon = getPolygonContainingPointFromCollection(point, polygons);
 		
 		// t2Polygon, meaning: tier-2-polygon
 		GeoPolygon t2Polygon = targetPolygon;
@@ -135,6 +149,6 @@ public abstract class GeoGrid {
 	/**
 	 * Generates the {@link GeoPolygon}s that make up all clusters of the grid.
 	 */
-	public abstract void generateGeoPolygons();
+	protected abstract void generateGeoPolygons();
 	
 }
