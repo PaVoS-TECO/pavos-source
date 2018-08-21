@@ -3,15 +3,19 @@ package server.core.grid.polygon;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import server.core.grid.config.Seperators;
 import server.core.grid.converter.GeoJsonConverter;
-import server.core.grid.polygon.math.Tuple;
+import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
+import server.transfer.producer.GraphiteProducer;
 import server.transfer.sender.util.TimeUtil;
 
 /**
@@ -34,7 +38,7 @@ public abstract class GeoPolygon {
 	public final int LEVELS_AFTER_THIS;
 	protected Path2D.Double path;
 	protected Map<String, GeoPolygon> subPolygons;
-	protected Map<String, ObservationData> sensorValues;
+	protected Set<ObservationData> sensorValues;
 	protected ObservationData observationData;
 	
 	/**
@@ -63,7 +67,7 @@ public abstract class GeoPolygon {
 		
 		this.path = new Path2D.Double();
 		this.subPolygons = new HashMap<>();
-		this.sensorValues = new HashMap<>();
+		this.sensorValues = new HashSet<>();
 	}
 	
 	/**
@@ -90,16 +94,45 @@ public abstract class GeoPolygon {
 		
 		this.path = new Path2D.Double();
 		this.subPolygons = new HashMap<>();
-		this.sensorValues = new HashMap<>();
+		this.sensorValues = new HashSet<>();
 	} 
+	
+	/**
+	 * Returns the current {@link ObservationData} data as a {@link Set} over all sensors.
+	 * The new sensorID will consist of the {@link GeoPolygon}.ID and the original sensorID.
+	 * @return sensorDataSet {@code Set<ObservationData>}
+	 */
+	public Set<ObservationData> getSensorDataSet() {
+		Set<ObservationData> result = new HashSet<>();
+		
+		for (ObservationData data : this.sensorValues) {
+			data.sensorID = this.ID + Seperators.CLUSTER_SENSOR_SEPERATOR + data.sensorID;
+			result.add(data);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Produces messages for the output kafka-topic.
+	 * Each message contains a single {@link ObservationData} object.
+	 * This method Produces recursively and starts with the smallest clusters.
+	 */
+	public void produceSensorDataMessage(String topic) {
+		for (GeoPolygon polygon : subPolygons.values()) {
+			polygon.produceSensorDataMessage(topic);
+		}
+		GraphiteProducer producer = new GraphiteProducer();
+		producer.produceMessages(topic, sensorValues);
+	}
 	
 	/**
 	 * Creates or overrides a map-entry with the new value in double-precision.
 	 * @param sensorID The {@link String} ID of the Sensor. Not a cluster.
 	 * @param observationData The {@link Double} value
 	 */
-	public void addValuesToCalculation(String sensorID, ObservationData data) {
-		this.sensorValues.put(sensorID, data);
+	public void addObservation(ObservationData data) {
+		this.sensorValues.add(data);
 	}
 	
 	/**
@@ -127,9 +160,8 @@ public abstract class GeoPolygon {
 		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
 			sum += entry.getValue().getNumberOfSensors(property);
 		}
-		for (Map.Entry<String, ObservationData> entry : this.sensorValues.entrySet()) {
-			ObservationData obs = entry.getValue();
-			if (obs.observations.containsKey(property)) {
+		for (ObservationData data : this.sensorValues) {
+			if (data.observations.containsKey(property)) {
 				sum++;
 			}
 		}
@@ -147,11 +179,10 @@ public abstract class GeoPolygon {
 		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
 			sum += entry.getValue().getNumberOfSensors(properties);
 		}
-		for (Map.Entry<String, ObservationData> entry : this.sensorValues.entrySet()) {
-			ObservationData obs = entry.getValue();
+		for (ObservationData data : this.sensorValues) {
 			boolean containsAll = true;
 			for (String property : properties) {
-				if (!obs.observations.containsKey(property)) {
+				if (!data.observations.containsKey(property)) {
 					containsAll = false;
 				}
 			}
@@ -178,7 +209,7 @@ public abstract class GeoPolygon {
 		
 		ObservationData obs = new ObservationData();
 		obs.observationDate = TimeUtil.getUTCDateTimeString();
-		Set<Tuple<String, Integer, Double>> values = new HashSet<>();
+		Set<Tuple3D<String, Integer, Double>> values = new HashSet<>();
 		Set<String> properties = new HashSet<>();
 		
 		// save properties found in sub-GeoPolygons and sensors
@@ -186,15 +217,15 @@ public abstract class GeoPolygon {
 			GeoPolygon poly = entry.getValue();
 			Map<String, String> obsTemp = poly.observationData.observations;
 			for (String property : obsTemp.keySet()) {
-				values.add(new Tuple<String, Integer, Double>(property
+				values.add(new Tuple3D<String, Integer, Double>(property
 						, Integer.valueOf(poly.getNumberOfSensors(property)), Double.valueOf(obsTemp.get(property))));
 				properties.add(property);
 			}
 		}
-		for (Map.Entry<String, ObservationData> entry : this.sensorValues.entrySet()) {
-			Map<String, String> obsTemp = entry.getValue().observations;
+		for (ObservationData entry : this.sensorValues) {
+			Map<String, String> obsTemp = entry.observations;
 			for (String property : obsTemp.keySet()) {
-				values.add(new Tuple<String, Integer, Double>(property
+				values.add(new Tuple3D<String, Integer, Double>(property
 						, Integer.valueOf(1), Double.valueOf(obsTemp.get(property))));
 				properties.add(property);
 			}
@@ -205,7 +236,7 @@ public abstract class GeoPolygon {
 			double value = 0;
 			int totalSensors = 0;
 			
-			for (Tuple<String, Integer, Double> tuple : values) {
+			for (Tuple3D<String, Integer, Double> tuple : values) {
 				if (tuple.getFirstValue().equals(property)) {
 					value += tuple.getThirdValue().doubleValue() * tuple.getSecondValue().doubleValue();
 					totalSensors += tuple.getSecondValue().intValue();
@@ -267,14 +298,14 @@ public abstract class GeoPolygon {
 	 * Returns a {@link Collection} of {@link Point2D.Double}s that make up the current {@link GeoPolygon}
 	 * @return points {@code Collection<Point2D.Double>}
 	 */
-	public Collection<Point2D.Double> getPoints() {
+	public List<Point2D.Double> getPoints() {
 		PathIterator pi = path.getPathIterator(null);
 		double[] values = new double[6];
-		Collection<Point2D.Double> points = new HashSet<>();
-
+		List<Point2D.Double> points = new ArrayList<>();
+		
 		while (!pi.isDone()) {
 		    int type = pi.currentSegment(values);
-		    if (type == PathIterator.SEG_LINETO) {
+		    if (type == PathIterator.SEG_LINETO || type == PathIterator.SEG_MOVETO) {
 		    	points.add(new Point2D.Double(values[0], values[1]));
 		    }
 		    else {

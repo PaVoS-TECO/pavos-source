@@ -3,6 +3,7 @@ package server.core.grid;
 import java.awt.geom.Point2D;
 
 import server.core.grid.config.Seperators;
+import server.core.grid.polygon.GeoPolygon;
 import server.core.grid.polygon.GeoRectangle;
 
 public class GeoRectangleGrid extends GeoGrid {
@@ -23,8 +24,9 @@ public class GeoRectangleGrid extends GeoGrid {
 				double yOffset = (double) row * height;
 				String id = String.valueOf(row) + Seperators.ROW_COLUMN_SEPERATOR + String.valueOf(col);
 				
-				GeoRectangle subPolygon = new GeoRectangle(xOffset, yOffset, width, height
+				GeoPolygon subPolygon = new GeoRectangle(xOffset, yOffset, width, height
 						, ROWS, COLUMNS, (MAX_LEVEL - 1), GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + id);
+				System.out.println(polygons == null);
 				polygons.put(id, subPolygon);
 			}
 		}

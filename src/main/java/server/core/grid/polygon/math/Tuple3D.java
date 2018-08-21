@@ -7,7 +7,7 @@ package server.core.grid.polygon.math;
  * @param <B>
  * @param <C>
  */
-public class Tuple<A, B, C> {
+public class Tuple3D<A, B, C> {
 	
 	private A valueA;
 	private B valueB;
@@ -19,7 +19,7 @@ public class Tuple<A, B, C> {
 	 * @param valueB
 	 * @param valueC
 	 */
-	public Tuple(A valueA, B valueB, C valueC) {
+	public Tuple3D(A valueA, B valueB, C valueC) {
 		this.valueA = valueA;
 		this.valueB = valueB;
 		this.valueC = valueC;

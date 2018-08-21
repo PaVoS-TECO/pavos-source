@@ -14,14 +14,14 @@ public final class GeoJsonConverter {
 				+ " \"geometry\": { \"type\": \"Polygon\", \"coordinates\": [ [ ";
 		int index = 1;
 		for (Point2D.Double point : points) {
-			result.concat("[ " + point.getX() + ", " + point.getY() + "]");
+			result = result + "[ " + point.getX() + ", " + point.getY() + "]";
 			if (index < points.size()) {
-				result.concat(",");
+				result = result + ",";
 			}
-			result.concat(" ");
+			result = result + " ";
 			index++;
 		}
-		result.concat("] ] } } ] }");
+		result = result + "] ] } } ] }";
 		return result;
 	}
 	

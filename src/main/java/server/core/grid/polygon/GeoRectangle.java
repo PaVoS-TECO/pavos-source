@@ -27,7 +27,7 @@ public class GeoRectangle extends GeoPolygon {
 
 	@Override
 	protected void generatePath() {
-		path.lineTo(X_OFFSET, Y_OFFSET);
+		path.moveTo(X_OFFSET, Y_OFFSET);
 		path.lineTo(X_OFFSET + WIDTH, Y_OFFSET);
 		path.lineTo(X_OFFSET + WIDTH, Y_OFFSET + HEIGHT);
 		path.lineTo(X_OFFSET, Y_OFFSET + HEIGHT);

@@ -3,6 +3,7 @@ package server.core.grid;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.polygon.GeoPolygon;
+import server.core.properties.KafkaTopicAdmin;
+import server.transfer.data.ObservationData;
 
 public abstract class GeoGrid {
 	
@@ -27,6 +30,77 @@ public abstract class GeoGrid {
 		this.COLUMNS = columns;
 		this.MAX_LEVEL = maxLevel;
 		this.GRID_ID = gridID;
+		
+		this.polygons = new HashMap<>();
+	}
+	
+	/**
+	 * Returns the {@link String} topic for kafka, in which all values should be written.
+	 * @return topic {@link String}
+	 */
+	public String getOutputTopic() {
+		return this.GRID_ID + ".out";
+	}
+	
+	/**
+	 * Produces messages for the output kafka-topic.
+	 * Each message contains a single {@link ObservationData} object.
+	 * This method Produces recursively and starts with the smallest clusters.
+	 */
+	public void produceSensorDataMessages() {
+		String topic = getOutputTopic();
+		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
+		if (!kAdmin.existsTopic(topic)) {
+			kAdmin.createTopic(topic);
+		}
+		for (GeoPolygon polygon : polygons.values()) {
+			polygon.produceSensorDataMessage(topic);
+		}
+	}
+	
+	/**
+	 * Adds a single observation to the {@link GeoGrid}.
+	 * Searches for the smallest cluster to put the values into.
+	 * @param sensorID The id of the sensor
+	 * @param location The {@link Point2D.Double} point on the map
+	 * @param data The {@link ObservationData} to be added
+	 */
+	public void addObservation(Point2D.Double location, ObservationData data) {
+		GeoPolygon targetPolygon = null;
+		try {
+			targetPolygon = getPolygonContaining(location, MAX_LEVEL);
+		} catch (PointNotOnMapException e) {
+			logger.warn("Could not add Observation to map. Point '" + location 
+					+ "' not in map boundaries! SensorID: " + data.sensorID + " " + e);
+		}
+		targetPolygon.addObservation(data);
+	}
+	
+	/**
+	 * Returns the ID for the Cluster which contains the {@link Point2D.Double} point. If the point is not on the mapped area, returns {@link null}!<p>
+	 * The ID is also specified by the {@link int} level of grid-scaling.
+	 * The level ranges from 0 to {@code MAX_LEVEL}.
+	 * A higher level means more {@link GeoPolygon}s to check but gives a better representation for the selected {@link Point2D.Double}.
+	 * @param point The {@link Point2D.Double} that is contained by the cluster that we are searching for
+	 * @param level The {@link int} that controls the level of detail
+	 * @return id The cluster id
+	 */
+	public GeoPolygon getPolygonContaining(Point2D.Double point, int level) throws PointNotOnMapException {
+		GeoPolygon targetPolygon = getPolygonContainingPointFromCollection(point, polygons.values());
+		
+		// t2Polygon, meaning: tier-2-polygon
+		GeoPolygon t2Polygon = targetPolygon;
+		int levelBounds = Math.min(level, MAX_LEVEL);
+		
+		for (int currentLevel = 1; currentLevel < levelBounds; currentLevel++) {
+			try {
+				t2Polygon = getPolygonContainingPointFromCollection(point, t2Polygon.getSubPolygons());
+				targetPolygon = t2Polygon;
+			} catch (PointNotOnMapException e) {
+				break;
+			}
+		}
+		return targetPolygon;
 	}
 	
 	/**
@@ -39,21 +113,7 @@ public abstract class GeoGrid {
 	 * @return id The cluster id
 	 */
 	public String getClusterID(Point2D.Double point, int level) throws PointNotOnMapException {
-		GeoPolygon targetPolygon = getPolygonContainingPoint(point, polygons.values());
-		
-		// t2Polygon, meaning: tier-2-polygon
-		GeoPolygon t2Polygon = targetPolygon;
-		int levelBounds = Math.min(level, MAX_LEVEL);
-		
-		for (int currentLevel = 1; currentLevel < levelBounds; currentLevel++) {
-			try {
-				t2Polygon = getPolygonContainingPoint(point, t2Polygon.getSubPolygons());
-				targetPolygon = t2Polygon;
-			} catch (PointNotOnMapException e) {
-				break;
-			}
-		}
-		return targetPolygon.ID;
+		return getPolygonContaining(point, level).ID;
 	}
 	
 	/**
@@ -63,7 +123,7 @@ public abstract class GeoGrid {
 	 * @return polygonContainingPoint {@link GeoPolygon}
 	 * @throws PointNotOnMapException
 	 */
-	protected GeoPolygon getPolygonContainingPoint(Double point, Collection<GeoPolygon> collection) throws PointNotOnMapException {
+	protected GeoPolygon getPolygonContainingPointFromCollection(Double point, Collection<GeoPolygon> collection) throws PointNotOnMapException {
 		for (GeoPolygon entry : collection) {
 			if (entry.contains(point, false)) {
 				return entry;
