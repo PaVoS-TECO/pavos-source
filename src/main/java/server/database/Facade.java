@@ -11,22 +11,21 @@ import web.grid.Grid;
  */
 public class Facade {
 
+	private KafkaToStorageProcessor storageProcessor;
+	
     /**
      * Default constructor
      */
     public Facade() {
+    	storageProcessor = new KafkaToStorageProcessor();
     }
-
-
-
-
 
     /**
      * Subscribes to the given KafkaStream, which contains ZoomLevel-specific data and initiates processing of its records.
      * @param stream The stream to subscribe to.
      */
     public void subscribeToZoomLevelStream(KStream stream) {
-        // TODO implement here
+        storageProcessor.subscribe(stream);
     }
 
     /**

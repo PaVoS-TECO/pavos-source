@@ -1,5 +1,9 @@
 package server.database;
 
+import java.util.Properties;
+
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+
 /**
  * This class converts KafkaStream records to data that can be inserted into the StorageSolution.
  */
@@ -19,7 +23,7 @@ public class KafkaToStorageProcessor {
      * @param stream The KStream to subscribe to.
      */
     public void subscribe(KStream stream) {
-        // TODO implement here
+        KafkaConsumer<?, ?> consumer = new KafkaConsumer<>(new Properties());
     }
 
 }
