@@ -35,6 +35,20 @@ public abstract class GeoGrid {
 	}
 	
 	/**
+	 * Returns the {@link GeoPolygon} that is associated with the specified {@link String} clusterID.
+	 * @param clusterID {@link String}
+	 * @return polygon {@link GeoPolygon}
+	 */
+	public GeoPolygon getPolygon(String clusterID) {
+		for (GeoPolygon polygon : this.polygons) {
+			if (polygon.ID.equals(clusterID)) {
+				return polygon;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Updates all values of this {@link GeoGrid} and it's {@link GeoPolygon}s.<p>
 	 * The process takes into account that {@link GeoPolygon} may have more or less data
 	 * about a certain property.
@@ -83,11 +97,11 @@ public abstract class GeoGrid {
 		GeoPolygon targetPolygon = null;
 		try {
 			targetPolygon = getPolygonContaining(location, MAX_LEVEL);
+			targetPolygon.addObservation(data);
 		} catch (PointNotOnMapException e) {
 			logger.warn("Could not add Observation to map. Point '" + location 
 					+ "' not in map boundaries! SensorID: " + data.sensorID + " " + e);
 		}
-		targetPolygon.addObservation(data);
 	}
 	
 	/**
@@ -105,7 +119,6 @@ public abstract class GeoGrid {
 		// t2Polygon, meaning: tier-2-polygon
 		GeoPolygon t2Polygon = targetPolygon;
 		int levelBounds = Math.min(level, MAX_LEVEL);
-		
 		for (int currentLevel = 1; currentLevel < levelBounds; currentLevel++) {
 			try {
 				t2Polygon = getPolygonContainingPointFromCollection(point, t2Polygon.getSubPolygons());

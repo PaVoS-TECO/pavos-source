@@ -46,8 +46,8 @@ public class GeoRectangle extends GeoPolygon {
 		
 		for (int row = 0; row < xSubdivisions; row++) {
 			for (int col = 0; col < ySubdivisions; col++) {
-				double subXOffset = (double) col * subWidth;
-				double subYOffset = (double) row * subHeight;
+				double subXOffset = X_OFFSET + (double) col * subWidth;
+				double subYOffset = Y_OFFSET + (double) row * subHeight;
 				String subID = String.valueOf(row) + Seperators.ROW_COLUMN_SEPERATOR + String.valueOf(col);
 				
 				GeoRectangle subPolygon = new GeoRectangle(subXOffset, subYOffset, subWidth, subHeight

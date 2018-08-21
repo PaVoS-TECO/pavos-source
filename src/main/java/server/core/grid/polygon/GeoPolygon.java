@@ -5,6 +5,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public abstract class GeoPolygon {
 	public final int LEVELS_AFTER_THIS;
 	protected Path2D.Double path;
 	protected List<GeoPolygon> subPolygons;
-	protected List<ObservationData> sensorValues;
+	protected Map<String, ObservationData> sensorValues;
 	protected ObservationData observationData;
 	
 	/**
@@ -65,8 +66,9 @@ public abstract class GeoPolygon {
 		
 		this.path = new Path2D.Double();
 		this.subPolygons = new ArrayList<>();
-		this.sensorValues = new ArrayList<>();
+		this.sensorValues = new HashMap<>();
 		this.observationData = new ObservationData();
+		setupObservationData();
 	}
 	
 	/**
@@ -93,10 +95,29 @@ public abstract class GeoPolygon {
 		
 		this.path = new Path2D.Double();
 		this.subPolygons = new ArrayList<>();
-		this.sensorValues = new ArrayList<>();
+		this.sensorValues = new HashMap<>();
 		this.observationData = new ObservationData();
+		setupObservationData();
 	} 
 	
+	/**
+	 * Returns the sub-{@link GeoPolygon} that is associated with the specified {@link String} clusterID.
+	 * @param clusterID {@link String}
+	 * @return polygon {@link GeoPolygon}
+	 */
+	public GeoPolygon getSubPolygon(String clusterID) {
+		for (GeoPolygon polygon : this.subPolygons) {
+			if (polygon.ID == clusterID) {
+				return polygon;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns a cloned object of this {@link GeoPolygon}s {@link ObservationData} data.
+	 * @return observationData {@link ObservationData}
+	 */
 	public ObservationData cloneObservation() {
 		ObservationData result = new ObservationData();
 		result.observationDate = this.observationData.observationDate;
@@ -113,8 +134,8 @@ public abstract class GeoPolygon {
 	 * The new sensorID will consist of the {@link GeoPolygon}.ID and the original sensorID.
 	 * @return sensorDataSet {@code Set<ObservationData>}
 	 */
-	public List<ObservationData> getSensorDataList() {
-		return this.sensorValues;
+	public Collection<ObservationData> getSensorDataList() {
+		return this.sensorValues.values();
 	}
 	
 	/**
@@ -127,7 +148,7 @@ public abstract class GeoPolygon {
 			polygon.produceSensorDataMessage(topic);
 		}
 		GraphiteProducer producer = new GraphiteProducer();
-		producer.produceMessages(topic, sensorValues);
+		producer.produceMessages(topic, sensorValues.values());
 	}
 	
 	/**
@@ -137,7 +158,7 @@ public abstract class GeoPolygon {
 	 */
 	public void addObservation(ObservationData data) {
 		data.clusterID = this.ID;
-		this.sensorValues.add(data);
+		this.sensorValues.put(data.sensorID, data);
 	}
 	
 	/**
@@ -165,7 +186,7 @@ public abstract class GeoPolygon {
 		for (GeoPolygon entry : this.subPolygons) {
 			sum += entry.getNumberOfSensors(property);
 		}
-		for (ObservationData data : this.sensorValues) {
+		for (ObservationData data : this.sensorValues.values()) {
 			if (data.observations.containsKey(property)) {
 				sum++;
 			}
@@ -184,7 +205,7 @@ public abstract class GeoPolygon {
 		for (GeoPolygon entry : this.subPolygons) {
 			sum += entry.getNumberOfSensors(properties);
 		}
-		for (ObservationData data : this.sensorValues) {
+		for (ObservationData data : this.sensorValues.values()) {
 			boolean containsAll = true;
 			for (String property : properties) {
 				if (!data.observations.containsKey(property)) {
@@ -226,7 +247,7 @@ public abstract class GeoPolygon {
 				properties.add(property);
 			}
 		}
-		for (ObservationData entry : this.sensorValues) {
+		for (ObservationData entry : this.sensorValues.values()) {
 			Map<String, String> obsTemp = entry.observations;
 			for (String property : obsTemp.keySet()) {
 				values.add(new Tuple3D<String, Integer, Double>(property
@@ -278,8 +299,8 @@ public abstract class GeoPolygon {
 	 * Returns the current {@link GeoPolygon} as JSON-String
 	 * @return json {@link String}
 	 */
-	public String getJson() {
-		return GeoJsonConverter.convert(getPoints());
+	public String getJson(String property) {
+		return GeoJsonConverter.convert(this, property);
 	}
 	
 	/**
@@ -322,19 +343,16 @@ public abstract class GeoPolygon {
 	}
 	
 	/**
-	 * Returns the ID of this {@link GeoPolygon}
-	 * @return id {@link String}
-	 */
-	public String getID() {
-		return this.ID;
-	}
-	
-	/**
 	 * Returns a {@link Collection} of all {@link GeoPolygon}s inside this {@link GeoPolygon}.
 	 * @return subPolygons {@code Set<Entry<String, GeoPolygon>>}
 	 */
-	public Collection<GeoPolygon> getSubPolygons() {
+	public List<GeoPolygon> getSubPolygons() {
 		return subPolygons;
+	}
+	
+	private void setupObservationData() {
+		this.observationData.observationDate = TimeUtil.getUTCDateTimeString();
+		this.observationData.clusterID = this.ID;
 	}
 	
 }
