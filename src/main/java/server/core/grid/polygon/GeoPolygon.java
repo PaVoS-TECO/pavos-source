@@ -7,14 +7,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import server.core.grid.converter.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple;
 import server.transfer.data.ObservationData;
 import server.transfer.sender.util.TimeUtil;
-
-import java.util.Set;
 
 /**
  * A geographically oriented approach to polygons with double precision.<p>
@@ -171,17 +169,21 @@ public abstract class GeoPolygon {
 	 * by the total amount of data.
 	 * This way, we achieve the most realistic representation of our data.
 	 */
-	public void updateValues() {
+	public void updateObservations() {
+		
+		//create entries for sub-polygons & sensors
+		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
+			entry.getValue().updateObservations();
+		}
+		
 		ObservationData obs = new ObservationData();
 		obs.observationDate = TimeUtil.getUTCDateTimeString();
 		Set<Tuple<String, Integer, Double>> values = new HashSet<>();
 		Set<String> properties = new HashSet<>();
 		
-		// create entries for sub-polygons & sensors (and save properties found)
+		// save properties found in sub-GeoPolygons and sensors
 		for (Map.Entry<String, GeoPolygon> entry : this.subPolygons.entrySet()) {
 			GeoPolygon poly = entry.getValue();
-			poly.updateValues();
-			
 			Map<String, String> obsTemp = poly.observationData.observations;
 			for (String property : obsTemp.keySet()) {
 				values.add(new Tuple<String, Integer, Double>(property
@@ -245,11 +247,19 @@ public abstract class GeoPolygon {
 	}
 	
 	/**
-	 * Returns true if the current {@link GeoPolygon} contains the specified {@link Point2D.Double}
+	 * Returns true if the current {@link GeoPolygon} contains the specified {@link Point2D.Double}.
+	 * If {@code checkBoundsFirst} is set to {@code true}, the method will check if the object is inside the boundaries first,
+	 * in order to reduce overhead on {@link GeoPolygon}s with a high amount of vertices.
 	 * @param point {@link Point2D.Double}
+	 * @param checkBoundsFirst {@link boolean}
 	 * @return containsPoint {@link boolean}
 	 */
-	public boolean contains(Point2D.Double point) {
+	public boolean contains(Point2D.Double point, boolean checkBoundsFirst) {
+		if (checkBoundsFirst) {
+			if (!path.getBounds2D().contains(point)) {
+				return false;
+			}
+		}
 		return path.contains(point);
 	}
 	
@@ -284,11 +294,11 @@ public abstract class GeoPolygon {
 	}
 	
 	/**
-	 * Returns a {@link Set} of all {@link Entry}s in the format {@code Entry<String, GeoPolygon>}
+	 * Returns a {@link Collection} of all {@link GeoPolygon}s inside this {@link GeoPolygon}.
 	 * @return subPolygons {@code Set<Entry<String, GeoPolygon>>}
 	 */
-	public Set<Entry<String, GeoPolygon>> getSubPolygons() {
-		return subPolygons.entrySet();
+	public Collection<GeoPolygon> getSubPolygons() {
+		return subPolygons.values();
 	}
 	
 }
