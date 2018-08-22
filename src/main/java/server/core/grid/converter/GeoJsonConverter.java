@@ -19,6 +19,7 @@ public final class GeoJsonConverter {
 		StringBuilder builder = new StringBuilder();
 		builder.append("{ " + toSProperty("type", "FeatureCollection") + comma);
 		builder.append(toSProperty("timestamp", TimeUtil.getUTCDateTimeString()) + comma);
+		builder.append(toSProperty("observationType", keyProperty) + comma);
 		builder.append(toEntry("features") + ": [ ");
 		int countFeature = 1;
 		for (GeoPolygon geoPolygon : geoPolygons) {
@@ -26,7 +27,6 @@ public final class GeoJsonConverter {
 			builder.append("{ " + toSProperty("type", "Feature") + comma);
 			builder.append(toEntry("properties") + ": { ");
 			builder.append(toNProperty("value", data.observations.get(keyProperty)) + comma);
-			builder.append(toSProperty("observationType", keyProperty) + comma);
 			builder.append(toSProperty("clusterID", geoPolygon.ID) + comma);
 			builder.append(toEntry("content") + ": [ ");
 			int count = 1;
@@ -47,13 +47,16 @@ public final class GeoJsonConverter {
 			builder.append(toSProperty("type", "Polygon") + comma);
 			builder.append(toEntry("coordinates") + ": [ [ ");
 			count = 1;
+			Point2D.Double tempPoint = null;
 			for (Point2D.Double point : geoPolygon.getPoints()) {
 				builder.append("[ " + point.getX() + comma + point.getY() + "]");
-				if (count < geoPolygon.getPoints().size()) {
-					builder.append(comma);
+				if (tempPoint == null) {
+					tempPoint = point;
 				}
+				builder.append(comma);
 				count++;
 			}
+			builder.append("[ " + tempPoint.getX() + comma + tempPoint.getY() + "]");
 			builder.append("] ] } }");
 			if (countFeature < geoPolygons.size()) {
 				builder.append(comma);
