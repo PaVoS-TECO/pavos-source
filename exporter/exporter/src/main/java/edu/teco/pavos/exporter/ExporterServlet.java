@@ -43,32 +43,24 @@ public class ExporterServlet extends HttpServlet {
 	
 	private void export(HttpServletRequest req, HttpServletResponse res) 
 			throws IOException {
-		String ext = req.getParameter("extension");
-		String tf = req.getParameter("timeFrame");
-		String ops = req.getParameter("observedProperties");
-		String cIDs = req.getParameter("clusters");
-		String sIDs = req.getParameter("sensors");
-		ExportProperties props = new ExportProperties(ext, tf, ops, cIDs, sIDs);
-		FileExporter exporter = new FileExporter(props);
-		String dID = exporter.createFileInformation();
-		
-		//make sure this thread continues working, since the servlet is finished after sending back id
-		Thread aThread = new Thread(new Runnable() {
-            public void run() {
-            	exporter.createFile();
-            }
-        });
-        aThread.start();
-        
-		PrintWriter writer = res.getWriter();
-		writer.println(dID);
-		writer.close();
+		String dID = req.getParameter("downloadID");
+		String ready = (new DownloadState(dID)).getDownloadState();
+		if (ready.equals("noID") || ready.equals("error")) {
+			String ext = req.getParameter("extension");
+			String tf = req.getParameter("timeFrame");
+			String ops = req.getParameter("observedProperties");
+			String cIDs = req.getParameter("clusters");
+			String sIDs = req.getParameter("sensors");
+			ExportProperties props = new ExportProperties(ext, tf, ops, cIDs, sIDs);
+			FileExporter exporter = new FileExporter(props, dID);
+			exporter.createFile();
+		}
 	}
 	
 	private void status(HttpServletRequest req, HttpServletResponse res) 
 			throws IOException {
 		String dID = req.getParameter("downloadID");
-		String ready = (new DownloadState(dID)).isFileReadyForDownload();
+		String ready = (new DownloadState(dID)).getDownloadState();
 		PrintWriter writer = res.getWriter();
 		writer.println(ready);
 		writer.close();
@@ -78,7 +70,7 @@ public class ExporterServlet extends HttpServlet {
 			throws IOException {
 		String dID = req.getParameter("downloadID");
 		DownloadState ds = new DownloadState(dID);
-		String ready = ds.isFileReadyForDownload();
+		String ready = ds.getDownloadState();
 		if (!ready.equals("true")) {
 			PrintWriter writer = res.getWriter();
 			writer.println(ready);

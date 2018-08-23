@@ -1,26 +1,292 @@
 package edu.teco.pavos.exporter;
 
-import java.io.BufferedInputStream;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
+import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.UUID;
+
+import org.apache.avro.*;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
 /**
  * Implementation of the FileWriterStrategy interface for CSV files.
  */
 public class CSVWriterStrategy implements FileWriterStrategy {
 
-    /**
+    private ArrayList<JSONObject> observations = new ArrayList<JSONObject>();
+    private HashMap<String, JSONObject> features = new HashMap<String, JSONObject>();
+    private HashMap<String, JSONObject> dataStreams = new HashMap<String, JSONObject>();
+    private HashMap<String, JSONObject> locations = new HashMap<String, JSONObject>();
+    private HashMap<String, JSONObject> things = new HashMap<String, JSONObject>();
+    private HashMap<String, JSONObject> sensors = new HashMap<String, JSONObject>();
+    private HashMap<String, JSONObject> observedProperties = new HashMap<String, JSONObject>();
+
+	/**
      * Default constructor
      */
     public CSVWriterStrategy() { }
     
     /**
      * Creates a File as specified by the FilePath and saves the Data from the provided KafkaStream into it.
-     * @param stream is the KStream, that should be exported to a File.
+     * @param props are the properties of the data, that should be exported to a File.
      * @param file Is the FilePath, where the new File should be created.
      */
-	public void saveToFile(BufferedInputStream stream, File file) {
-		// TODO Auto-generated method stub
+	public void saveToFile(ExportProperties props, File file) {
+		//Client Props
+        Properties kprops = new Properties();
+        kprops.put(BOOTSTRAP_SERVERS_CONFIG, "192.168.56.3:9092");
+        kprops.put(GROUP_ID_CONFIG, "i");
+        kprops.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
+        kprops.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        kprops.put(SESSION_TIMEOUT_MS_CONFIG, "30000");
+        kprops.put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+        kprops.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
+        kprops.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
+        kprops.put(ConsumerConfig.CLIENT_ID_CONFIG, "your_client_id");
+        kprops.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        kprops.put("schema.registry.url", "http://192.168.56.3:8081");
+
+        KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(kprops);
+
+        consumer.subscribe(Arrays.asList("Observations"));
+
+        JSONObject obj;
+        
+        boolean continueGettingRecords = true;
+
+        while (continueGettingRecords) {
+
+            final ConsumerRecords<String, GenericRecord> foi = consumer.poll(100);
+            System.out.println(foi.count());
+            foi.forEach(record -> {
+                record.value().get("FeatureOfInterest");
+                
+                //continueGettingRecords = processRecord("");
+                
+            });
+        }
+        
+        saveToFile();
 		
 	}
+	
+	private void processRecord(String record) {
+		
+		JSONObject observation = new JSONObject();
+		JSONObject featureOfInterest = new JSONObject();
+		JSONObject dataStream = new JSONObject();
+		JSONObject thing = new JSONObject();
+		JSONObject location = new JSONObject();
+		JSONObject observedProperty = new JSONObject();
+		JSONObject sensor = new JSONObject();
+		
+		this.observations.add(observation);
+		this.features.put(featureOfInterest.get("iot.id").toString(), featureOfInterest);
+		this.dataStreams.put(dataStream.get("iot.id").toString(), dataStream);
+		this.locations.put(location.get("iot.id").toString(), location);
+		this.sensors.put(sensor.get("iot.id").toString(), sensor);
+		this.things.put(thing.get("iot.id").toString(), thing);
+		this.observedProperties.put(observedProperty.get("iot.id").toString(), observedProperty);
+	}
+	
+	private void saveToFile() {
+		String path = null;
+		try {
+			PrintWriter writer = new PrintWriter(path, "UTF-8");
+			
+			ArrayList<String> lines = getObservedPropertyLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			lines = getSensorLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			lines = getLocationLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			lines = getFeatureLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			lines = getThingLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			lines = getDataStreamLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			lines = getObservationLines();
+			for (String line : lines) {
+				writer.println(line);
+			}
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private ArrayList<String> getObservedPropertyLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (String id : this.observedProperties.keySet()) {
+			JSONObject value = this.observedProperties.get(id);
+			String line = "observedProperty|" + value.get("@iot.id") + "|";
+			line += value.get("name") + "|";
+			line += value.get("description") + "|";
+			line += value.get("definition");
+			lines.add(line);
+		}
+		return lines;
+	}
+	
+	private ArrayList<String> getSensorLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (String id : this.sensors.keySet()) {
+			JSONObject value = this.sensors.get(id);
+			String line = "sensor|" + value.get("@iot.id") + "|";
+			line += value.get("name") + "|";
+			line += value.get("description") + "|";
+			line += value.get("encodingType") + "|";
+			line += value.get("metadata");
+			lines.add(line);
+		}
+		return lines;
+	}
+	
+	private ArrayList<String> getLocationLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (String id : this.locations.keySet()) {
+			JSONObject value = this.locations.get(id);
+			String line = "location|" + value.get("@iot.id") + "|";
+			line += value.get("name") + "|";
+			line += value.get("description") + "|";
+			line += value.get("encodingType") + "|";
+			line += ((JSONObject) value.get("location")).toJSONString();
+			lines.add(line);
+		}
+		return lines;
+	}
+	
+	private ArrayList<String> getFeatureLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (String id : this.features.keySet()) {
+			JSONObject value = this.features.get(id);
+			String line = "featureOfInterest|" + value.get("@iot.id") + "|";
+			line += value.get("name") + "|";
+			line += value.get("description") + "|";
+			line += value.get("encodingType") + "|";
+			line += ((JSONObject) value.get("feature")).toJSONString();
+			lines.add(line);
+		}
+		return lines;
+	}
 
+	private ArrayList<String> getThingLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (String id : this.things.keySet()) {
+			JSONObject value = this.things.get(id);
+			String line = "thing|" + value.get("@iot.id") + "|";
+			line += value.get("name") + "|";
+			line += value.get("description") + "|";
+			line += ((JSONObject) value.get("properties")).toJSONString() + "|";
+			lines.add(line);
+		}
+		return lines;
+	}
+
+	private ArrayList<String> getDataStreamLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (String id : this.dataStreams.keySet()) {
+			JSONObject value = this.dataStreams.get(id);
+			String line = "dataStream|" + value.get("@iot.id") + "|";
+			line += value.get("name") + "|";
+			line += value.get("description") + "|";
+			line += value.get("observationType") + "|";
+			line += ((JSONObject) value.get("unitOfMeasurement")).toJSONString() + "|";
+			
+			line += value.get("Thing@iot.id") + "|";
+			line += value.get("ObservedProperty@iot.id") + "|";
+			line += value.get("Sensor@iot.id") + "|";
+			
+			String opt = "";
+			Object optional = value.get("observedArea");
+			if (optional != null) {
+				opt = "" + optional;
+			}
+			line += opt + "|";
+			opt = "";
+			optional = value.get("phenomenonTime");
+			if (optional != null) {
+				opt = "" + optional;
+			}
+			line += opt + "|";
+			opt = "";
+			optional = value.get("resultTime");
+			if (optional != null) {
+				opt = "" + optional;
+			}
+			line += opt + "|";
+			lines.add(line);
+		}
+		return lines;
+	}
+
+	private ArrayList<String> getObservationLines() {
+		ArrayList<String> lines = new ArrayList<String>();
+		for (JSONObject value : this.observations) {
+			String line = "observation|" + value.get("@iot.id") + "|";
+			line += value.get("phenomenonTime") + "|";
+			line += value.get("result") + "|";
+			line += value.get("resultTime") + "|";
+			
+			line += value.get("Datastream@iot.id") + "|";
+			line += value.get("FeatureOfInterest@iot.id") + "|";
+			
+			String opt = "";
+			Object optional = value.get("resultQuality");
+			if (optional != null) {
+				opt = "" + optional;
+			}
+			line += opt + "|";
+			opt = "";
+			optional = value.get("validTime");
+			if (optional != null) {
+				opt = "" + optional;
+			}
+			line += opt + "|";
+			opt = "";
+			optional = value.get("parameters");
+			if (optional != null) {
+				JSONObject op = (JSONObject) optional;
+				opt = "" + op.toJSONString();
+			}
+			line += opt + "|";
+			lines.add(line);
+		}
+		return lines;
+	}
 }

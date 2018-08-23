@@ -51,7 +51,7 @@ public class DownloadState {
      * Checks if a File is Ready to be downloaded.
      * @return A boolean whether the file is downloadable or not.
      */
-    public String isFileReadyForDownload() {
+    public String getDownloadState() {
         return this.ready;
     }
 

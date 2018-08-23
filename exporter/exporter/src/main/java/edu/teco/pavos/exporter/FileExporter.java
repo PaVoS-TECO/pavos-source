@@ -14,9 +14,11 @@ public class FileExporter extends AbstractExporter {
     /**
      * Default constructor
      * @param properties for the export
+     * @param downloadID of the download
      */
-    public FileExporter(ExportProperties properties) {
+    public FileExporter(ExportProperties properties, String downloadID) {
     	this.properties = properties;
+    	this.ads =  new AlterableDownloadState(downloadID);
     }
 
     /**
@@ -41,9 +43,6 @@ public class FileExporter extends AbstractExporter {
      * Generates the File with the desired Data.
      */
     public void createFile() {
-    	//TODO get Stream
-    	ExportStreamGenerator streamer = new ExportStreamGenerator(this.properties);
-    	//KStream stream = streamer.createExportStream();
     	String extension = this.properties.getFileExtension();
     	FileType fileType = new FileType(extension);
     	try {
@@ -55,7 +54,7 @@ public class FileExporter extends AbstractExporter {
 	    	if (!directory.exists()) {
 	    		directory.mkdir();
 	    	}
-	    	//fileWriter.saveToFile(stream, new File(path));
+	    	fileWriter.saveToFile(this.properties, new File(path));
 	    	this.ads.setFilePath(new File(path));
 	    	this.ads.setFileReadyForDownload();
 	    	this.ads.savePersistent();

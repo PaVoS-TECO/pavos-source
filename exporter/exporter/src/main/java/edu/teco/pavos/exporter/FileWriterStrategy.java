@@ -1,6 +1,5 @@
 package edu.teco.pavos.exporter;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 
 /**
@@ -11,9 +10,9 @@ public interface FileWriterStrategy {
 
     /**
      * Creates a File as specified by the FilePath and saves the Data from the provided KafkaStream into it.
-     * @param stream is the KStream, that should be exported to a File.
+     * @param props are the properties of the data, that should be exported to a File.
      * @param file Is the FilePath, where the new File should be created.
      */
-    void saveToFile(BufferedInputStream stream, File file);
+    void saveToFile(ExportProperties props, File file);
 
 }
