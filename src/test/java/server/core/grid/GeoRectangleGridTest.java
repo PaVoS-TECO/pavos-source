@@ -18,7 +18,7 @@ public class GeoRectangleGridTest {
 
 	@Test
 	public void test() {
-		GeoGrid grid = new GeoRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3, "testGrid");
+		GeoGrid grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
 		
 		ObservationData data = new ObservationData();
 		data.observationDate = TimeUtil.getUTCDateTimeString();
