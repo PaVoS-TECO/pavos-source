@@ -1,10 +1,8 @@
 package server.transfer.sender.util;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 
 /**
  * 
@@ -20,7 +18,7 @@ public final class TimeUtil {
 	 * @return localDateTimeString {@link String}
 	 */
 	public static String getUTCDateTimeString() {
-		return getUTCDateTime().toString();
+		return getUTCDateTime().toString(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
 	}
 	
 	/**
@@ -28,15 +26,7 @@ public final class TimeUtil {
 	 * @return localDateTime {@link LocalDateTime}
 	 */
 	public static LocalDateTime getUTCDateTime() {
-		return LocalDateTime.now(Clock.systemUTC());
-	}
-	
-	public static org.joda.time.DateTime getJodaDateTime(LocalDateTime ldt) {
-		ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault());
-		Instant inst = zdt.toInstant();
-		long millis = inst.toEpochMilli();
-		org.joda.time.LocalDateTime jodaLDT = new org.joda.time.LocalDateTime(millis);
-		return jodaLDT.toDateTime();
+		return LocalDateTime.now(DateTimeZone.UTC);
 	}
 	
 }

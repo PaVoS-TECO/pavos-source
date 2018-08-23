@@ -1,10 +1,12 @@
 package server.transfer.converter.util;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
 import org.python.core.PyList;
@@ -42,10 +44,9 @@ public final class PythonMetricUtil {
 			String value = entry.getValue();
 			if (key != null && value != null) {
 				
-				LocalDateTime dateTime = LocalDateTime.parse(record.value().observationDate);
-
+				LocalDateTime ldc = LocalDateTime.parse(record.value().observationDate, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
 				PyString metricName = new PyString(graphTopic + "." + key);
-				PyInteger timestamp = new PyInteger((int) dateTime.toEpochSecond(ZoneOffset.UTC));
+				PyInteger timestamp = new PyInteger((int) (ldc.toDateTime(DateTimeZone.UTC).getMillis() / 1000));
 				PyFloat metricValue = new PyFloat(Double.parseDouble(value));
 				PyTuple metric = new PyTuple(metricName, new PyTuple(timestamp, metricValue));
 				list.append(metric);

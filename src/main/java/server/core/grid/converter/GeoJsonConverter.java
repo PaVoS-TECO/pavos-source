@@ -4,8 +4,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.joda.time.format.DateTimeFormat;
-
 import server.core.grid.polygon.GeoPolygon;
 import server.transfer.data.ObservationData;
 import server.transfer.sender.util.TimeUtil;
@@ -20,9 +18,7 @@ public final class GeoJsonConverter {
 		String comma = ", ";
 		StringBuilder builder = new StringBuilder();
 		builder.append("{ " + toSProperty("type", "FeatureCollection") + comma);
-		builder.append(toSProperty("timestamp",
-				TimeUtil.getJodaDateTime(TimeUtil.getUTCDateTime())
-				.toString(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))) + comma);
+		builder.append(toSProperty("timestamp", TimeUtil.getUTCDateTimeString()) + comma);
 		builder.append(toSProperty("observationType", keyProperty) + comma);
 		builder.append(toEntry("features") + ": [ ");
 		int countFeature = 1;
