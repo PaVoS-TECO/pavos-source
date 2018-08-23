@@ -3,7 +3,7 @@
  *
  * DO NOT EDIT DIRECTLY
  */
-package server.core.data;
+package server.core.data.avro;
 
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.message.BinaryMessageEncoder;
@@ -336,8 +336,8 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 	 * 
 	 * @return A new Observation RecordBuilder
 	 */
-	public static server.core.data.Observation.Builder newBuilder() {
-		return new server.core.data.Observation.Builder();
+	public static server.core.data.avro.Observation.Builder newBuilder() {
+		return new server.core.data.avro.Observation.Builder();
 	}
 
 	/**
@@ -346,9 +346,9 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 	 * @param other The existing builder to copy.
 	 * @return A new Observation RecordBuilder
 	 */
-	public static server.core.data.Observation.Builder newBuilder(
-			server.core.data.Observation.Builder other) {
-		return new server.core.data.Observation.Builder(other);
+	public static server.core.data.avro.Observation.Builder newBuilder(
+			server.core.data.avro.Observation.Builder other) {
+		return new server.core.data.avro.Observation.Builder(other);
 	}
 
 	/**
@@ -358,8 +358,8 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 	 * @param other The existing instance to copy.
 	 * @return A new Observation RecordBuilder
 	 */
-	public static server.core.data.Observation.Builder newBuilder(server.core.data.Observation other) {
-		return new server.core.data.Observation.Builder(other);
+	public static server.core.data.avro.Observation.Builder newBuilder(server.core.data.avro.Observation other) {
+		return new server.core.data.avro.Observation.Builder(other);
 	}
 
 	/**
@@ -395,7 +395,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @param other The existing Builder to copy.
 		 */
-		private Builder(server.core.data.Observation.Builder other) {
+		private Builder(server.core.data.avro.Observation.Builder other) {
 			super(other);
 			if (isValidValue(fields()[0], other.iotId)) {
 				this.iotId = data().deepCopy(fields()[0].schema(), other.iotId);
@@ -436,7 +436,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @param other The existing instance to copy.
 		 */
-		private Builder(server.core.data.Observation other) {
+		private Builder(server.core.data.avro.Observation other) {
 			super(SCHEMA$);
 			if (isValidValue(fields()[0], other.iotId)) {
 				this.iotId = data().deepCopy(fields()[0].schema(), other.iotId);
@@ -487,7 +487,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'iotId'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setIotId(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setIotId(java.lang.CharSequence value) {
 			validate(fields()[0], value);
 			this.iotId = value;
 			fieldSetFlags()[0] = true;
@@ -508,7 +508,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearIotId() {
+		public server.core.data.avro.Observation.Builder clearIotId() {
 			iotId = null;
 			fieldSetFlags()[0] = false;
 			return this;
@@ -531,7 +531,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'phenomenonTime'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setPhenomenonTime(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setPhenomenonTime(java.lang.CharSequence value) {
 			validate(fields()[1], value);
 			this.phenomenonTime = value;
 			fieldSetFlags()[1] = true;
@@ -554,7 +554,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearPhenomenonTime() {
+		public server.core.data.avro.Observation.Builder clearPhenomenonTime() {
 			phenomenonTime = null;
 			fieldSetFlags()[1] = false;
 			return this;
@@ -575,7 +575,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'resultTime'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setResultTime(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setResultTime(java.lang.CharSequence value) {
 			validate(fields()[2], value);
 			this.resultTime = value;
 			fieldSetFlags()[2] = true;
@@ -597,7 +597,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearResultTime() {
+		public server.core.data.avro.Observation.Builder clearResultTime() {
 			resultTime = null;
 			fieldSetFlags()[2] = false;
 			return this;
@@ -620,7 +620,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'result'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setResult(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setResult(java.lang.CharSequence value) {
 			validate(fields()[3], value);
 			this.result = value;
 			fieldSetFlags()[3] = true;
@@ -643,7 +643,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearResult() {
+		public server.core.data.avro.Observation.Builder clearResult() {
 			result = null;
 			fieldSetFlags()[3] = false;
 			return this;
@@ -666,7 +666,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'resultQuality'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setResultQuality(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setResultQuality(java.lang.CharSequence value) {
 			validate(fields()[4], value);
 			this.resultQuality = value;
 			fieldSetFlags()[4] = true;
@@ -689,7 +689,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearResultQuality() {
+		public server.core.data.avro.Observation.Builder clearResultQuality() {
 			resultQuality = null;
 			fieldSetFlags()[4] = false;
 			return this;
@@ -710,7 +710,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'validTime'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setValidTime(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setValidTime(java.lang.CharSequence value) {
 			validate(fields()[5], value);
 			this.validTime = value;
 			fieldSetFlags()[5] = true;
@@ -733,7 +733,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearValidTime() {
+		public server.core.data.avro.Observation.Builder clearValidTime() {
 			validTime = null;
 			fieldSetFlags()[5] = false;
 			return this;
@@ -756,7 +756,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'Datastream'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setDatastream(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setDatastream(java.lang.CharSequence value) {
 			validate(fields()[6], value);
 			this.Datastream = value;
 			fieldSetFlags()[6] = true;
@@ -779,7 +779,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearDatastream() {
+		public server.core.data.avro.Observation.Builder clearDatastream() {
 			Datastream = null;
 			fieldSetFlags()[6] = false;
 			return this;
@@ -802,7 +802,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * @param value The value of 'FeatureOfInterest'.
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder setFeatureOfInterest(java.lang.CharSequence value) {
+		public server.core.data.avro.Observation.Builder setFeatureOfInterest(java.lang.CharSequence value) {
 			validate(fields()[7], value);
 			this.FeatureOfInterest = value;
 			fieldSetFlags()[7] = true;
@@ -825,7 +825,7 @@ public class Observation extends org.apache.avro.specific.SpecificRecordBase
 		 * 
 		 * @return This builder.
 		 */
-		public server.core.data.Observation.Builder clearFeatureOfInterest() {
+		public server.core.data.avro.Observation.Builder clearFeatureOfInterest() {
 			FeatureOfInterest = null;
 			fieldSetFlags()[7] = false;
 			return this;

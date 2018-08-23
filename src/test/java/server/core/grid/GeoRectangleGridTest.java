@@ -4,12 +4,15 @@ import static org.junit.Assert.fail;
 
 import java.awt.geom.Point2D;
 import java.util.Collection;
+import java.util.HashSet;
 
+import org.joda.time.LocalDateTime;
 import org.junit.Test;
 
 import server.core.grid.config.Seperators;
 import server.core.grid.config.WorldMapData;
 import server.core.grid.exceptions.PointNotOnMapException;
+import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
 import server.transfer.data.ObservationData;
 import server.transfer.sender.util.TimeUtil;
@@ -18,10 +21,10 @@ public class GeoRectangleGridTest {
 
 	@Test
 	public void test() {
-		GeoGrid grid = new GeoRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3, "testGrid");
+		GeoGrid grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
 		
 		ObservationData data = new ObservationData();
-		data.observationDate = TimeUtil.getUTCDateTimeString();
+		data.observationDate = TimeUtil.getUTCDateTimeNowString();
 		data.sensorID = "testSensorID1";
 		String property = "temperature_celsius";
 		data.observations.put(property, "14.0");
@@ -82,7 +85,17 @@ public class GeoRectangleGridTest {
 			}
 		}
 		
-		System.out.println(grid.getPolygon(grid.GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + "0_1").getJson(property));
+		GeoPolygon jsonPoly = grid.getPolygon(grid.GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + "0_1");
+		System.out.println(jsonPoly.getJson(property));
+		
+		ObservationData dataClone = jsonPoly.cloneObservation();
+		dataClone.observations.put(property, "10.799999999999998");
+		LocalDateTime ldt = TimeUtil.getUTCDateTime(dataClone.observationDate);
+		LocalDateTime subtracted = ldt.minusYears(20);
+		dataClone.observationDate = TimeUtil.getUTCDateTimeString(subtracted);
+		Collection<ObservationData> observations = new HashSet<>();
+		observations.add(dataClone);
+		System.out.println(GeoJsonConverter.convertObservations(observations, property, grid));
 	}
 	
 	private String observationToString(ObservationData data) {

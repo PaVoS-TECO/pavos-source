@@ -6,10 +6,12 @@ import server.core.grid.config.Seperators;
 import server.core.grid.polygon.GeoPolygon;
 import server.core.grid.polygon.GeoRectangle;
 
-public class GeoRectangleGrid extends GeoGrid {
+public class GeoRecRectangleGrid extends GeoGrid {
 	
-	public GeoRectangleGrid(Point2D.Double mapBounds, int rows, int columns, int maxLevel, String gridID) {
-		super(mapBounds, rows, columns, maxLevel, gridID);
+	public static final String NAME = "recursiveRectangleGrid";
+	
+	public GeoRecRectangleGrid(Point2D.Double mapBounds, int rows, int columns, int maxLevel) {
+		super(mapBounds, rows, columns, maxLevel, getGridID(rows, columns, maxLevel));
 		generateGeoPolygons();
 	}
 
@@ -29,6 +31,11 @@ public class GeoRectangleGrid extends GeoGrid {
 				polygons.add(polygon);
 			}
 		}
+	}
+	
+	private static String getGridID(int rows, int columns, int maxLevel) {
+		return NAME + Seperators.GRIDID_GRIDPROPERTIES_SEPERATOR + rows + Seperators.GRIDPROPERTIES_SEPERATOR 
+				+ columns + Seperators.GRIDPROPERTIES_SEPERATOR + maxLevel;
 	}
 	
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import server.core.grid.converter.GeoJsonConverter;
+import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
 import server.transfer.producer.GraphiteProducer;
@@ -130,12 +130,35 @@ public abstract class GeoPolygon {
 	}
 	
 	/**
-	 * Returns the current {@link ObservationData} data as a {@link Set} over all sensors.
+	 * Returns the current {@link ObservationData} data as a {@link Collection} over all sensors.
 	 * The new sensorID will consist of the {@link GeoPolygon}.ID and the original sensorID.
-	 * @return sensorDataSet {@code Set<ObservationData>}
+	 * @return sensorDataSet {@code Collection<ObservationData>}
 	 */
 	public Collection<ObservationData> getSensorDataList() {
 		return this.sensorValues.values();
+	}
+	
+	/**
+	 * Returns the current {@link String} sensorIDs that are inside this cluster as a {@link Collection} over all sensors.
+	 * This does not include sensors from sub-{@link GeoPolygon}s.
+	 * @return sensorDataSet {@code Collection<String>}
+	 */
+	public Collection<String> getDirectSensorIDs() {
+		return this.sensorValues.keySet();
+	}
+	
+	/**
+	 * Returns the current {@link String} sensorIDs that are inside this cluster as a {@link Collection} over all sensors.
+	 * This includes sensors from all sub-{@link GeoPolygon}s until the last level.
+	 * @return sensorDataSet {@code Collection<String>}
+	 */
+	public Collection<String> getAllSensorIDs() {
+		Collection<String> result = new HashSet<>();
+		result.addAll(getDirectSensorIDs());
+		for (GeoPolygon subPolygon : this.subPolygons) {
+			result.addAll(subPolygon.getAllSensorIDs());
+		}
+		return result;
 	}
 	
 	/**
@@ -234,7 +257,7 @@ public abstract class GeoPolygon {
 		}
 		
 		ObservationData obs = new ObservationData();
-		obs.observationDate = TimeUtil.getUTCDateTimeString();
+		obs.observationDate = TimeUtil.getUTCDateTimeNowString();
 		Set<Tuple3D<String, Integer, Double>> values = new HashSet<>();
 		Set<String> properties = new HashSet<>();
 		
@@ -351,7 +374,7 @@ public abstract class GeoPolygon {
 	}
 	
 	private void setupObservationData() {
-		this.observationData.observationDate = TimeUtil.getUTCDateTimeString();
+		this.observationData.observationDate = TimeUtil.getUTCDateTimeNowString();
 		this.observationData.clusterID = this.ID;
 	}
 	
