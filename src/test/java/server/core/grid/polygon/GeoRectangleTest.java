@@ -19,7 +19,7 @@ public class GeoRectangleTest {
 		System.out.println("Starting Test [generateJson]:");
 		GeoRectangle rect = new GeoRectangle(2.3, 1.7, 10.0, 5.0, 1, 1, 0, "test1");
 		System.out.println(rect.getPoints());
-		System.out.println(rect.getJson());
+		System.out.println(rect.getJson("pM10"));
 		System.out.println();
 	}
 	
@@ -32,7 +32,7 @@ public class GeoRectangleTest {
 		data.observationDate = TimeUtil.getUTCDateTimeString();
 		data.sensorID = "testSensorID";
 		String property = "temperature_celsius";
-		data.observations.put(property, "28");
+		data.observations.put(property, "28.0");
 		rect.addObservation(data);
 		int numTotal = rect.getNumberOfSensors();
 		int numBla = rect.getNumberOfSensors("bla");

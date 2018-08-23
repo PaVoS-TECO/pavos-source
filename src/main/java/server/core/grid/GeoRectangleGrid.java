@@ -14,7 +14,7 @@ public class GeoRectangleGrid extends GeoGrid {
 	}
 
 	@Override
-	public void generateGeoPolygons() {
+	protected void generateGeoPolygons() {
 		double width = MAP_BOUNDS.getX() / (double) COLUMNS;
 		double height = MAP_BOUNDS.getY() / (double) ROWS;
 		
@@ -24,10 +24,9 @@ public class GeoRectangleGrid extends GeoGrid {
 				double yOffset = (double) row * height;
 				String id = String.valueOf(row) + Seperators.ROW_COLUMN_SEPERATOR + String.valueOf(col);
 				
-				GeoPolygon subPolygon = new GeoRectangle(xOffset, yOffset, width, height
+				GeoPolygon polygon = new GeoRectangle(xOffset, yOffset, width, height
 						, ROWS, COLUMNS, (MAX_LEVEL - 1), GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + id);
-				System.out.println(polygons == null);
-				polygons.put(id, subPolygon);
+				polygons.add(polygon);
 			}
 		}
 	}
