@@ -38,6 +38,18 @@ public final class PropertiesFileManager {
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getProperty("M_AUTO_OFFSET_RESET_CONFIG"));
 		return props;
 	}
+	
+	public Properties getDummyStreamProperties() {
+		Properties props = new Properties();
+		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
+		props.put(StreamsConfig.APPLICATION_ID_CONFIG, getProperty("M_APPLICATION_ID_CONFIG"));
+		props.put(StreamsConfig.CLIENT_ID_CONFIG, getProperty("M_CLIENT_ID_CONFIG"));
+		props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+		props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getProperty("M_AUTO_OFFSET_RESET_CONFIG"));
+		return props;
+	}
+
 
 	public Properties getGraphiteStreamProperties() {
 		Properties props = new Properties();
