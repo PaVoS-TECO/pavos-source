@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.apache.kafka.common.metrics.Sensor;
 
+import server.transfer.data.ObservationData;
+import server.transfer.data.ObservationDataDeserializer;
 import web.grid.Grid;
 
 /**
@@ -30,12 +32,24 @@ public class Facade {
     }
     
     /**
-     * Add a GeoJSON String to the storage solution.
-     * @param key The key to the GeoJSON String
-     * @param geoJson The GeoJSON String
+     * Add an ObservationData object to the storage solution.
+     * @param observationData The ObservationData object.
      */
-    public void addGeoJSONToStorage(String key, String geoJson) {
-    	storageProcessor.add(key, geoJson);
+    public void addObservationData(ObservationData observationData) {
+    	storageProcessor.add(observationData);
+    }
+    
+    /**
+     * Add a byte array (which represents a serialized ObservationData object)
+     * to the storage solution.
+     * @param observationData The serialized ObservationData object.
+     */
+    public void addObservationData(byte[] observationData) {
+    	ObservationDataDeserializer deserializer = new ObservationDataDeserializer();
+    	ObservationData obsDataObject = deserializer.deserialize(null, observationData);
+    	if (obsDataObject != null) {
+    		addObservationData(obsDataObject);
+    	}
     }
 
     /**
