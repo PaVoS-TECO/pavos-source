@@ -21,7 +21,7 @@ import server.core.properties.PropertiesFileManager;
  * It's needed for other Processing Classes
  *
  */
-public class MergeObsToFoiProcess {
+public class MergeObsToFoiProcess  implements ProcessInterface{
 
 	private String ObservationTopic;
 	private String FeatureOfIntresssTopic;
@@ -65,7 +65,7 @@ public class MergeObsToFoiProcess {
 	 *  This Starts the process with String Serializer
 	 */
 	
-	public boolean start() {
+	public boolean startDifferent(){
 		final Serde<String> stringSerde = Serdes.String();
 
 		StreamsBuilder builder = new StreamsBuilder();
@@ -103,8 +103,20 @@ public class MergeObsToFoiProcess {
 	 *  This Starts the process with Generic Avro Serialiser
 	 */
 
-	public boolean startGeneric() {
+	public boolean kafkaStreamStart() {
 		StreamsBuilder builder = new StreamsBuilder();
+		
+		apply(builder);
+		kafkaStreams = new KafkaStreams(builder.build(), props);
+		kafkaStreams.start();
+
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see server.core.controller.ProcessInterface#apply(org.apache.kafka.streams.StreamsBuilder)
+	 */
+	public void apply(StreamsBuilder builder) {
 		final KStream<String, GenericRecord> foIT = builder.stream(FeatureOfIntresssTopic);
 		final KTable<String, GenericRecord> obsT = builder.table(ObservationTopic);
 		final KStream<String, GenericRecord> transformfoIT = foIT
@@ -117,7 +129,7 @@ public class MergeObsToFoiProcess {
 				if (obj != null) {
 					value.put("FeatureOfInterest", obj.get("coordinates").toString());
 				} else {
-					// Observation ohne Location ?
+					//TODO ? Observation ohne Location ?
 					return value;
 				}
 
@@ -128,11 +140,6 @@ public class MergeObsToFoiProcess {
 		});
 
 		transformfoITTable.to(outputTopic);
-
-		kafkaStreams = new KafkaStreams(builder.build(), props);
-		kafkaStreams.start();
-
-		return true;
 	}
 
 	
@@ -140,12 +147,13 @@ public class MergeObsToFoiProcess {
 	/**
 	 *  This closes the process
 	 */
-	public void close() {
+	public boolean  kafkaStreamClose() {
 		if (kafkaStreams == null) {
 			System.out.println("Applikation 'Merge' is not Running");
-			return;
+			return false;
 		}
 		Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
+		return true;
 	}
 
 }
