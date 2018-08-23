@@ -17,7 +17,8 @@ public class Facade {
      * Default constructor
      */
     public Facade() {
-    	storageProcessor = new KafkaToStorageProcessor();
+    	// TODO set host by property list
+    	storageProcessor = new KafkaToStorageProcessor("localhost");
     }
 
     /**
@@ -26,6 +27,15 @@ public class Facade {
      */
     public void subscribeToZoomLevelStream(KStream stream) {
         storageProcessor.subscribe(stream);
+    }
+    
+    /**
+     * Add a GeoJSON String to the storage solution.
+     * @param key The key to the GeoJSON String
+     * @param geoJson The GeoJSON String
+     */
+    public void addGeoJSONToStorage(String key, String geoJson) {
+    	storageProcessor.add(key, geoJson);
     }
 
     /**
