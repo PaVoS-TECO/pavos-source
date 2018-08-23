@@ -21,7 +21,7 @@ import server.core.properties.PropertiesFileManager;
  * It's needed for other Processing Classes
  *
  */
-public class MergeObsToFoi {
+public class MergeObsToFoiProcess {
 
 	private String ObservationTopic;
 	private String FeatureOfIntresssTopic;
@@ -37,7 +37,7 @@ public class MergeObsToFoi {
 	 * @param outputTopic
 	 * @param key is the where you want to merge the topics
 	 */
-	public MergeObsToFoi(String topic1, String topic2, String outputTopic, String key) {
+	public MergeObsToFoiProcess(String topic1, String topic2, String outputTopic, String key) {
 		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
 
 		if (!kAdmin.existsTopic(topic1, topic2)) {
@@ -57,7 +57,7 @@ public class MergeObsToFoi {
 	/**
 	 *  Default Constructer 
 	 */
-	public MergeObsToFoi() {
+	public MergeObsToFoiProcess() {
 		this("Observations", "FeaturesOfInterest", "ObservationsMerges12", "Observations");
 	}
 

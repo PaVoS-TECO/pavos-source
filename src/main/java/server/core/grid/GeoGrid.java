@@ -14,6 +14,10 @@ import server.core.grid.polygon.GeoPolygon;
 import server.core.properties.KafkaTopicAdmin;
 import server.transfer.data.ObservationData;
 
+/**
+ * A geographically oriented approach to a polygon-tiled map.<br>
+ * Uses {@link GeoPolygon}s to tile the map.
+ */
 public abstract class GeoGrid {
 	
 	public final Point2D.Double MAP_BOUNDS;
