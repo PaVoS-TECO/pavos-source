@@ -90,6 +90,15 @@ public abstract class GeoGrid {
 		}
 	}
 	
+	public Collection<ObservationData> getGridObservations() {
+		Collection<ObservationData> observations = new ArrayList<>();
+		for (GeoPolygon polygon : polygons) {
+			observations.addAll(polygon.getSubObservations());
+			observations.add(polygon.cloneObservation());
+		}
+		return observations;
+	}
+	
 	/**
 	 * Adds a single observation to the {@link GeoGrid}.
 	 * Searches for the smallest cluster to put the values into.

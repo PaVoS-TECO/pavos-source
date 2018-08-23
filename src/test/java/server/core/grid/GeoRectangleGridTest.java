@@ -96,6 +96,13 @@ public class GeoRectangleGridTest {
 		Collection<ObservationData> observations = new HashSet<>();
 		observations.add(dataClone);
 		System.out.println(GeoJsonConverter.convertObservations(observations, property, grid));
+		
+		Collection<ObservationData> observations2 = grid.getGridObservations();
+		for (ObservationData data2 : observations2) {
+			System.out.println(data2.clusterID);
+			System.out.println(data2.observations.get(property));
+		}
+		
 	}
 	
 	private String observationToString(ObservationData data) {

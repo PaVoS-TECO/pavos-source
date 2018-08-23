@@ -100,6 +100,15 @@ public abstract class GeoPolygon {
 		setupObservationData();
 	} 
 	
+	public Collection<ObservationData> getSubObservations() {
+		Collection<ObservationData> observations = new ArrayList<>();
+		for (GeoPolygon polygon : subPolygons) {
+			observations.addAll(polygon.getSubObservations());
+			observations.add(polygon.cloneObservation());
+		}
+		return observations;
+	}
+	
 	/**
 	 * Returns the sub-{@link GeoPolygon} that is associated with the specified {@link String} clusterID.
 	 * @param clusterID {@link String}
