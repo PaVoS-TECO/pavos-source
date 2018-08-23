@@ -7,7 +7,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 
-import server.core.controller.Controller;
+import server.core.controller.testClasses.Controller;
 
 /**
  * This Class holds the main functionality of the PaVoS program. It starts/stops the whole System and manages the export/import.

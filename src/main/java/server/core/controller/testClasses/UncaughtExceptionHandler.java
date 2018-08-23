@@ -1,4 +1,4 @@
-package server.core.controller;
+package server.core.controller.testClasses;
 
 /**
  * To catch any unexpected exceptions, you can set before you start the

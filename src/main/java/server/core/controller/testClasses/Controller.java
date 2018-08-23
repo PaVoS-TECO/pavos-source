@@ -1,4 +1,4 @@
-package server.core.controller;
+package server.core.controller.testClasses;
 
 import server.core.command.RequestCommand;
 import server.core.command.StreamProcessingStrategy;
