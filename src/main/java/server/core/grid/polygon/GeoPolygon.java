@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import server.core.grid.converter.GeoJsonConverter;
+import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
 import server.transfer.producer.GraphiteProducer;
@@ -257,7 +257,7 @@ public abstract class GeoPolygon {
 		}
 		
 		ObservationData obs = new ObservationData();
-		obs.observationDate = TimeUtil.getUTCDateTimeString();
+		obs.observationDate = TimeUtil.getUTCDateTimeNowString();
 		Set<Tuple3D<String, Integer, Double>> values = new HashSet<>();
 		Set<String> properties = new HashSet<>();
 		
@@ -374,7 +374,7 @@ public abstract class GeoPolygon {
 	}
 	
 	private void setupObservationData() {
-		this.observationData.observationDate = TimeUtil.getUTCDateTimeString();
+		this.observationData.observationDate = TimeUtil.getUTCDateTimeNowString();
 		this.observationData.clusterID = this.ID;
 	}
 	

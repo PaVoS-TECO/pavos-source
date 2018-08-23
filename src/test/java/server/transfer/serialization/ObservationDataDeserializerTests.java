@@ -62,7 +62,7 @@ public class ObservationDataDeserializerTests {
 	}
 	
 	private ObservationData setupCorrectData(ObservationData data) {
-		return setupData(data, "8848", "Mt.Everest_27-59-16_86-55-29", "Mt.Everest", TimeUtil.getUTCDateTimeString(), "0");
+		return setupData(data, "8848", "Mt.Everest_27-59-16_86-55-29", "Mt.Everest", TimeUtil.getUTCDateTimeNowString(), "0");
 	}
 	
 	private ObservationData setupData(ObservationData data, String locationElevation, String locationID, String locationName, String date, String pM10) {

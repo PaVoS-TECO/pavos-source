@@ -5,7 +5,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 
 /**
- * 
+ *  Utility time class.
  */
 public final class TimeUtil {
 	
@@ -13,20 +13,41 @@ public final class TimeUtil {
 		
 	}
 	
-	/**
-	 * Returns the String of the current {@link LocalDateTime} in UTC time
-	 * @return localDateTimeString {@link String}
-	 */
-	public static String getUTCDateTimeString() {
-		return getUTCDateTime().toString(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+	public static String removeMillis(String localDateTimeString) {
+		return getUTCDateTimeString(LocalDateTime.parse(localDateTimeString));
 	}
 	
 	/**
-	 * Returns the {@link LocalDateTime} in UTC time
+	 * Returns the {@link LocalDateTime} in UTC time.
+	 * Parses from {@link String}.
 	 * @return localDateTime {@link LocalDateTime}
 	 */
-	public static LocalDateTime getUTCDateTime() {
+	public static LocalDateTime getUTCDateTime(String localDateTimeString) {
+		return LocalDateTime.parse(localDateTimeString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+	}
+	
+	/**
+	 * Returns the String of the current {@link LocalDateTime} in UTC time.
+	 * @return localDateTimeString {@link String}
+	 */
+	public static String getUTCDateTimeNowString() {
+		return getUTCDateTimeNow().toString(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+	}
+	
+	/**
+	 * Returns the {@link LocalDateTime} in UTC time.
+	 * @return localDateTime {@link LocalDateTime}
+	 */
+	public static LocalDateTime getUTCDateTimeNow() {
 		return LocalDateTime.now(DateTimeZone.UTC);
+	}
+	
+	/**
+	 * Returns the {@link LocalDateTime} in UTC time.
+	 * @return localDateTime {@link String}
+	 */
+	public static String getUTCDateTimeString(LocalDateTime ldt) {
+		return ldt.toString(DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
 	}
 	
 }
