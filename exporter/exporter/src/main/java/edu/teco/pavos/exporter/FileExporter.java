@@ -22,24 +22,6 @@ public class FileExporter extends AbstractExporter {
     }
 
     /**
-     * Creates Information for that Export. These Information will be used to identify a
-     * File for the WebGUI, that gets the created DownloadID.
-     * @return Is the DownloadID for the started Export.
-     */
-    public String createFileInformation() {
-    	String id = createRandomDownloadID();
-    	this.ads =  new AlterableDownloadState(id);
-    	this.ads.savePersistent();
-        return id;
-    }
-    
-    private static String createRandomDownloadID() {
-    	String output = "pavos";
-    	output += UUID.randomUUID().toString().replace("-", "");
-    	return output;
-    }
-
-    /**
      * Generates the File with the desired Data.
      */
     public void createFile() {

@@ -21,7 +21,6 @@ import org.apache.avro.*;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
