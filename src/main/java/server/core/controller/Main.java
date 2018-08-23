@@ -1,6 +1,11 @@
 package server.core.controller;
 
+import java.awt.geom.Point2D;
+
 import server.core.controller.testClasses.DummyTable;
+import server.core.grid.GeoGrid;
+import server.core.grid.GeoRectangleGrid;
+import server.core.grid.config.WorldMapData;
 import server.core.properties.KafkaTopicAdmin;
 
 public class Main {

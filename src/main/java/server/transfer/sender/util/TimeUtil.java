@@ -13,13 +13,8 @@ public final class TimeUtil {
 		
 	}
 	
-	/**
-	 * Removes the milliseconds from a {@link String} created from {@link LocalDateTime} (joda-time).
-	 * @param localDateTime {@link String}
-	 * @return resultLocalDateTime {@link String}
-	 */
-	public static String removeMillis(String localDateTime) {
-		return getUTCDateTimeString(LocalDateTime.parse(localDateTime, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")));
+	public static String removeMillis(String localDateTimeString) {
+		return getUTCDateTimeString(LocalDateTime.parse(localDateTimeString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")));
 	}
 	
 	/**

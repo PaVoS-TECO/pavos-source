@@ -1,37 +1,39 @@
 package server.core.controller;
 
-import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG;
-import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
-
-import java.awt.geom.Point2D;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
+import java.util.Set;
+
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import server.core.grid.GeoGrid;
+import server.core.grid.GeoRectangleGrid;
+import server.core.grid.config.WorldMapData;
+import server.transfer.data.ObservationData;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.*;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.python.icu.util.BytesTrie.Result;
 
-import io.confluent.kafka.serializers.KafkaAvroDeserializer;
-import server.core.grid.GeoGrid;
-import server.core.grid.GeoRecRectangleGrid;
-import server.core.grid.config.WorldMapData;
-import server.transfer.data.ObservationData;
+import java.awt.geom.Point2D;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
+
+import static org.apache.kafka.clients.consumer.ConsumerConfig.*;
+import static org.apache.kafka.streams.StreamsConfig.BOOTSTRAP_SERVERS_CONFIG;
 
 public class GridProcessClass {
 
@@ -40,7 +42,7 @@ public class GridProcessClass {
 		KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(getProps());
 		consumer.subscribe(Arrays.asList("ObservationsMerges12"));
 		System.out.println("Consumer Grid gestartet!");
-		GeoGrid grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
+		GeoGrid grid = new GeoRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3, "testGrid");
 
 		long t= System.currentTimeMillis();
 		long end = t+15000;
