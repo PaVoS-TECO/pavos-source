@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.polygon.GeoPolygon;
 import server.core.properties.KafkaTopicAdmin;
+import server.database.Facade;
 import server.transfer.data.ObservationData;
 
 /**
@@ -75,6 +76,15 @@ public abstract class GeoGrid {
 	public void updateObservations() {
 		for (GeoPolygon polygon : polygons) {
 			polygon.updateObservations();
+		}
+		updateDatabase();
+	}
+	
+	private void updateDatabase() {
+		Facade database = new Facade();
+		Collection<ObservationData> observations = getGridObservations();
+		for (ObservationData entry : observations) {
+			database.addObservationData(entry);
 		}
 	}
 	
