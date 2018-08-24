@@ -26,7 +26,7 @@ public class DataServlet  extends HttpServlet {
 		}
 	}
 	
-	private void getGeoJson(HttpServletRequest req, HttpServletResponse res) throws ServletException {
+	private void getGeoJson(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String gridID = req.getParameter("gridID");
 		String fusedClusterIDs = req.getParameter("clusterID");
 		String keyProperty = req.getParameter("property");
@@ -40,7 +40,9 @@ public class DataServlet  extends HttpServlet {
 				polygons.add(polygon);
 			}
 		}
-		GeoJsonConverter.convertPolygons(polygons, keyProperty);
+		res.setContentType("application/json");
+		res.setCharacterEncoding("UTF-8");
+	    res.getWriter().write(GeoJsonConverter.convertPolygons(polygons, keyProperty));
 	}
 	
 	private GeoGrid getGrid(String gridID) throws ServletException {
