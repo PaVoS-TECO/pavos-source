@@ -14,6 +14,10 @@ import server.core.grid.polygon.GeoPolygon;
 import server.core.properties.KafkaTopicAdmin;
 import server.transfer.data.ObservationData;
 
+/**
+ * A geographically oriented approach to a polygon-tiled map.<br>
+ * Uses {@link GeoPolygon}s to tile the map.
+ */
 public abstract class GeoGrid {
 	
 	public final Point2D.Double MAP_BOUNDS;
@@ -21,8 +25,9 @@ public abstract class GeoGrid {
 	public final int COLUMNS;
 	public final int MAX_LEVEL;
 	public final String GRID_ID;
-	protected List<GeoPolygon> polygons;
+	protected List<GeoPolygon> polygons = new ArrayList<>();
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
+	private GeoGridManager manager = GeoGridManager.getInstance();
 	
 	public GeoGrid(Point2D.Double mapBounds, int rows, int columns, int maxLevel, String gridID) {
 		this.MAP_BOUNDS = mapBounds;
@@ -31,7 +36,18 @@ public abstract class GeoGrid {
 		this.MAX_LEVEL = maxLevel;
 		this.GRID_ID = gridID;
 		
-		this.polygons = new ArrayList<>();
+		this.manager.addGeoGrid(this);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		GeoGrid oGrid = (GeoGrid) o;
+		return (this.GRID_ID.equals(oGrid.GRID_ID));
+	}
+	
+	public void close() {
+		this.manager.removeGeoGrid(this);
 	}
 	
 	/**
@@ -84,6 +100,15 @@ public abstract class GeoGrid {
 		for (GeoPolygon polygon : polygons) {
 			polygon.produceSensorDataMessage(topic);
 		}
+	}
+	
+	public Collection<ObservationData> getGridObservations() {
+		Collection<ObservationData> observations = new ArrayList<>();
+		for (GeoPolygon polygon : polygons) {
+			observations.addAll(polygon.getSubObservations());
+			observations.add(polygon.cloneObservation());
+		}
+		return observations;
 	}
 	
 	/**

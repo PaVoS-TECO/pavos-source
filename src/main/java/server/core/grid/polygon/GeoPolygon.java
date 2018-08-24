@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import server.core.grid.converter.GeoJsonConverter;
+import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
 import server.transfer.producer.GraphiteProducer;
@@ -100,6 +100,15 @@ public abstract class GeoPolygon {
 		setupObservationData();
 	} 
 	
+	public Collection<ObservationData> getSubObservations() {
+		Collection<ObservationData> observations = new ArrayList<>();
+		for (GeoPolygon polygon : subPolygons) {
+			observations.addAll(polygon.getSubObservations());
+			observations.add(polygon.cloneObservation());
+		}
+		return observations;
+	}
+	
 	/**
 	 * Returns the sub-{@link GeoPolygon} that is associated with the specified {@link String} clusterID.
 	 * @param clusterID {@link String}
@@ -130,25 +139,61 @@ public abstract class GeoPolygon {
 	}
 	
 	/**
-	 * Returns the current {@link ObservationData} data as a {@link Set} over all sensors.
+	 * Returns the current {@link ObservationData} data as a {@link Collection} over all sensors.
 	 * The new sensorID will consist of the {@link GeoPolygon}.ID and the original sensorID.
-	 * @return sensorDataSet {@code Set<ObservationData>}
+	 * @return sensorDataSet {@code Collection<ObservationData>}
 	 */
 	public Collection<ObservationData> getSensorDataList() {
 		return this.sensorValues.values();
 	}
 	
 	/**
+	 * Returns the current {@link String} sensorIDs that are inside this cluster as a {@link Collection} over all sensors.
+	 * This does not include sensors from sub-{@link GeoPolygon}s.
+	 * @return sensorDataSet {@code Collection<String>}
+	 */
+	public Collection<String> getDirectSensorIDs() {
+		return this.sensorValues.keySet();
+	}
+	
+	/**
+	 * Returns the current {@link String} sensorIDs that are inside this cluster as a {@link Collection} over all sensors.
+	 * This includes sensors from all sub-{@link GeoPolygon}s until the last level.
+	 * @return sensorDataSet {@code Collection<String>}
+	 */
+	public Collection<String> getAllSensorIDs() {
+		Collection<String> result = new HashSet<>();
+		result.addAll(getDirectSensorIDs());
+		for (GeoPolygon subPolygon : this.subPolygons) {
+			result.addAll(subPolygon.getAllSensorIDs());
+		}
+		return result;
+	}
+	
+	/**
 	 * Produces messages for the output kafka-topic.
-	 * Each message contains a single {@link ObservationData} object.
 	 * This method Produces recursively and starts with the smallest clusters.
+	 * @param topic {@link String}
 	 */
 	public void produceSensorDataMessage(String topic) {
-		for (GeoPolygon polygon : subPolygons) {
-			polygon.produceSensorDataMessage(topic);
-		}
 		GraphiteProducer producer = new GraphiteProducer();
-		producer.produceMessages(topic, sensorValues.values());
+		producer.produceMessages(topic, getClusterObservations(topic));
+	}
+	
+	/**
+	 * Produces messages for the output kafka-topic.
+	 * This method Produces recursively and starts with the smallest clusters.
+	 * Returns a {@link Collection} of {@link ObservationData}.
+	 * @param topic {@link String}
+	 * @param recursive {@link boolean}
+	 */
+	protected Collection<ObservationData> getClusterObservations(String topic) {
+		Collection<ObservationData> result = new HashSet<>();
+		for (GeoPolygon polygon : subPolygons) {
+			result.addAll(polygon.getClusterObservations(topic));
+		}
+		result.add(cloneObservation());
+		return result;
 	}
 	
 	/**
@@ -218,6 +263,10 @@ public abstract class GeoPolygon {
 		return sum;
 	}
 	
+	private void resetDirectObservations() {
+		this.sensorValues = new HashMap<>();
+	}
+	
 	/**
 	 * Updates all values of this {@link GeoPolygon} and it's sub-{@link GeoPolygon}s.<p>
 	 * The process takes into account that sub-{@link GeoPolygon} may have more or less data
@@ -234,7 +283,7 @@ public abstract class GeoPolygon {
 		}
 		
 		ObservationData obs = new ObservationData();
-		obs.observationDate = TimeUtil.getUTCDateTimeString();
+		obs.observationDate = TimeUtil.getUTCDateTimeNowString();
 		Set<Tuple3D<String, Integer, Double>> values = new HashSet<>();
 		Set<String> properties = new HashSet<>();
 		
@@ -273,6 +322,8 @@ public abstract class GeoPolygon {
 		}
 		obs.clusterID = this.ID;
 		this.observationData = obs;
+		
+		resetDirectObservations();
 	}
 	
 	/**
@@ -351,7 +402,7 @@ public abstract class GeoPolygon {
 	}
 	
 	private void setupObservationData() {
-		this.observationData.observationDate = TimeUtil.getUTCDateTimeString();
+		this.observationData.observationDate = TimeUtil.getUTCDateTimeNowString();
 		this.observationData.clusterID = this.ID;
 	}
 	
