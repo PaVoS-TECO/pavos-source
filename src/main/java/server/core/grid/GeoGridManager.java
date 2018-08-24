@@ -23,8 +23,13 @@ public final class GeoGridManager {
 		this.grids.add(grid);
 	}
 	
-	public void removeGeoGrid(GeoGrid grid) {
-		this.grids.remove(grid);
+	public GeoGrid getGrid(String gridID) {
+		for (GeoGrid entry : this.grids) {
+			if (entry.GRID_ID.equals(gridID)) {
+				return entry;
+			}
+		}
+		return null;
 	}
 	
 	public boolean isGridActive(GeoGrid grid) {
@@ -40,13 +45,8 @@ public final class GeoGridManager {
 		return false;
 	}
 	
-	public GeoGrid getGrid(String gridID) {
-		for (GeoGrid entry : this.grids) {
-			if (entry.GRID_ID.equals(gridID)) {
-				return entry;
-			}
-		}
-		return null;
+	public void removeGeoGrid(GeoGrid grid) {
+		this.grids.remove(grid);
 	}
 	
 }

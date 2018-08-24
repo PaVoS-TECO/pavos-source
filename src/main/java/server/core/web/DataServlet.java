@@ -32,27 +32,6 @@ public class DataServlet  extends HttpServlet {
 		}
 	}
 	
-	private void getGeoJson(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-		String gridID = req.getParameter("gridID");
-		String fusedClusterIDs = req.getParameter("clusterID");
-		String keyProperty = req.getParameter("property");
-		String fusedTime = req.getParameter("time");
-		String[] clusterIDs = fusedClusterIDs.split(",");
-		String[] time = fusedTime.split(",");
-		String stepsString = req.getParameter("steps");
-		
-		String result = null;
-		if (time[0] == null) {
-			result = getLiveData(gridID, keyProperty, clusterIDs, req, res);
-		} else {
-			result = getDatabaseData(gridID, keyProperty, clusterIDs, time, stepsString, req, res);
-		}
-		
-		res.setContentType("application/json");
-		res.setCharacterEncoding("UTF-8");
-	    res.getWriter().write(result);
-	}
-	
 	private String getDatabaseData(String gridID, String keyProperty, String[] clusterIDs, String[] time, 
 			String stepsString, HttpServletRequest req, HttpServletResponse res) throws ServletException {
 		if (time.length == 1) {
@@ -93,6 +72,33 @@ public class DataServlet  extends HttpServlet {
 		throw new ServletException("Time format unacceptable.");
 	}
 	
+	private void getGeoJson(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+		String gridID = req.getParameter("gridID");
+		String fusedClusterIDs = req.getParameter("clusterID");
+		String keyProperty = req.getParameter("property");
+		String fusedTime = req.getParameter("time");
+		String[] clusterIDs = fusedClusterIDs.split(",");
+		String[] time = fusedTime.split(",");
+		String stepsString = req.getParameter("steps");
+		
+		String result = null;
+		if (time[0] == null) {
+			result = getLiveData(gridID, keyProperty, clusterIDs, req, res);
+		} else {
+			result = getDatabaseData(gridID, keyProperty, clusterIDs, time, stepsString, req, res);
+		}
+		
+		res.setContentType("application/json");
+		res.setCharacterEncoding("UTF-8");
+	    res.getWriter().write(result);
+	}
+	
+	private GeoGrid getGrid(String gridID) throws ServletException {
+		GeoGridManager gridManager = GeoGridManager.getInstance();
+		if (!gridManager.isGridActive(gridID)) throw new ServletException("Grid is not active and therefore can not be fetched.");
+		return gridManager.getGrid(gridID);
+	}
+	
 	private String getLiveData(String gridID, String keyProperty, String[] clusterIDs, 
 			HttpServletRequest req, HttpServletResponse res) throws ServletException {
 		Collection<GeoPolygon> polygons = new HashSet<>();
@@ -104,12 +110,6 @@ public class DataServlet  extends HttpServlet {
 			}
 		}
 		return GeoJsonConverter.convertPolygons(polygons, keyProperty);
-	}
-	
-	private GeoGrid getGrid(String gridID) throws ServletException {
-		GeoGridManager gridManager = GeoGridManager.getInstance();
-		if (!gridManager.isGridActive(gridID)) throw new ServletException("Grid is not active and therefore can not be fetched.");
-		return gridManager.getGrid(gridID);
 	}
 	
 }

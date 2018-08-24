@@ -13,10 +13,10 @@ public final class GeoJsonConverter {
 		
 	}
 	
-	public static String convertPolygons(Collection<GeoPolygon> geoPolygons, String keyProperty) {
-		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty);
-		builder.addGeoPolygons(geoPolygons);
-		return builder.toString();
+	public static String convert(GeoPolygon geoPolygon, String keyProperty) {
+		Collection<GeoPolygon> col = new ArrayList<>();
+		col.add(geoPolygon);
+		return convertPolygons(col, keyProperty);
 	}
 	
 	public static String convertObservations(Collection<ObservationData> observations, String keyProperty, GeoGrid geoGrid) {
@@ -25,10 +25,10 @@ public final class GeoJsonConverter {
 		return builder.toString();
 	}
 
-	public static String convert(GeoPolygon geoPolygon, String keyProperty) {
-		Collection<GeoPolygon> col = new ArrayList<>();
-		col.add(geoPolygon);
-		return convertPolygons(col, keyProperty);
+	public static String convertPolygons(Collection<GeoPolygon> geoPolygons, String keyProperty) {
+		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty);
+		builder.addGeoPolygons(geoPolygons);
+		return builder.toString();
 	}
 	
 }

@@ -15,6 +15,11 @@ public class GeoRecRectangleGrid extends GeoGrid {
 		generateGeoPolygons();
 	}
 
+	private static String getGridID(int rows, int columns, int maxLevel) {
+		return NAME + Seperators.GRIDID_GRIDPROPERTIES_SEPERATOR + rows + Seperators.GRIDPROPERTIES_SEPERATOR 
+				+ columns + Seperators.GRIDPROPERTIES_SEPERATOR + maxLevel;
+	}
+	
 	@Override
 	protected void generateGeoPolygons() {
 		double width = MAP_BOUNDS.getX() / (double) COLUMNS;
@@ -31,11 +36,6 @@ public class GeoRecRectangleGrid extends GeoGrid {
 				polygons.add(polygon);
 			}
 		}
-	}
-	
-	private static String getGridID(int rows, int columns, int maxLevel) {
-		return NAME + Seperators.GRIDID_GRIDPROPERTIES_SEPERATOR + rows + Seperators.GRIDPROPERTIES_SEPERATOR 
-				+ columns + Seperators.GRIDPROPERTIES_SEPERATOR + maxLevel;
 	}
 	
 }

@@ -27,20 +27,6 @@ public final class GeoJsonBuilder {
 		this.polygonsBuilder = new StringBuilder();
 	}
 	
-	public void addGeoPolygons(Collection<GeoPolygon> geoPolygons) {
-		StringBuilder polyBuilder = new StringBuilder();
-		
-		int countFeature = 1;
-		for (GeoPolygon geoPolygon : geoPolygons) {
-			polyBuilder.append(geoPolygonToString(geoPolygon));
-			if (countFeature < geoPolygons.size()) {
-				polyBuilder.append(COMMA);
-			}
-			countFeature++;
-		}
-		this.polygonsBuilder.append(polyBuilder.toString());
-	}
-	
 	public void addDBObservations(Collection<ObservationData> observations, GeoGrid geoGrid) {
 		Collection<GeoPolygon> geoPolygons = new HashSet<>();
 		StringBuilder polyBuilder = new StringBuilder();
@@ -55,6 +41,35 @@ public final class GeoJsonBuilder {
 		}
 			
 		this.polygonsBuilder.append(polyBuilder.toString());
+	}
+	
+	public void addGeoPolygons(Collection<GeoPolygon> geoPolygons) {
+		StringBuilder polyBuilder = new StringBuilder();
+		
+		int countFeature = 1;
+		for (GeoPolygon geoPolygon : geoPolygons) {
+			polyBuilder.append(geoPolygonToString(geoPolygon));
+			if (countFeature < geoPolygons.size()) {
+				polyBuilder.append(COMMA);
+			}
+			countFeature++;
+		}
+		this.polygonsBuilder.append(polyBuilder.toString());
+	}
+	
+	@Override
+	public String toString() {
+		return build();
+	}
+	
+	private String build() {
+	builder.append("{ " + toSProperty("type", "FeatureCollection") + COMMA);
+	builder.append(toSProperty("timestamp", ldtString) + COMMA);
+	builder.append(toSProperty("observationType", keyProperty) + COMMA);
+	builder.append(toEntry("features") + ": [ ");
+	builder.append(polygonsBuilder.toString());
+	builder.append("] }");
+	return builder.toString();
 	}
 	
 	private String geoPolygonToString(GeoPolygon geoPolygon) {
@@ -100,19 +115,8 @@ public final class GeoJsonBuilder {
 		return polyBuilder.toString();
 	}
 	
-	private String build() {
-	builder.append("{ " + toSProperty("type", "FeatureCollection") + COMMA);
-	builder.append(toSProperty("timestamp", ldtString) + COMMA);
-	builder.append(toSProperty("observationType", keyProperty) + COMMA);
-	builder.append(toEntry("features") + ": [ ");
-	builder.append(polygonsBuilder.toString());
-	builder.append("] }");
-	return builder.toString();
-	}
-	
-	@Override
-	public String toString() {
-		return build();
+	private String toEntry(String name) {
+		return "\"" + name + "\"";
 	}
 	
 	private String toNProperty(String key, String value) {
@@ -121,10 +125,6 @@ public final class GeoJsonBuilder {
 	
 	private String toSProperty(String key, String value) {
 		return toEntry(key) + ": " + toEntry(value);
-	}
-	
-	private String toEntry(String name) {
-		return "\"" + name + "\"";
 	}
 	
 }

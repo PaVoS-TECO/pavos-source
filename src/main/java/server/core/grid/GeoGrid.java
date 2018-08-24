@@ -40,87 +40,6 @@ public abstract class GeoGrid {
 		this.manager.addGeoGrid(this);
 	}
 	
-	@Override
-	public boolean equals(Object o) {
-		if (o == null) return false;
-		GeoGrid oGrid = (GeoGrid) o;
-		return (this.GRID_ID.equals(oGrid.GRID_ID));
-	}
-	
-	public void close() {
-		this.manager.removeGeoGrid(this);
-	}
-	
-	/**
-	 * Returns the {@link GeoPolygon} that is associated with the specified {@link String} clusterID.
-	 * @param clusterID {@link String}
-	 * @return polygon {@link GeoPolygon}
-	 */
-	public GeoPolygon getPolygon(String clusterID) {
-		for (GeoPolygon polygon : this.polygons) {
-			if (polygon.ID.equals(clusterID)) {
-				return polygon;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Updates all values of this {@link GeoGrid} and it's {@link GeoPolygon}s.<p>
-	 * The process takes into account that {@link GeoPolygon} may have more or less data
-	 * about a certain property.
-	 * It sums up all values (that were factored by the amount of data) and finally divides it
-	 * by the total amount of data.
-	 * This way, we achieve the most realistic representation of our data.
-	 */
-	public void updateObservations() {
-		for (GeoPolygon polygon : polygons) {
-			polygon.updateObservations();
-		}
-		updateDatabase();
-	}
-	
-	private void updateDatabase() {
-		Facade database = new Facade();
-		Collection<ObservationData> observations = getGridObservations();
-		for (ObservationData entry : observations) {
-			database.addObservationData(entry);
-		}
-	}
-	
-	/**
-	 * Returns the {@link String} topic for kafka, in which all values should be written.
-	 * @return topic {@link String}
-	 */
-	public String getOutputTopic() {
-		return this.GRID_ID + ".out";
-	}
-	
-	/**
-	 * Produces messages for the output kafka-topic.
-	 * Each message contains a single {@link ObservationData} object.
-	 * This method Produces recursively and starts with the smallest clusters.
-	 */
-	public void produceSensorDataMessages() {
-		String topic = getOutputTopic();
-		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
-		if (!kAdmin.existsTopic(topic)) {
-			kAdmin.createTopic(topic);
-		}
-		for (GeoPolygon polygon : polygons) {
-			polygon.produceSensorDataMessage(topic);
-		}
-	}
-	
-	public Collection<ObservationData> getGridObservations() {
-		Collection<ObservationData> observations = new ArrayList<>();
-		for (GeoPolygon polygon : polygons) {
-			observations.addAll(polygon.getSubObservations());
-			observations.add(polygon.cloneObservation());
-		}
-		return observations;
-	}
-	
 	/**
 	 * Adds a single observation to the {@link GeoGrid}.
 	 * Searches for the smallest cluster to put the values into.
@@ -137,6 +56,61 @@ public abstract class GeoGrid {
 			logger.warn("Could not add Observation to map. Point '" + location 
 					+ "' not in map boundaries! SensorID: " + data.sensorID + " " + e);
 		}
+	}
+	
+	public void close() {
+		this.manager.removeGeoGrid(this);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		GeoGrid oGrid = (GeoGrid) o;
+		return (this.GRID_ID.equals(oGrid.GRID_ID));
+	}
+	
+	/**
+	 * Returns the ID for the Cluster which contains the {@link Point2D.Double} point. If the point is not on the mapped area, returns {@link null}!<p>
+	 * The ID is also specified by the {@link int} level of grid-scaling.
+	 * The level ranges from 0 to {@code MAX_LEVEL}.
+	 * A higher level means more {@link GeoPolygon}s to check but gives a better representation for the selected {@link Point2D.Double}.
+	 * @param point The {@link Point2D.Double} that is contained by the cluster that we are searching for
+	 * @param level The {@link int} that controls the level of detail
+	 * @return id The cluster id
+	 */
+	public String getClusterID(Point2D.Double point, int level) throws PointNotOnMapException {
+		return getPolygonContaining(point, level).ID;
+	}
+	
+	public Collection<ObservationData> getGridObservations() {
+		Collection<ObservationData> observations = new ArrayList<>();
+		for (GeoPolygon polygon : polygons) {
+			observations.addAll(polygon.getSubObservations());
+			observations.add(polygon.cloneObservation());
+		}
+		return observations;
+	}
+	
+	/**
+	 * Returns the {@link String} topic for kafka, in which all values should be written.
+	 * @return topic {@link String}
+	 */
+	public String getOutputTopic() {
+		return this.GRID_ID + ".out";
+	}
+	
+	/**
+	 * Returns the {@link GeoPolygon} that is associated with the specified {@link String} clusterID.
+	 * @param clusterID {@link String}
+	 * @return polygon {@link GeoPolygon}
+	 */
+	public GeoPolygon getPolygon(String clusterID) {
+		for (GeoPolygon polygon : this.polygons) {
+			if (polygon.ID.equals(clusterID)) {
+				return polygon;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -166,18 +140,49 @@ public abstract class GeoGrid {
 	}
 	
 	/**
-	 * Returns the ID for the Cluster which contains the {@link Point2D.Double} point. If the point is not on the mapped area, returns {@link null}!<p>
-	 * The ID is also specified by the {@link int} level of grid-scaling.
-	 * The level ranges from 0 to {@code MAX_LEVEL}.
-	 * A higher level means more {@link GeoPolygon}s to check but gives a better representation for the selected {@link Point2D.Double}.
-	 * @param point The {@link Point2D.Double} that is contained by the cluster that we are searching for
-	 * @param level The {@link int} that controls the level of detail
-	 * @return id The cluster id
+	 * Produces messages for the output kafka-topic.
+	 * Each message contains a single {@link ObservationData} object.
+	 * This method Produces recursively and starts with the smallest clusters.
 	 */
-	public String getClusterID(Point2D.Double point, int level) throws PointNotOnMapException {
-		return getPolygonContaining(point, level).ID;
+	public void produceSensorDataMessages() {
+		String topic = getOutputTopic();
+		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
+		if (!kAdmin.existsTopic(topic)) {
+			kAdmin.createTopic(topic);
+		}
+		for (GeoPolygon polygon : polygons) {
+			polygon.produceSensorDataMessage(topic);
+		}
 	}
 	
+	/**
+	 * Updates all values of this {@link GeoGrid} and it's {@link GeoPolygon}s.<p>
+	 * The process takes into account that {@link GeoPolygon} may have more or less data
+	 * about a certain property.
+	 * It sums up all values (that were factored by the amount of data) and finally divides it
+	 * by the total amount of data.
+	 * This way, we achieve the most realistic representation of our data.
+	 */
+	public void updateObservations() {
+		for (GeoPolygon polygon : polygons) {
+			polygon.updateObservations();
+		}
+		updateDatabase();
+	}
+	
+	private void updateDatabase() {
+		Facade database = new Facade();
+		Collection<ObservationData> observations = getGridObservations();
+		for (ObservationData entry : observations) {
+			database.addObservationData(entry);
+		}
+	}
+	
+	/**
+	 * Generates the {@link GeoPolygon}s that make up all clusters of the grid.
+	 */
+	protected abstract void generateGeoPolygons();
+
 	/**
 	 * Returns the first {@link GeoPolygon} from the {@link Collection} of {@link GeoPolygon}s that contains the specified {@link Point2D.Double}.
 	 * @param point {@link Point2D.Double}
@@ -193,10 +198,5 @@ public abstract class GeoGrid {
 		}
 		throw new PointNotOnMapException(point);
 	}
-
-	/**
-	 * Generates the {@link GeoPolygon}s that make up all clusters of the grid.
-	 */
-	protected abstract void generateGeoPolygons();
 	
 }
