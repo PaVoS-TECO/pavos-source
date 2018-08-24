@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.joda.time.LocalDateTime;
+
 import server.core.grid.GeoGrid;
 import server.core.grid.polygon.GeoPolygon;
 import server.transfer.data.ObservationData;
+import server.transfer.sender.util.TimeUtil;
 
 public final class GeoJsonBuilder {
 	
@@ -59,7 +62,11 @@ public final class GeoJsonBuilder {
 	}
 	
 	private String geoPolygonToStringQuick(ObservationData data, List<GeoPolygon> subPolygons, List<Point2D.Double> points) {
-		ldtString = data.observationDate;
+		LocalDateTime ldt = TimeUtil.getUTCDateTime(data.observationDate);
+		if (ldtString == null || ldt.isAfter(TimeUtil.getUTCDateTime(ldtString))) {
+			ldtString = data.observationDate;
+		}
+		
 		StringBuilder polyBuilder = new StringBuilder();
 		polyBuilder.append("{ " + toSProperty("type", "Feature") + COMMA);
 		polyBuilder.append(toEntry("properties") + ": { ");
