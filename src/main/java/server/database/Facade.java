@@ -2,8 +2,6 @@ package server.database;
 
 import java.util.Set;
 
-import org.apache.kafka.common.metrics.Sensor;
-
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationDataDeserializer;
 import web.grid.Grid;
@@ -19,16 +17,8 @@ public class Facade {
      * Default constructor
      */
     public Facade() {
-        // TODO set host by property list
+    	// TODO set host by property list
     	storageProcessor = new KafkaToStorageProcessor("localhost");
-    }
-
-    /**
-     * Subscribes to the given KafkaStream, which contains ZoomLevel-specific data and initiates processing of its records.
-     * @param stream The stream to subscribe to.
-     */
-    public void subscribeToZoomLevelStream(KStream stream) {
-        storageProcessor.subscribe(stream);
     }
     
     /**
@@ -47,20 +37,10 @@ public class Facade {
     public void addObservationData(byte[] observationData) {
     	ObservationDataDeserializer deserializer = new ObservationDataDeserializer();
     	ObservationData obsDataObject = deserializer.deserialize(null, observationData);
+    	deserializer.close();
     	if (obsDataObject != null) {
     		addObservationData(obsDataObject);
     	}
-    }
-
-    /**
-     * Fetches all sensors from the given cluster that observe the given ObservedProperty and returns an array of sensors.
-     * @param type The ObservationType of the requested sensors.
-     * @param id The ID of the cluster.
-     * @return An array of sensors.
-     */
-    public Set<Sensor> getSensors(ObservationType type, ClusterID id) {
-        // TODO implement here
-        return null;
     }
 
     /**
@@ -70,9 +50,27 @@ public class Facade {
      * @param time The point in time.
      * @return A grid with the computed data.
      */
-    public Grid getGrid(ClusterID[] clusters, ZoomLevel zoom, Time time) {
+    public Grid getGrid(ClusterID[] clusters, ZoomLevel zoom, String timestamp) {
         // TODO implement here
         return null;
+    }
+    
+    /**
+     * Get the value of an observedProperty from a clusterID at or before the given timestamp.
+     * The returned value is guaranteed to come from an observation in the given cluster at or before
+     * the given timestamp (i.e. no values from the future).
+     * @param clusterID The cluster from which to get the value
+     * @param timestamp The time to check
+     * @param observedProperty The observedProperty needed
+     * @return The value to the observedProperty key. Returns {@code null} in any of the following cases:<br>
+     * - There is no entry for the cluster<br>
+     * - There is no entry for the cluster before or at the given timestamp<br>
+     * - There is no {@code observedProperty} key in the observations Map<br>
+     * - The value to the {@code observedProperty} key is literally {@code null}<br>
+     * - Any of the parameters is badly formatted (see logs)
+     */
+    public String getObservationData(String clusterID, String timestamp, String observedProperty) {
+    	return storageProcessor.get(clusterID, timestamp, observedProperty);
     }
 
 }
