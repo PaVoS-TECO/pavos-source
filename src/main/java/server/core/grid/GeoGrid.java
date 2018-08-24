@@ -38,6 +38,13 @@ public abstract class GeoGrid {
 		this.polygons = new ArrayList<>();
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) return false;
+		GeoGrid oGrid = (GeoGrid) o;
+		return (this.GRID_ID.equals(oGrid.GRID_ID));
+	}
+	
 	/**
 	 * Returns the {@link GeoPolygon} that is associated with the specified {@link String} clusterID.
 	 * @param clusterID {@link String}

@@ -19,7 +19,6 @@ import org.apache.kafka.streams.StreamsConfig;
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
-import server.transfer.config.KafkaConfig;
 import server.transfer.data.ObservationDataSerializer;
 
 public final class PropertiesFileManager {

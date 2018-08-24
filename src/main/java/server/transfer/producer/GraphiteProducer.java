@@ -4,13 +4,10 @@ import java.util.Collection;
 import java.util.Properties;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import server.core.properties.PropertiesFileManager;
-import server.transfer.config.KafkaConfig;
 import server.transfer.data.ObservationData;
-import server.transfer.data.ObservationDataSerializer;
 
 public class GraphiteProducer {
 	
