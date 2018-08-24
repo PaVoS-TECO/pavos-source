@@ -172,15 +172,28 @@ public abstract class GeoPolygon {
 	
 	/**
 	 * Produces messages for the output kafka-topic.
-	 * Each message contains a single {@link ObservationData} object.
 	 * This method Produces recursively and starts with the smallest clusters.
+	 * @param topic {@link String}
 	 */
 	public void produceSensorDataMessage(String topic) {
-		for (GeoPolygon polygon : subPolygons) {
-			polygon.produceSensorDataMessage(topic);
-		}
 		GraphiteProducer producer = new GraphiteProducer();
-		producer.produceMessages(topic, sensorValues.values());
+		producer.produceMessages(topic, getClusterObservations(topic));
+	}
+	
+	/**
+	 * Produces messages for the output kafka-topic.
+	 * This method Produces recursively and starts with the smallest clusters.
+	 * Returns a {@link Collection} of {@link ObservationData}.
+	 * @param topic {@link String}
+	 * @param recursive {@link boolean}
+	 */
+	protected Collection<ObservationData> getClusterObservations(String topic) {
+		Collection<ObservationData> result = new HashSet<>();
+		for (GeoPolygon polygon : subPolygons) {
+			result.addAll(polygon.getClusterObservations(topic));
+		}
+		result.add(cloneObservation());
+		return result;
 	}
 	
 	/**
@@ -250,6 +263,10 @@ public abstract class GeoPolygon {
 		return sum;
 	}
 	
+	private void resetDirectObservations() {
+		this.sensorValues = new HashMap<>();
+	}
+	
 	/**
 	 * Updates all values of this {@link GeoPolygon} and it's sub-{@link GeoPolygon}s.<p>
 	 * The process takes into account that sub-{@link GeoPolygon} may have more or less data
@@ -305,6 +322,8 @@ public abstract class GeoPolygon {
 		}
 		obs.clusterID = this.ID;
 		this.observationData = obs;
+		
+		resetDirectObservations();
 	}
 	
 	/**
