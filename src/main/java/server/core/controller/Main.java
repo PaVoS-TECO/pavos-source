@@ -2,6 +2,8 @@ package server.core.controller;
 
 import java.awt.geom.Point2D;
 
+import org.python.modules.thread.thread;
+
 import server.core.controller.testClasses.DummyTable;
 import server.core.grid.GeoGrid;
 
@@ -15,8 +17,11 @@ public class Main {
 //		GraphitePClass pc = new GraphitePClass("test");
 //		pc.start();
 		//Merge process
+		//MergeObsToFoiProcess foiProcess = new MergeObsToFoiProcess();
+		//foiProcess.kafkaStreamStart();
+		GridProcess gridProcess = new GridProcess();
+		gridProcess.kafkaStreamStart();
 
-	
 		
 		
 		System.out.println("[Main] finished successfully!");

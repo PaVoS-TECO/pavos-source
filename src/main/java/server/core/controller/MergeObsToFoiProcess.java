@@ -58,7 +58,7 @@ public class MergeObsToFoiProcess  implements ProcessInterface{
 	 *  Default Constructer 
 	 */
 	public MergeObsToFoiProcess() {
-		this("Observations", "FeaturesOfInterest", "ObservationsMerges12", "Observations");
+		this("Observations", "FeaturesOfInterest", "ObservationsMergesGeneric", "Observations");
 	}
 
 	/**

@@ -12,12 +12,15 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 
 import io.confluent.kafka.serializers.AbstractKafkaAvroSerDeConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
+import server.transfer.config.KafkaConfig;
+import server.transfer.data.ObservationDataSerializer;
 
 public final class PropertiesFileManager {
 
@@ -88,6 +91,16 @@ public final class PropertiesFileManager {
 
 		return props;
 	}
+	
+	public Properties getProducerGridProperties() {
+    	Properties configProperties = new Properties();
+    	configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
+        configProperties.put(ProducerConfig.ACKS_CONFIG, "all");
+        configProperties.put(ProducerConfig.RETRIES_CONFIG, 0);
+        configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ObservationDataSerializer.class.getName());
+        configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        return configProperties;
+    }
 
 	public String getProperty(String key) {
 		return properties.getProperty(key);
