@@ -1,7 +1,5 @@
 package server.database;
 
-import java.util.Set;
-
 import server.transfer.data.ObservationData;
 import server.transfer.data.ObservationDataDeserializer;
 import web.grid.Grid;
