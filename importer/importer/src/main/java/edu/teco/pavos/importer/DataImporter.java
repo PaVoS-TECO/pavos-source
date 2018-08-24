@@ -60,7 +60,7 @@ public class DataImporter extends AbstractTableModel implements ActionListener {
         int w = 180;
         int h = 80;
         
-        this.urlField = new JTextField("http://pavos-master.teco.edu/8080/v1.0/");
+        this.urlField = new JTextField("http://pavos-master.teco.edu/FROST-Server/v1.0/");
         contentPane.add(this.urlField);
         layout.putConstraint(SpringLayout.WEST, this.urlField, 20, SpringLayout.WEST, this.contentPane);
         layout.putConstraint(SpringLayout.EAST, this.urlField, -20, SpringLayout.EAST, this.contentPane);

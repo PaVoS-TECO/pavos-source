@@ -153,9 +153,9 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (String id : this.observedProperties.keySet()) {
 			JSONObject value = this.observedProperties.get(id);
-			String line = "observedProperty|" + value.get("@iot.id") + "|";
-			line += value.get("name") + "|";
-			line += value.get("description") + "|";
+			String line = "observedPropertyϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("name") + "Ϣ";
+			line += value.get("description") + "Ϣ";
 			line += value.get("definition");
 			lines.add(line);
 		}
@@ -166,10 +166,10 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (String id : this.sensors.keySet()) {
 			JSONObject value = this.sensors.get(id);
-			String line = "sensor|" + value.get("@iot.id") + "|";
-			line += value.get("name") + "|";
-			line += value.get("description") + "|";
-			line += value.get("encodingType") + "|";
+			String line = "sensorϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("name") + "Ϣ";
+			line += value.get("description") + "Ϣ";
+			line += value.get("encodingType") + "Ϣ";
 			line += value.get("metadata");
 			lines.add(line);
 		}
@@ -180,10 +180,10 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (String id : this.locations.keySet()) {
 			JSONObject value = this.locations.get(id);
-			String line = "location|" + value.get("@iot.id") + "|";
-			line += value.get("name") + "|";
-			line += value.get("description") + "|";
-			line += value.get("encodingType") + "|";
+			String line = "locationϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("name") + "Ϣ";
+			line += value.get("description") + "Ϣ";
+			line += value.get("encodingType") + "Ϣ";
 			line += ((JSONObject) value.get("location")).toJSONString();
 			lines.add(line);
 		}
@@ -194,10 +194,10 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (String id : this.features.keySet()) {
 			JSONObject value = this.features.get(id);
-			String line = "featureOfInterest|" + value.get("@iot.id") + "|";
-			line += value.get("name") + "|";
-			line += value.get("description") + "|";
-			line += value.get("encodingType") + "|";
+			String line = "featureOfInterestϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("name") + "Ϣ";
+			line += value.get("description") + "Ϣ";
+			line += value.get("encodingType") + "Ϣ";
 			line += ((JSONObject) value.get("feature")).toJSONString();
 			lines.add(line);
 		}
@@ -208,10 +208,10 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (String id : this.things.keySet()) {
 			JSONObject value = this.things.get(id);
-			String line = "thing|" + value.get("@iot.id") + "|";
-			line += value.get("name") + "|";
-			line += value.get("description") + "|";
-			line += ((JSONObject) value.get("properties")).toJSONString() + "|";
+			String line = "thingϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("name") + "Ϣ";
+			line += value.get("description") + "Ϣ";
+			line += ((JSONObject) value.get("properties")).toJSONString() + "Ϣ";
 			lines.add(line);
 		}
 		return lines;
@@ -221,34 +221,34 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (String id : this.dataStreams.keySet()) {
 			JSONObject value = this.dataStreams.get(id);
-			String line = "dataStream|" + value.get("@iot.id") + "|";
-			line += value.get("name") + "|";
-			line += value.get("description") + "|";
-			line += value.get("observationType") + "|";
-			line += ((JSONObject) value.get("unitOfMeasurement")).toJSONString() + "|";
+			String line = "dataStreamϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("name") + "Ϣ";
+			line += value.get("description") + "Ϣ";
+			line += value.get("observationType") + "Ϣ";
+			line += ((JSONObject) value.get("unitOfMeasurement")).toJSONString() + "Ϣ";
 			
-			line += value.get("Thing@iot.id") + "|";
-			line += value.get("ObservedProperty@iot.id") + "|";
-			line += value.get("Sensor@iot.id") + "|";
+			line += value.get("Thing@iot.id") + "Ϣ";
+			line += value.get("ObservedProperty@iot.id") + "Ϣ";
+			line += value.get("Sensor@iot.id") + "Ϣ";
 			
 			String opt = "";
 			Object optional = value.get("observedArea");
 			if (optional != null) {
 				opt = "" + optional;
 			}
-			line += opt + "|";
+			line += opt + "Ϣ";
 			opt = "";
 			optional = value.get("phenomenonTime");
 			if (optional != null) {
 				opt = "" + optional;
 			}
-			line += opt + "|";
+			line += opt + "Ϣ";
 			opt = "";
 			optional = value.get("resultTime");
 			if (optional != null) {
 				opt = "" + optional;
 			}
-			line += opt + "|";
+			line += opt + "Ϣ";
 			lines.add(line);
 		}
 		return lines;
@@ -257,33 +257,33 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 	private ArrayList<String> getObservationLines() {
 		ArrayList<String> lines = new ArrayList<String>();
 		for (JSONObject value : this.observations) {
-			String line = "observation|" + value.get("@iot.id") + "|";
-			line += value.get("phenomenonTime") + "|";
-			line += value.get("result") + "|";
-			line += value.get("resultTime") + "|";
+			String line = "observationϢ" + value.get("@iot.id") + "Ϣ";
+			line += value.get("phenomenonTime") + "Ϣ";
+			line += value.get("result") + "Ϣ";
+			line += value.get("resultTime") + "Ϣ";
 			
-			line += value.get("Datastream@iot.id") + "|";
-			line += value.get("FeatureOfInterest@iot.id") + "|";
+			line += value.get("Datastream@iot.id") + "Ϣ";
+			line += value.get("FeatureOfInterest@iot.id") + "Ϣ";
 			
 			String opt = "";
 			Object optional = value.get("resultQuality");
 			if (optional != null) {
 				opt = "" + optional;
 			}
-			line += opt + "|";
+			line += opt + "Ϣ";
 			opt = "";
 			optional = value.get("validTime");
 			if (optional != null) {
 				opt = "" + optional;
 			}
-			line += opt + "|";
+			line += opt + "Ϣ";
 			opt = "";
 			optional = value.get("parameters");
 			if (optional != null) {
 				JSONObject op = (JSONObject) optional;
 				opt = "" + op.toJSONString();
 			}
-			line += opt + "|";
+			line += opt + "Ϣ";
 			lines.add(line);
 		}
 		return lines;

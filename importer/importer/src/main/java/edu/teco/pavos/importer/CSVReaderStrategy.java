@@ -48,7 +48,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 			br = new BufferedReader(new FileReader(file));
 			String line;
 			while ((line = br.readLine()) != null) {
-				String[] separated = line.split("|");
+				String[] separated = line.split("Ϣ");
 				if (separated.length >= 2) {
 					if (separated[0].equals(OBSERVED_PROPERTY) && separated.length >= 5) {
 						this.importObservedProperty(separated);
@@ -60,9 +60,9 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 						this.importFoI(separated);
 					} else if (separated[0].equals(THING) && separated.length >= 6) {
 						this.importThing(separated);
-					} else if (separated[0].equals(DATASTREAM) && separated.length >= 12) {
+					} else if (separated[0].equals(DATASTREAM) && separated.length >= 8) {
 						this.importDataStream(separated);
-					} else if (separated[0].equals(OBSERVATION) && separated.length >= 10) {
+					} else if (separated[0].equals(OBSERVATION) && separated.length >= 7) {
 						this.importObservation(separated);
 					} else {
 						if (!separated[0].equals(TITLE)) {
@@ -90,9 +90,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         obj.put("description", data[3]);
         obj.put("definition", data[4]);
         String json = obj.toJSONString();
-        if (!FrostSender.sendSafeToFrostServer(this.url, json)) {
-        	this.errorlines++;
-        }
+        FrostSender.sendToFrostServer(this.url + "ObservedProperties", json);
     }
     
     private void importSensor(String[] data) {
@@ -103,9 +101,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         obj.put("encodingType", data[4]);
         obj.put("metadata", data[5]);
         String json = obj.toJSONString();
-        if (!FrostSender.sendSafeToFrostServer(url, json)) {
-        	this.errorlines++;
-        }
+        FrostSender.sendToFrostServer(this.url + "Sensors", json);
     }
     
     private void importLocation(String[] data) {
@@ -121,9 +117,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 			JSONObject location = (JSONObject) o;
 	        obj.put("location", location);
 	        String json = obj.toJSONString();
-	        if (!FrostSender.sendSafeToFrostServer(url, json)) {
-	        	this.errorlines++;
-	        }
+	        FrostSender.sendToFrostServer(this.url + "Locations", json);
 		} catch (ParseException e) {
 			this.errorlines++;
 			System.out.println(e.getLocalizedMessage());
@@ -143,9 +137,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 			JSONObject feature = (JSONObject) o;
 	        obj.put("feature", feature);
 	        String json = obj.toJSONString();
-	        if (!FrostSender.sendSafeToFrostServer(url, json)) {
-	        	this.errorlines++;
-	        }
+	        FrostSender.sendToFrostServer(this.url + "FeaturesOfInterest", json);
 		} catch (ParseException e) {
 			this.errorlines++;
 			System.out.println(e.getLocalizedMessage());
@@ -177,19 +169,8 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         	}
         	obj.put("Locations", locations);
         	
-//        	JSONArray histLocations = new JSONArray();
-//        	ids = data[6].split(";");
-//        	for (String id : ids) {
-//        		JSONObject iotID = new JSONObject();
-//        		iotID.put("@iot.id", iotIDImport + id);
-//        		histLocations.add(iotID);
-//        	}
-//        	obj.put("HistoricalLocations", histLocations);
-        	
         	String json = obj.toJSONString();
-            if (!FrostSender.sendSafeToFrostServer(url, json)) {
-            	this.errorlines++;
-            }
+            FrostSender.sendToFrostServer(this.url + "Things", json);
 		} catch (ParseException e) {
 			this.errorlines++;
 			System.out.println(e.getLocalizedMessage());
@@ -223,20 +204,18 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 	        obj.put("Sensor", sensor);
 	        
 
-	        if (!data[9].equals("")) {
+	        if (data.length >= 10 && !data[9].equals("")) {
 	        	obj.put("observedArea", data[9]);
-	        }
-	        if (!data[10].equals("")) {
-	        	obj.put("phenomenonTime", data[10]);
-	        }
-	        if (!data[11].equals("")) {
-	        	obj.put("resultTime", data[11]);
+		        if (data.length >= 11 && !data[10].equals("")) {
+		        	obj.put("phenomenonTime", data[10]);
+			        if (data.length >= 12 && !data[11].equals("")) {
+			        	obj.put("resultTime", data[11]);
+			        }
+		        }
 	        }
 	        
 	        String json = obj.toJSONString();
-	        if (!FrostSender.sendSafeToFrostServer(url, json)) {
-	        	this.errorlines++;
-	        }
+	        FrostSender.sendToFrostServer(this.url + "Datastreams", json);
 		} catch (ParseException e) {
 			this.errorlines++;
 			System.out.println(e.getLocalizedMessage());
@@ -248,7 +227,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 		obj.put("@iot.id", iotIDImport + data[1]);
         obj.put("phenomenonTime", data[2]);
         obj.put("result", data[3]);
-        obj.put("resultTime", data[4]);
+        obj.put("resultTime", data[4].equals("null") ? null : data[4]);
         
         JSONObject dataStream = new JSONObject();
         dataStream.put("@iot.id", iotIDImport + data[5]);
@@ -256,29 +235,29 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         
         JSONObject featureOI = new JSONObject();
         featureOI.put("@iot.id", iotIDImport + data[6]);
-        obj.put("FeatureOfInterest", featureOI);
-
-        if (!data[7].equals("")) {
-        	obj.put("resultQuality", data[7]);
-        }
-        if (!data[8].equals("")) {
-        	obj.put("validTime", data[8]);
-        }
+        //obj.put("FeatureOfInterest", featureOI);
         
         JSONParser parser = new JSONParser();
-		try {
-	        if (!data[9].equals("")) {
-	        	Object ob = parser.parse(data[9]);
-				JSONObject param = (JSONObject) ob;
-		        obj.put("parameters", param);
-	        }
-	        
-	        String json = obj.toJSONString();
-	        FrostSender.sendToFrostServer(url, json);
-		} catch (ParseException e) {
-			this.errorlines++;
-			System.out.println(e.getLocalizedMessage());
-		}
+
+        if (data.length >= 8 && !data[7].equals("")) {
+        	obj.put("resultQuality", data[7]);
+            if (data.length >= 9 && !data[8].equals("")) {
+            	obj.put("validTime", data[8]);
+            }
+            try {
+    	        if (data.length >= 10 && !data[9].equals("")) {
+    	        	Object ob = parser.parse(data[9]);
+    				JSONObject param = (JSONObject) ob;
+    		        obj.put("parameters", param);
+    	        }
+    		} catch (ParseException e) {
+    			this.errorlines++;
+    			System.out.println(e.getLocalizedMessage());
+    		}
+        }
+        
+        String json = obj.toJSONString();
+        FrostSender.sendToFrostServer(this.url + "Observations", json);
     }
 
 }

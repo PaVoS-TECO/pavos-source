@@ -1,6 +1,0 @@
-observedProperty|eu.jlmb.pavos/ObservedProperty|Windslowness|The slowness of the wind|http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html#AreaTemperature|
-sensor|eu.jlmb.pavos/Sensor|MyWindSensor|JLMB Windsensor Model 1|application/pdf|https://cdn-shop.adafruit.com/datasheets/DHT22.pdf|
-location|eu.jlmb.pavos/Location|MyLocation|The location where I am|application/vnd.geo+json|{"type": "Point","coordinates": [-114.133, 51.08]}|
-thing|eu.jlmb.pavos/Thing|MyThing|Thing that contains a Sensor|{"Deployment Condition":"Deployed in a third floor balcony","Case Used": "Radiation shield"}|eu.jlmb.pavos/Location|
-dataStream|eu.jlmb.pavos/DataStream|MyStream|A Stream of Observations|http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement|{"name":"Degree Celsius","symbol":"degC","definition":"http://www.qudt.org/qudt/owl/1.0.0/unit/Instances.html#DegreeCelsius"}|eu.jlmb.pavos/Thing|eu.jlmb.pavos/ObservedProperty|eu.jlmb.pavos/Sensor|||||
-observation|eu.jlmb.pavos/obs1|2017-02-07T18:02:00.000Z|12|2017-02-07T18:02:00.000Z|eu.jlmb.pavos/DataStream|{"name": "UofC CCIT","description": "University of Calgary, CCIT building",  "encodingType":"application/vnd.geo+json","feature":{"type":"Point","coordinates":[-114.133, 51.08]}}||||
