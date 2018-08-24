@@ -62,7 +62,7 @@ public class GridProcess implements ProcessInterface,Runnable{
 			// convert JSON string to Map
 			map = mapper.readValue(json.toJSONString(), new TypeReference<Map<String, String>>() {
 			});
-			System.out.println(map);
+			//System.out.println(map);
 			return map;
 
 		} catch (JsonGenerationException e) {
@@ -164,7 +164,7 @@ public class GridProcess implements ProcessInterface,Runnable{
 		while (this.threadBoolean) {
 
 			final ConsumerRecords<String, GenericRecord> observations = consumer.poll(100);
-			System.out.println(observations.count());
+			//System.out.println(observations.count());
 			observations.forEach(record1 -> {
 				GenericRecord value = (record1.value());
 

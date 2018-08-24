@@ -17,10 +17,11 @@ public class Main {
 //		GraphitePClass pc = new GraphitePClass("test");
 //		pc.start();
 		//Merge process
-		//MergeObsToFoiProcess foiProcess = new MergeObsToFoiProcess();
-		//foiProcess.kafkaStreamStart();
-		GridProcess gridProcess = new GridProcess();
-		gridProcess.kafkaStreamStart();
+		MergeObsToFoiProcess foiProcess = new MergeObsToFoiProcess();
+		foiProcess.kafkaStreamStart();
+		//Thread.sleep(5000);
+		//GridProcess gridProcess = new GridProcess();
+		//gridProcess.kafkaStreamStart();
 
 		
 		

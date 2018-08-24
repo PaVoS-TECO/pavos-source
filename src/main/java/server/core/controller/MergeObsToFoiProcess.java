@@ -1,6 +1,7 @@
 package server.core.controller;
 
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serde;
@@ -16,12 +17,12 @@ import server.core.properties.KafkaTopicAdmin;
 import server.core.properties.PropertiesFileManager;
 
 /**
- * @author Patrick
- * This Class merges bascily the ObservationTopic with the FeatureOfInterested topic to an Output topic.
- * It's needed for other Processing Classes
+ * @author Patrick This Class merges bascily the ObservationTopic with the
+ *         FeatureOfInterested topic to an Output topic. It's needed for other
+ *         Processing Classes
  *
  */
-public class MergeObsToFoiProcess  implements ProcessInterface{
+public class MergeObsToFoiProcess implements ProcessInterface, Runnable {
 
 	private String ObservationTopic;
 	private String FeatureOfIntresssTopic;
@@ -29,13 +30,21 @@ public class MergeObsToFoiProcess  implements ProcessInterface{
 	private String keyEqual;
 	private Properties props;
 	private KafkaStreams kafkaStreams;
+	private final String threadName = "MergeProcess";
+
+	private boolean threadBoolean = true;
+	private Thread thread;
+
+	private CountDownLatch countdownLatch = null;
 
 	/**
-	 * This is the custom Constructor for the Merge Class if you want to merge other Topics
+	 * This is the custom Constructor for the Merge Class if you want to merge other
+	 * Topics
+	 * 
 	 * @param topic1
 	 * @param topic2
 	 * @param outputTopic
-	 * @param key is the where you want to merge the topics
+	 * @param key         is the where you want to merge the topics
 	 */
 	public MergeObsToFoiProcess(String topic1, String topic2, String outputTopic, String key) {
 		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
@@ -52,20 +61,21 @@ public class MergeObsToFoiProcess  implements ProcessInterface{
 
 		PropertiesFileManager propManager = PropertiesFileManager.getInstance();
 		this.props = propManager.getMergeStreamProperties();
+		System.out.println("Creating " + threadName);
 	}
 
 	/**
-	 *  Default Constructer 
+	 * Default Constructer
 	 */
 	public MergeObsToFoiProcess() {
 		this("Observations", "FeaturesOfInterest", "ObservationsMergesGeneric", "Observations");
 	}
 
 	/**
-	 *  This Starts the process with String Serializer
+	 * This Starts the process with String Serializer
 	 */
-	
-	public boolean startDifferent(){
+
+	public boolean startDifferent() {
 		final Serde<String> stringSerde = Serdes.String();
 
 		StreamsBuilder builder = new StreamsBuilder();
@@ -98,23 +108,30 @@ public class MergeObsToFoiProcess  implements ProcessInterface{
 
 		return true;
 	}
-	
+
 	/**
-	 *  This Starts the process with Generic Avro Serialiser
+	 * This Starts the process with Generic Avro Serialiser
 	 */
 
 	public boolean kafkaStreamStart() {
-		StreamsBuilder builder = new StreamsBuilder();
-		
-		apply(builder);
-		kafkaStreams = new KafkaStreams(builder.build(), props);
-		kafkaStreams.start();
 
-		return true;
+		System.out.println("Starting " + threadName);
+		if (thread == null) {
+			thread = new Thread(this, threadName);
+
+			countdownLatch = new CountDownLatch(1);
+			thread.start();
+
+			return true;
+		}
+		return false;
 	}
-	
-	/* (non-Javadoc)
-	 * @see server.core.controller.ProcessInterface#apply(org.apache.kafka.streams.StreamsBuilder)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see server.core.controller.ProcessInterface#apply(org.apache.kafka.streams.
+	 * StreamsBuilder)
 	 */
 	public void apply(StreamsBuilder builder) {
 		final KStream<String, GenericRecord> foIT = builder.stream(FeatureOfIntresssTopic);
@@ -129,7 +146,7 @@ public class MergeObsToFoiProcess  implements ProcessInterface{
 				if (obj != null) {
 					value.put("FeatureOfInterest", obj.get("coordinates").toString());
 				} else {
-					//TODO ? Observation ohne Location ?
+					// TODO ? Observation ohne Location ?
 					return value;
 				}
 
@@ -142,18 +159,48 @@ public class MergeObsToFoiProcess  implements ProcessInterface{
 		transformfoITTable.to(outputTopic);
 	}
 
-	
-	
 	/**
-	 *  This closes the process
+	 * This closes the process
 	 */
-	public boolean  kafkaStreamClose() {
-		if (kafkaStreams == null) {
-			System.out.println("Applikation 'Merge' is not Running");
-			return false;
+	public boolean kafkaStreamClose() {
+		
+
+		
+		
+		System.out.println("Closing " + threadName);
+		if(countdownLatch != null) {
+			countdownLatch.countDown();
 		}
-		Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
-		return true;
+		
+		if(thread != null) {
+			this.threadBoolean = false;
+			try {
+				thread.join();
+				if (kafkaStreams == null) {
+					System.out.println("Applikation 'Merge' is not Running");
+					return false;
+				}
+				Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
+			System.out.println(threadName + "successfully stopped.");
+			return true;
+			
+		}
+		return false;
+	}
+
+	@Override
+	public void run() {
+		System.out.println("Running " +  threadName );
+		StreamsBuilder builder = new StreamsBuilder();
+
+		apply(builder);
+		kafkaStreams = new KafkaStreams(builder.build(), props);
+		kafkaStreams.start();
+
 	}
 
 }
