@@ -25,7 +25,7 @@ public class FileExporter {
      */
     public void createFile() {
     	String extension = this.properties.getFileExtension();
-    	FileType fileType = new FileType(extension);
+    	FileType fileType = new FileType(this.properties);
     	try {
 			FileWriterStrategy fileWriter = fileType.getFileWriter();
 			String filename = this.ads.getID() + "." + extension;
@@ -35,7 +35,7 @@ public class FileExporter {
 	    	if (!directory.exists()) {
 	    		directory.mkdir();
 	    	}
-	    	fileWriter.saveToFile(this.properties, new File(path));
+	    	fileWriter.saveToFile(new File(path));
 	    	this.ads.setFilePath(new File(path));
 	    	this.ads.setFileReadyForDownload();
 	    	this.ads.savePersistent();

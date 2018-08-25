@@ -8,7 +8,7 @@ import java.util.Set;
  * of the FileWriter associated with a given FileExtension. If a new FileWriter is added to PaVoS, this class
  * needs some changed to be able to return the new FileWriter.
  */
-public class FileTypesUtility {
+public final class FileTypesUtility {
 
     /**
      * Default constructor
@@ -28,17 +28,18 @@ public class FileTypesUtility {
 
     /**
      * Gives a new Instance of the FileWriter associated with a given FileExtension.
-     * @param extension Is the FileExtension for which a new instance of an Implementation of the FileWriterStrategy
-     * is wanted.
+     * @param properties are the properties for the file to create. This contains information
+     * about the extension to use.
      * @return Is the instance of the implementation of a FileWriterStrategy.
      * @throws IllegalFileExtensionException 
      */
-    public static FileWriterStrategy getFileWriterForFileExtension(String extension)
+    public static FileWriterStrategy getFileWriterForFileExtension(ExportProperties properties)
     		throws IllegalFileExtensionException {
-        if (extension.equals("csv")) {
-        	return new CSVWriterStrategy();
+        String extension = properties.getFileExtension();
+    	if (extension.equals("csv")) {
+        	return new CSVWriterStrategy(properties);
         } else if (extension.equals("netcdf")) {
-        	return new NetCDFWriterStrategy();
+        	return new NetCDFWriterStrategy(properties);
         } else {
         	throw new IllegalFileExtensionException("Error");
         }

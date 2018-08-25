@@ -8,14 +8,14 @@ public class FileType {
     /**
      * The FileExtension is defining the FileType.
      */
-    private String extension;
+    private ExportProperties properties;
 
     /**
      * Default constructor
-     * @param extension that defines this file type
+     * @param properties that defines this export
      */
-    public FileType(String extension) {
-    	this.extension = extension;
+    public FileType(ExportProperties properties) {
+    	this.properties = properties;
     }
     
     /**
@@ -25,7 +25,7 @@ public class FileType {
      * @throws IllegalFileExtensionException 
      */
     public FileWriterStrategy getFileWriter() throws IllegalFileExtensionException {
-        return FileTypesUtility.getFileWriterForFileExtension(this.extension);
+        return FileTypesUtility.getFileWriterForFileExtension(this.properties);
     }
 
 }

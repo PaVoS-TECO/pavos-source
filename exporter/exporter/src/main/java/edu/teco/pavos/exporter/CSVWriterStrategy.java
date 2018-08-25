@@ -15,12 +15,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 
@@ -36,18 +42,32 @@ public class CSVWriterStrategy implements FileWriterStrategy {
     private HashMap<String, JSONObject> things = new HashMap<String, JSONObject>();
     private HashMap<String, JSONObject> sensors = new HashMap<String, JSONObject>();
     private HashMap<String, JSONObject> observedProperties = new HashMap<String, JSONObject>();
+	private DateTime startTime;
+	private DateTime endTime;
+	private DateTimeFormatter timeParser;
+	private Set<String> obsProps;
+	private JSONParser jsonParser;
+	private Set<String> clusters;
 
 	/**
      * Default constructor
+     * @param props are the properties of the data, that should be exported to a File.
      */
-    public CSVWriterStrategy() { }
+    public CSVWriterStrategy(ExportProperties props) {
+    	this.jsonParser = new JSONParser();
+    	TimeIntervall interval = props.getTimeFrame();
+		this.startTime = interval.getStartDate();
+		this.endTime = interval.getEndDate();
+		this.timeParser = ISODateTimeFormat.dateTimeNoMillis();
+		this.obsProps = props.getObservedProperties();
+		this.clusters = props.getClusters();
+    }
     
     /**
      * Creates a File as specified by the FilePath and saves the Data from the provided KafkaStream into it.
-     * @param props are the properties of the data, that should be exported to a File.
      * @param file Is the FilePath, where the new File should be created.
      */
-	public void saveToFile(ExportProperties props, File file) {
+	public void saveToFile(File file) {
 		//Client Props
         Properties kprops = new Properties();
         kprops.put(BOOTSTRAP_SERVERS_CONFIG, "192.168.56.3:9092");
@@ -62,16 +82,22 @@ public class CSVWriterStrategy implements FileWriterStrategy {
         kprops.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         kprops.put("schema.registry.url", "http://192.168.56.3:8081");
 
-        KafkaConsumer<String, JSONObject> consumer = new KafkaConsumer<>(kprops);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(kprops);
 
         consumer.subscribe(Arrays.asList("Observations"));
         
         boolean continueGettingRecords = true;
 
         while (continueGettingRecords) {
-            final ConsumerRecords<String, JSONObject> obs = consumer.poll(100);
+            final ConsumerRecords<String, String> obs = consumer.poll(100);
             obs.forEach(record -> {
-                processRecord(record.value());
+				try {
+					JSONObject json = (JSONObject) this.jsonParser.parse(record.value());
+	                processRecord(json);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             });
             // change ending condition
             continueGettingRecords = false;
@@ -84,22 +110,47 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 	}
 	
 	private void processRecord(JSONObject record) {
+		
 		JSONObject observation = (JSONObject) record.get("Observation");
+		DateTime time = this.timeParser.parseDateTime("" + observation.get("phenomenonTime"));
 		
-		JSONObject featureOfInterest = (JSONObject) record.get("FeatureOfInterest");
-		JSONObject dataStream = (JSONObject) record.get("Datastream");
-		JSONObject thing = (JSONObject) record.get("Thing");
-		JSONObject location = (JSONObject) record.get("Location");
-		JSONObject observedProperty = (JSONObject) record.get("ObservedProperty");
-		JSONObject sensor = (JSONObject) record.get("Sensor");
+		if (time.isAfter(this.startTime) && time.isBefore(this.endTime)) {
+
+			JSONObject observedProperty = (JSONObject) record.get("ObservedProperty");
+			String o = "" + observedProperty.get("name");
+			
+			if (this.obsProps.contains(o)) {
+				
+				JSONObject featureOfInterest = (JSONObject) record.get("FeatureOfInterest");
+				JSONObject loc = (JSONObject) featureOfInterest.get("feature");
+				
+				if (this.isContainedInClusters(loc)) {
+					
+					JSONObject dataStream = (JSONObject) record.get("Datastream");
+					JSONObject thing = (JSONObject) record.get("Thing");
+					JSONObject location = (JSONObject) record.get("Location");
+					JSONObject sensor = (JSONObject) record.get("Sensor");
+					
+					this.observations.add(observation);
+					this.features.put(featureOfInterest.get("iot.id").toString(), featureOfInterest);
+					this.dataStreams.put(dataStream.get("iot.id").toString(), dataStream);
+					this.locations.put(location.get("iot.id").toString(), location);
+					this.sensors.put(sensor.get("iot.id").toString(), sensor);
+					this.things.put(thing.get("iot.id").toString(), thing);
+					this.observedProperties.put(observedProperty.get("iot.id").toString(), observedProperty);
+					
+				}
+				
+			}
+			
+		}
 		
-		this.observations.add(observation);
-		this.features.put(featureOfInterest.get("iot.id").toString(), featureOfInterest);
-		this.dataStreams.put(dataStream.get("iot.id").toString(), dataStream);
-		this.locations.put(location.get("iot.id").toString(), location);
-		this.sensors.put(sensor.get("iot.id").toString(), sensor);
-		this.things.put(thing.get("iot.id").toString(), thing);
-		this.observedProperties.put(observedProperty.get("iot.id").toString(), observedProperty);
+	}
+	
+	private boolean isContainedInClusters(JSONObject location) {
+		// TODO
+		// uses this.clusters to check
+		return false;
 	}
 	
 	private void saveToFile() {
