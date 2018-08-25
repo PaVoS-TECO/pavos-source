@@ -8,11 +8,10 @@
   	<servlet>
 		<servlet-name>ExporterServlet</servlet-name>
 		<servlet-class>edu.teco.pavos.exporter.ExporterServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
 	</servlet>
 	
 	<servlet-mapping>
-		<servlet-name>ExporterServlet</servlet-name>
-		<url-pattern>/Query</url-pattern>
+		<servlet-name>Exporter Servlet</servlet-name>
+		<url-pattern>/ExporterServlet</url-pattern>
 	</servlet-mapping>
 </web-app>
