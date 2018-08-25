@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import server.core.grid.GeoGrid;
 import server.core.grid.GeoGridManager;
@@ -23,15 +25,28 @@ import server.transfer.sender.util.TimeUtil;
 public class DataServlet  extends HttpServlet {
 	
 	private static final long serialVersionUID = 4505621561403961545L;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String type = req.getParameter("requestType");
 		if (type.equals("getGeoJson")) {
 			getGeoJson(req, res);
+		} else if (type.equals("reportSensor")) {
+			reportSensor(req, res);
 		}
 	}
 	
+	private void reportSensor(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		String sensor = req.getParameter("sensor");
+		String reason = req.getParameter("reason");
+		String ip = req.getRemoteAddr();
+		logger.info("[Webinterface][Sensor-Reported] Sensor = " + sensor + ", ip = " + ip + ", reason = " + reason);
+		res.setContentType("text/plain");
+		res.setCharacterEncoding("UTF-8");
+	    res.getWriter().write("Sensor reported successfully!");
+	}
+
 	private String getDatabaseData(String gridID, String keyProperty, String[] clusterIDs, String[] time, 
 			String stepsString, HttpServletRequest req, HttpServletResponse res) throws ServletException {
 		if (time.length == 1) {
