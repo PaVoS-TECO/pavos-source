@@ -1,12 +1,11 @@
 package edu.teco.pavos.exporter;
 
 import java.io.File;
-import java.util.UUID;
 
 /**
  * Exporter of Data from Kafka to a File.
  */
-public class FileExporter extends AbstractExporter {
+public class FileExporter {
 	
 	private ExportProperties properties;
 	private AlterableDownloadState ads;

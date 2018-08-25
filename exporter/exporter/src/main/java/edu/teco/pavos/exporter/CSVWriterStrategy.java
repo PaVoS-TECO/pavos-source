@@ -77,6 +77,8 @@ public class CSVWriterStrategy implements FileWriterStrategy {
             continueGettingRecords = false;
         }
         
+        consumer.close();
+        
         saveToFile();
 		
 	}
