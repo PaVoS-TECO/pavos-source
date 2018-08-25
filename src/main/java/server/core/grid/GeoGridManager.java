@@ -1,6 +1,8 @@
 package server.core.grid;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 public final class GeoGridManager {
@@ -47,6 +49,14 @@ public final class GeoGridManager {
 	
 	public void removeGeoGrid(GeoGrid grid) {
 		this.grids.remove(grid);
+	}
+	
+	public Collection<String> getAllProperties() {
+		Collection<String> properties = new HashSet<>();
+		for (GeoGrid grid : this.grids) {
+			properties.addAll(grid.getGridProperties());
+		}
+		return properties;
 	}
 	
 }

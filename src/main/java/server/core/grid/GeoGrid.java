@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -83,6 +84,10 @@ public abstract class GeoGrid {
 		return getPolygonContaining(point, level).ID;
 	}
 	
+	/**
+	 * Returns all {@link ObservationData} objects of clusters in this {@link GeoGrid}.
+	 * @return gridObservations {@link Collection} of {@link ObservationData}
+	 */
 	public Collection<ObservationData> getGridObservations() {
 		Collection<ObservationData> observations = new ArrayList<>();
 		for (GeoPolygon polygon : polygons) {
@@ -90,6 +95,17 @@ public abstract class GeoGrid {
 			observations.add(polygon.cloneObservation());
 		}
 		return observations;
+	}
+	
+	public Collection<String> getGridProperties() {
+		Collection<String> properties = new HashSet<>();
+		Collection<ObservationData> observations = getGridObservations();
+		for (ObservationData observation : observations) {
+			for (String key : observation.observations.keySet()) {
+				properties.add(key);
+			}
+		}
+		return properties;
 	}
 	
 	/**

@@ -34,14 +34,23 @@ public class DataServlet  extends HttpServlet {
 			getGeoJson(req, res);
 		} else if (type.equals("reportSensor")) {
 			reportSensor(req, res);
+		} else if (type.equals("getObservationTypes")) {
+			getObservationTypes(req, res);
 		}
 	}
 	
+	private void getObservationTypes(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		GeoGridManager manager = GeoGridManager.getInstance();
+		res.setContentType("text/plain");
+		res.setCharacterEncoding("UTF-8");
+	    res.getWriter().write(manager.getAllProperties().toString());
+	}
+
 	private void reportSensor(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		String sensor = req.getParameter("sensor");
 		String reason = req.getParameter("reason");
 		String ip = req.getRemoteAddr();
-		logger.info("[Webinterface][Sensor-Reported] Sensor = " + sensor + ", ip = " + ip + ", reason = " + reason);
+		logger.info("[Webinterface][Sensor-Reported] Sensor = " + sensor + ", reason = " + reason + ", ip = " + ip);
 		res.setContentType("text/plain");
 		res.setCharacterEncoding("UTF-8");
 	    res.getWriter().write("Sensor reported successfully!");
