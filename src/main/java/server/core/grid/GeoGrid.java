@@ -10,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import server.core.grid.config.Seperators;
 import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.polygon.GeoPolygon;
 import server.core.properties.KafkaTopicAdmin;
@@ -53,6 +54,7 @@ public abstract class GeoGrid {
 		try {
 			targetPolygon = getPolygonContaining(location, MAX_LEVEL);
 			targetPolygon.addObservation(data);
+			System.out.println(targetPolygon.ID + " -> " + location.toString());
 		} catch (PointNotOnMapException e) {
 			logger.warn("Could not add Observation to map. Point '" + location 
 					+ "' not in map boundaries! SensorID: " + data.sensorID + " " + e);
@@ -84,8 +86,8 @@ public abstract class GeoGrid {
 		return getPolygonContaining(point, level).ID;
 	}
 	
-	public ObservationData getSensorObservation(String sensorID, String clusterID) {
-		GeoPolygon polygon = getPolygon(clusterID);
+	public ObservationData getSensorObservation(String sensorID, Point2D.Double point) throws PointNotOnMapException {
+		GeoPolygon polygon = getPolygonContaining(point, MAX_LEVEL);
 		for (ObservationData observation : polygon.getSensorDataList()) {
 			if (observation.sensorID == sensorID) {
 				return observation;
@@ -141,12 +143,39 @@ public abstract class GeoGrid {
 	 * @return polygon {@link GeoPolygon}
 	 */
 	public GeoPolygon getPolygon(String clusterID) {
-		for (GeoPolygon polygon : this.polygons) {
-			if (polygon.ID.equals(clusterID)) {
-				return polygon;
+		String[] splitGridClusters = clusterID.split(Seperators.GRID_CLUSTER_SEPERATOR);
+		String[] clusters = splitGridClusters[1].split(Seperators.CLUSTER_SEPERATOR);
+		int levels = clusters.length;
+		
+		System.out.println(splitGridClusters[0] + " | " + splitGridClusters[1]);
+		System.out.println(clusters[0]);
+		
+		GeoPolygon result = null;
+		StringBuilder currentID = new StringBuilder();
+		currentID.append(GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR);
+		for (int i = 0; i < levels; i++) {
+			if (i == 0) {
+				currentID.append(clusters[i]);
+				for (GeoPolygon polygon : this.polygons) {
+					System.out.println("currentID: " + currentID.toString());
+					if (polygon.ID.equals(currentID.toString())) {
+						result = polygon;
+						break;
+					}
+					
+				}
+			} else {
+				currentID.append(Seperators.CLUSTER_SEPERATOR + clusters[i]);
+				for (GeoPolygon polygon : result.getSubPolygons()) {
+					System.out.println("currentID: " + currentID.toString());
+					if (polygon.ID.equals(currentID.toString())) {
+						result = polygon;
+						break;
+					}
+				}
 			}
 		}
-		return null;
+		return result;
 	}
 	
 	/**
@@ -204,10 +233,12 @@ public abstract class GeoGrid {
 		for (GeoPolygon polygon : polygons) {
 			polygon.updateObservations();
 		}
-		updateDatabase();
 	}
 	
-	private void updateDatabase() {
+	/**
+	 * Updates the Database.
+	 */
+	public void updateDatabase() {
 		Facade database = new Facade();
 		Collection<ObservationData> observations = getGridObservations();
 		for (ObservationData entry : observations) {

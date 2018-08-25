@@ -26,9 +26,9 @@ public final class GeoJsonConverter {
 		return builder.toString();
 	}
 	
-	public static String convertSensorObservations(Collection<ObservationData> observations, String keyProperty, Point2D.Double point) {
+	public static String convertSensorObservations(ObservationData observation, String keyProperty, Point2D.Double point) {
 		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty, "sensor");
-		builder.addDBSensorObservations(observations, point);
+		builder.addDBSensorObservation(observation, point);
 		return builder.toString();
 	}
 

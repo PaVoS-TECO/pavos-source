@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import server.core.grid.GeoGrid;
 import server.core.grid.GeoGridManager;
+import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
 import server.database.Facade;
@@ -44,35 +45,28 @@ public class DataServlet  extends HttpServlet {
 	
 	private void getGeoJsonSensor(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String gridID = req.getParameter("gridID");
-		String fusedClusterIDs = req.getParameter("clusterID");
-		String fusedSensorIDs = req.getParameter("sensorID");
+		String clusterID = req.getParameter("clusterID");
+		String sensorID = req.getParameter("sensorID");
 		String keyProperty = req.getParameter("property");
-		String fusedTime = req.getParameter("time");
-		String[] clusterIDs = fusedClusterIDs.split(",");
-		String[] time = fusedTime.split(",");
-		String[] sensorIDs = fusedSensorIDs.split(", ");
 		String pointString = req.getParameter("location");
 		String[] coordinates = pointString.replaceAll("[", "").replaceAll("]", "").split(",");
 		Point2D.Double point = new Point2D.Double(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
 		
-		String result = null;
-		if (time[0] == null) {
-			result = getLiveDataSensor(sensorIDs, gridID, point, keyProperty, clusterIDs, req, res);
-		}
+		String result = getLiveDataSensor(sensorID, gridID, point, keyProperty, clusterID, req, res);
 		
 		res.setContentType("application/json");
 		res.setCharacterEncoding("UTF-8");
 	    res.getWriter().write(result);
 	}
 
-	private String getLiveDataSensor(String[] sensorIDs, String gridID, Point2D.Double point, String keyProperty, String[] clusterIDs,
+	private String getLiveDataSensor(String sensorID, String gridID, Point2D.Double point, String keyProperty, String clusterID,
 			HttpServletRequest req, HttpServletResponse res) throws ServletException {
-		Collection<ObservationData> observations = new HashSet<>();
 		final GeoGrid grid = getGrid(gridID);
-		for (int i = 0; i < sensorIDs.length; i++) {
-			grid.getSensorObservation(sensorIDs[i], clusterIDs[i]);
+		try {
+			return GeoJsonConverter.convertSensorObservations(grid.getSensorObservation(sensorID, point), keyProperty, point);
+		} catch (PointNotOnMapException e) {
+			throw new ServletException("Point is not on map.");
 		}
-		return GeoJsonConverter.convertSensorObservations(observations, keyProperty, point);
 	}
 
 	private void getObservationTypes(HttpServletRequest req, HttpServletResponse res) throws IOException {

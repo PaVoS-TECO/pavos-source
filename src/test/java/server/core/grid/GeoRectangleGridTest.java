@@ -34,6 +34,7 @@ public class GeoRectangleGridTest {
 		
 		data = new ObservationData();
 		data.sensorID = "testSensorID2";
+		data.observationDate = TimeUtil.getUTCDateTimeNowString();
 		data.observations.put(property, "28.0");
 		
 		Point2D.Double location2 = new  Point2D.Double(260.0, 80.0);
@@ -45,6 +46,14 @@ public class GeoRectangleGridTest {
 		
 		Point2D.Double location3 = new  Point2D.Double(260.0, 80.0);
 		grid.addObservation(location3, data);
+		
+		try {
+			data = grid.getSensorObservation("testSensorID2", location2);
+		} catch (PointNotOnMapException e1) {
+			e1.printStackTrace();
+		}
+		System.out.println(data.observationDate);
+		System.out.println(GeoJsonConverter.convertSensorObservations(data, property, new  Point2D.Double(260.0, 80.0)));
 		
 		String clusterID = null;
 		GeoPolygon poly = null;
@@ -70,6 +79,7 @@ public class GeoRectangleGridTest {
 				}
 			}
 		}
+		
 		System.out.println();
 		grid.updateObservations();
 		

@@ -29,6 +29,7 @@ public final class GeoJsonBuilder {
 		
 		this.builder = new StringBuilder();
 		this.polygonsBuilder = new StringBuilder();
+		this.sensorsBuilder = new StringBuilder();
 	}
 	
 	public void addDBClusterObservations(Collection<ObservationData> observations, GeoGrid geoGrid) {
@@ -47,21 +48,15 @@ public final class GeoJsonBuilder {
 		this.polygonsBuilder.append(polyBuilder.toString());
 	}
 	
-	public void addDBSensorObservations(Collection<ObservationData> observations, Point2D.Double point) {
+	public void addDBSensorObservation(ObservationData observation, Point2D.Double point) {
 		StringBuilder sensorBuilder = new StringBuilder();
 		
-		int countFeature = 1;
-		for (ObservationData data : observations) {
-			sensorBuilder.append(geoSensorToStringQuick(data, point));
-			if (countFeature < observations.size()) {
-				sensorBuilder.append(COMMA);
-			}
-		}
+		sensorBuilder.append(geoSensorToStringQuick(observation, point));
 			
 		this.sensorsBuilder.append(sensorBuilder.toString());
 	}
 	
-	private Object geoSensorToStringQuick(ObservationData data, Double point) {
+	private String geoSensorToStringQuick(ObservationData data, Double point) {
 		LocalDateTime ldt = TimeUtil.getUTCDateTime(data.observationDate);
 		if (ldtString == null || ldt.isAfter(TimeUtil.getUTCDateTime(ldtString))) {
 			ldtString = data.observationDate;
@@ -122,7 +117,7 @@ public final class GeoJsonBuilder {
 		builder.append(toSProperty("timestamp", ldtString) + COMMA);
 		builder.append(toSProperty("observationType", keyProperty) + COMMA);
 		builder.append(toEntry("features") + ": [ ");
-		builder.append(polygonsBuilder.toString());
+		builder.append(sensorsBuilder.toString());
 		builder.append("] }");
 		return builder.toString();
 		}
