@@ -84,6 +84,16 @@ public abstract class GeoGrid {
 		return getPolygonContaining(point, level).ID;
 	}
 	
+	public ObservationData getSensorObservation(String sensorID, String clusterID) {
+		GeoPolygon polygon = getPolygon(clusterID);
+		for (ObservationData observation : polygon.getSensorDataList()) {
+			if (observation.sensorID == sensorID) {
+				return observation;
+			}
+		}
+		return new ObservationData();
+	}
+	
 	/**
 	 * Returns all {@link ObservationData} objects of clusters in this {@link GeoGrid}.
 	 * @return gridObservations {@link Collection} of {@link ObservationData}
@@ -106,6 +116,15 @@ public abstract class GeoGrid {
 			}
 		}
 		return properties;
+	}
+	
+	public Collection<ObservationData> getGridSensorObservations() {
+		Collection<ObservationData> observations = new ArrayList<>();
+		for (GeoPolygon polygon : polygons) {
+			observations.addAll(polygon.getSubObservations());
+			observations.addAll(polygon.getSensorDataList());
+		}
+		return observations;
 	}
 	
 	/**

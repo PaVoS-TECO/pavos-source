@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import server.transfer.data.ObservationData;
+
 public final class GeoGridManager {
 	
 	private static GeoGridManager instance;
@@ -57,6 +59,23 @@ public final class GeoGridManager {
 			properties.addAll(grid.getGridProperties());
 		}
 		return properties;
+	}
+	
+	public Collection<ObservationData> getAllSensorObservations() {
+		Collection<ObservationData> observations = new HashSet<>();
+		for (GeoGrid grid : this.grids) {
+			observations.addAll(grid.getGridSensorObservations());
+		}
+		return observations;
+	}
+	
+	public ObservationData getSensorObservation(String sensorID, String clusterID, String gridID) {
+		for (GeoGrid grid : this.grids) {
+			if (grid.GRID_ID.equals(gridID)) {
+				return grid.getSensorObservation(sensorID, clusterID);
+			}
+		}
+		return new ObservationData();
 	}
 	
 }

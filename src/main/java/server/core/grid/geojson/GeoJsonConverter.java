@@ -1,5 +1,6 @@
 package server.core.grid.geojson;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -19,14 +20,20 @@ public final class GeoJsonConverter {
 		return convertPolygons(col, keyProperty);
 	}
 	
-	public static String convertObservations(Collection<ObservationData> observations, String keyProperty, GeoGrid geoGrid) {
-		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty);
-		builder.addDBObservations(observations, geoGrid);
+	public static String convertPolygonObservations(Collection<ObservationData> observations, String keyProperty, GeoGrid geoGrid) {
+		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty, "polygon");
+		builder.addDBClusterObservations(observations, geoGrid);
+		return builder.toString();
+	}
+	
+	public static String convertSensorObservations(Collection<ObservationData> observations, String keyProperty, Point2D.Double point) {
+		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty, "sensor");
+		builder.addDBSensorObservations(observations, point);
 		return builder.toString();
 	}
 
 	public static String convertPolygons(Collection<GeoPolygon> geoPolygons, String keyProperty) {
-		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty);
+		GeoJsonBuilder builder = new GeoJsonBuilder(keyProperty, "polygon");
 		builder.addGeoPolygons(geoPolygons);
 		return builder.toString();
 	}

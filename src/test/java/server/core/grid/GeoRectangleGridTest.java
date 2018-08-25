@@ -95,7 +95,7 @@ public class GeoRectangleGridTest {
 		dataClone.observationDate = TimeUtil.getUTCDateTimeString(subtracted);
 		Collection<ObservationData> observations = new HashSet<>();
 		observations.add(dataClone);
-		System.out.println(GeoJsonConverter.convertObservations(observations, property, grid));
+		System.out.println(GeoJsonConverter.convertPolygonObservations(observations, property, grid));
 		
 		Collection<ObservationData> observations2 = grid.getGridObservations();
 		for (ObservationData data2 : observations2) {
