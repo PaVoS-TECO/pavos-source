@@ -11,7 +11,9 @@ import org.junit.Test;
 
 import server.core.grid.config.Seperators;
 import server.core.grid.config.WorldMapData;
+import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.exceptions.PointNotOnMapException;
+import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
 import server.transfer.data.ObservationData;
@@ -49,8 +51,8 @@ public class GeoRectangleGridTest {
 		
 		try {
 			data = grid.getSensorObservation("testSensorID2", location2);
-		} catch (PointNotOnMapException e1) {
-			e1.printStackTrace();
+		} catch (PointNotOnMapException | SensorNotFoundException e) {
+			fail(e.getMessage());
 		}
 		System.out.println(data.observationDate);
 		System.out.println(GeoJsonConverter.convertSensorObservations(data, property, new  Point2D.Double(260.0, 80.0)));
@@ -95,7 +97,12 @@ public class GeoRectangleGridTest {
 			}
 		}
 		
-		GeoPolygon jsonPoly = grid.getPolygon(grid.GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + "0_1");
+		GeoPolygon jsonPoly = null;
+		try {
+			jsonPoly = grid.getPolygon(grid.GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + "0_1");
+		} catch (ClusterNotFoundException e) {
+			fail(e.getMessage());
+		}
 		System.out.println(jsonPoly.getJson(property));
 		
 		ObservationData dataClone = jsonPoly.cloneObservation();
