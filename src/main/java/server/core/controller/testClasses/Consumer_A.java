@@ -35,7 +35,7 @@ public class Consumer_A {
 		
 		// Client Props
 		Properties props = new Properties();
-		props.put(BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+		props.put(BOOTSTRAP_SERVERS_CONFIG, "192.168.56.3:9092");
 		props.put(GROUP_ID_CONFIG, "i");
 		props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
 		props.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
@@ -50,33 +50,45 @@ public class Consumer_A {
 	}
 
 	public void start() {
-		consumer.subscribe(Arrays.asList("Observations"));
+		consumer.subscribe(Arrays.asList("tEXPOR"));
 
 		System.out.println("Consumer A started!");
 
 		try {
-			while (loop) {
+//			while (loop) {
+//
+//				ConsumerRecords<String, String> records = consumer.poll(1000);
+//				if (records.count() == 0)
+//					continue;
+//
+//				for (ConsumerRecord<String, String> record : records) {
+//
+//					String result = record.value();
+//					int i = result.indexOf("{");
+//					result = result.substring(i);
+//					try {
+//						JSONObject jo = (JSONObject) new JSONParser().parse(result.toString());
+//						System.out.println(jo.get("@iot.id"));
+//					} catch (ParseException e) {
+//						e.printStackTrace();
+//					}
+//					System.out.println(result);
+//
+//				}
+//
+//			}
+			
+			while (true) {
 
-				ConsumerRecords<String, String> records = consumer.poll(1000);
-				if (records.count() == 0)
-					continue;
+	            final ConsumerRecords<String, GenericRecord> foi =
+	                    consumer.poll(100);
+	            System.out.println(foi.count());
+	            foi.forEach(record1 -> {
+	                System.out.println(record1.value().get("FeatureOfInterest"));
 
-				for (ConsumerRecord<String, String> record : records) {
 
-					String result = record.value();
-					int i = result.indexOf("{");
-					result = result.substring(i);
-					try {
-						JSONObject jo = (JSONObject) new JSONParser().parse(result.toString());
-						System.out.println(jo.get("@iot.id"));
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-					System.out.println(result);
-
-				}
-
-			}
+	            });
+	    }
 		} catch (WakeupException ex) {
 			logger.info("Consumer has received instruction to wake up");
 		} finally {

@@ -50,6 +50,19 @@ public final class PropertiesFileManager {
 		return props;
 	}
 	
+	public Properties getExportStreamProperties() {
+		Properties props = new Properties();
+		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
+		props.put(StreamsConfig.APPLICATION_ID_CONFIG, getProperty("E_APPLICATION_ID_CONFIG"));
+		props.put(StreamsConfig.CLIENT_ID_CONFIG, getProperty("E_CLIENT_ID_CONFIG"));
+		props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+		props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+		props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, getProperty("SCHEMA_REGISTRY_URL_CONFIG"));
+		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getProperty("E_AUTO_OFFSET_RESET_CONFIG"));
+		return props;
+	}
+	
+	
 	public Properties getDummyStreamProperties() {
 		Properties props = new Properties();
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));

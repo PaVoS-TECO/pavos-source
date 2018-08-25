@@ -134,8 +134,9 @@ public class MergeObsToFoiProcess implements ProcessInterface, Runnable {
 	 * StreamsBuilder)
 	 */
 	public void apply(StreamsBuilder builder) {
-		final KStream<String, GenericRecord> foIT = builder.stream(FeatureOfIntresssTopic);
 		final KTable<String, GenericRecord> obsT = builder.table(ObservationTopic);
+		final KStream<String, GenericRecord> foIT = builder.stream(FeatureOfIntresssTopic);
+		
 		final KStream<String, GenericRecord> transformfoIT = foIT
 				.map((key, value) -> KeyValue.pair(value.get(keyEqual).toString(), value));
 

@@ -128,6 +128,9 @@ public class GridProcess implements ProcessInterface,Runnable{
 		if(countdownLatch != null) {
 			countdownLatch.countDown();
 		}
+		if(grid != null) {
+			grid.close();
+		}
 		
 		if(thread != null) {
 			this.threadBoolean = false;
@@ -137,6 +140,7 @@ public class GridProcess implements ProcessInterface,Runnable{
 				
 				e.printStackTrace();
 			}
+			
 			System.out.println(threadName + "successfully stopped.");
 			return true;
 			
