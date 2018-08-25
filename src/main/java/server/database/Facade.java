@@ -9,14 +9,14 @@ import web.grid.Grid;
  */
 public class Facade {
 
-	private KafkaToStorageProcessor storageProcessor;
+	private ObservationDataToStorageProcessor storageProcessor;
 	
     /**
      * Default constructor
      */
     public Facade() {
     	// TODO set host by property list
-    	storageProcessor = new KafkaToStorageProcessor("localhost");
+    	storageProcessor = new ObservationDataToStorageProcessor("localhost");
     }
     
     /**
