@@ -11,7 +11,9 @@ import org.junit.Test;
 
 import server.core.grid.config.Seperators;
 import server.core.grid.config.WorldMapData;
+import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.exceptions.PointNotOnMapException;
+import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
 import server.transfer.data.ObservationData;
@@ -34,6 +36,7 @@ public class GeoRectangleGridTest {
 		
 		data = new ObservationData();
 		data.sensorID = "testSensorID2";
+		data.observationDate = TimeUtil.getUTCDateTimeNowString();
 		data.observations.put(property, "28.0");
 		
 		Point2D.Double location2 = new  Point2D.Double(260.0, 80.0);
@@ -45,6 +48,14 @@ public class GeoRectangleGridTest {
 		
 		Point2D.Double location3 = new  Point2D.Double(260.0, 80.0);
 		grid.addObservation(location3, data);
+		
+		try {
+			data = grid.getSensorObservation("testSensorID2", location2);
+		} catch (PointNotOnMapException | SensorNotFoundException e) {
+			fail(e.getMessage());
+		}
+		System.out.println(data.observationDate);
+		System.out.println(GeoJsonConverter.convertSensorObservations(data, property, new  Point2D.Double(260.0, 80.0)));
 		
 		String clusterID = null;
 		GeoPolygon poly = null;
@@ -70,6 +81,7 @@ public class GeoRectangleGridTest {
 				}
 			}
 		}
+		
 		System.out.println();
 		grid.updateObservations();
 		
@@ -85,7 +97,12 @@ public class GeoRectangleGridTest {
 			}
 		}
 		
-		GeoPolygon jsonPoly = grid.getPolygon(grid.GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + "0_1");
+		GeoPolygon jsonPoly = null;
+		try {
+			jsonPoly = grid.getPolygon(grid.GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR + "0_1");
+		} catch (ClusterNotFoundException e) {
+			fail(e.getMessage());
+		}
 		System.out.println(jsonPoly.getJson(property));
 		
 		ObservationData dataClone = jsonPoly.cloneObservation();
@@ -95,7 +112,7 @@ public class GeoRectangleGridTest {
 		dataClone.observationDate = TimeUtil.getUTCDateTimeString(subtracted);
 		Collection<ObservationData> observations = new HashSet<>();
 		observations.add(dataClone);
-		System.out.println(GeoJsonConverter.convertObservations(observations, property, grid));
+		System.out.println(GeoJsonConverter.convertPolygonObservations(observations, property, grid));
 		
 		Collection<ObservationData> observations2 = grid.getGridObservations();
 		for (ObservationData data2 : observations2) {

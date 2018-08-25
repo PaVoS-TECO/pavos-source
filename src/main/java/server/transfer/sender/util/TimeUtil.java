@@ -25,6 +25,7 @@ public final class TimeUtil {
 	/**
 	 * Returns the {@link LocalDateTime} in UTC time.
 	 * Parses from {@link String}.
+	 * @param localDateTimeString The {@link String} to parse.
 	 * @return localDateTime {@link LocalDateTime}
 	 */
 	public static LocalDateTime getUTCDateTime(String localDateTimeString) {
@@ -49,6 +50,7 @@ public final class TimeUtil {
 	
 	/**
 	 * Returns the {@link LocalDateTime} in UTC time.
+	 * @param ldt The {@link LocalDateTime} to be converted.
 	 * @return localDateTime {@link String}
 	 */
 	public static String getUTCDateTimeString(LocalDateTime ldt) {
