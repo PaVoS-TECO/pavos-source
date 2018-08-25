@@ -14,6 +14,8 @@ public class GeoRectangle extends GeoPolygon {
 	 * @param yOffset The vertical offset
 	 * @param width
 	 * @param height
+	 * @param rows 
+	 * @param columns 
 	 * @param levelsAfterThis The depth of the map
 	 * @param id The identifier {@link String} of this {@link GeoPolygon}
 	 */

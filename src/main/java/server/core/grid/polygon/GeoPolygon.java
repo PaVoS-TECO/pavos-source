@@ -103,7 +103,7 @@ public abstract class GeoPolygon {
 	/**
 	 * Creates or overrides a map-entry with the new value in double-precision.
 	 * @param sensorID The {@link String} ID of the Sensor. Not a cluster.
-	 * @param observationData The {@link Double} value
+	 * @param data The {@link ObservationData} with the value.
 	 */
 	public void addObservation(ObservationData data) {
 		data.clusterID = this.ID;
@@ -167,6 +167,7 @@ public abstract class GeoPolygon {
 	
 	/**
 	 * Returns the current {@link GeoPolygon} as JSON-String
+	 * @param property The {@link String} representing an observation-type.
 	 * @return json {@link String}
 	 */
 	public String getJson(String property) {
@@ -190,6 +191,7 @@ public abstract class GeoPolygon {
 	
 	/**
 	 * Returns the number of sensors in this {@link GeoPolygon} that send data about a specific {@link Collection} of properties.
+	 * @param properties The {@link Collection} of {@link String}s representing different observation-types.
 	 * @return numberOfSensors {@link int}
 	 */
 	public int getNumberOfSensors(Collection<String> properties) {
@@ -213,6 +215,7 @@ public abstract class GeoPolygon {
 	
 	/**
 	 * Returns the number of sensors in this {@link GeoPolygon} that send data about a specific property.
+	 * @param property The {@link String} representing an observation-type.
 	 * @return numberOfSensors {@link int}
 	 */
 	public int getNumberOfSensors(String property) {

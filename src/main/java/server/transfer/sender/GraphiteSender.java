@@ -75,7 +75,7 @@ public class GraphiteSender extends Sender {
 	 * Uses a single data object.
 	 * <p>
 	 * {@link String} topic, {@link ObservationData} data
-	 * 
+	 * @param singleTopic The {@link String} topic. A KafkaTopic representing the source of the data.
 	 * @param topic The name of the topic that this data belongs to
 	 * @param data  The data that will be sent to Graphite
 	 */

@@ -47,6 +47,7 @@ public abstract class Connector {
 
     /**
      * Starts the transferring-process
+     * @param sender The {@link Sender} to use in this process.
      */
     public abstract void run(Sender sender);
 

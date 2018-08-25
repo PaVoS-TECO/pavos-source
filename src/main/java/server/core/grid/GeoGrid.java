@@ -77,6 +77,7 @@ public abstract class GeoGrid {
 	 * @param point The {@link Point2D.Double} that is contained by the cluster that we are searching for
 	 * @param level The {@link int} that controls the level of detail
 	 * @return id The cluster id
+	 * @throws PointNotOnMapException Thrown when the Point was not located in the map-boundaries.
 	 */
 	public String getClusterID(Point2D.Double point, int level) throws PointNotOnMapException {
 		return getPolygonContaining(point, level).ID;
@@ -121,6 +122,7 @@ public abstract class GeoGrid {
 	 * @param point The {@link Point2D.Double} that is contained by the cluster that we are searching for
 	 * @param level The {@link int} that controls the level of detail
 	 * @return id The cluster id
+	 * @throws PointNotOnMapException Thrown when the Point was not located in the map-boundaries.
 	 */
 	public GeoPolygon getPolygonContaining(Point2D.Double point, int level) throws PointNotOnMapException {
 		GeoPolygon targetPolygon = getPolygonContainingPointFromCollection(point, polygons);
@@ -188,7 +190,7 @@ public abstract class GeoGrid {
 	 * @param point {@link Point2D.Double}
 	 * @param collection {@link Collection} of {@link GeoPolygon}s
 	 * @return polygonContainingPoint {@link GeoPolygon}
-	 * @throws PointNotOnMapException
+	 * @throws PointNotOnMapException Thrown when the Point was not located in the map-boundaries.
 	 */
 	protected GeoPolygon getPolygonContainingPointFromCollection(Double point, Collection<GeoPolygon> collection) throws PointNotOnMapException {
 		for (GeoPolygon entry : collection) {
