@@ -1,5 +1,6 @@
 package edu.teco.pavos.exporter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -10,14 +11,28 @@ public class ExportProperties {
 	private String extension;
 	private Set<String> observedProperties;
 	private Set<String> clusters;
-	private Set<String> sensors;
 	private TimeIntervall time;
 
     /**
      * Default constructor
+     * @param ext is the extension
+     * @param tf is the time frame
+     * @param ops is the list of observed properties
+     * @param  cIDs is the list of cluster ids
      */
-    public ExportProperties(String ext, String tf, String ops, String cIDs, String sIDs) {
-    	//TODO
+    public ExportProperties(String ext, String tf, String ops, String cIDs) {
+    	this.extension = ext;
+    	String[] obprops = ops.split(",");
+    	this.observedProperties = new HashSet<String>();
+    	for (String op : obprops) {
+    		this.observedProperties.add(op);
+    	}
+    	String[] cluIDs = cIDs.split(",");
+    	this.clusters = new HashSet<String>();
+    	for (String cluster : cluIDs) {
+    		this.clusters.add(cluster);
+    	}
+    	this.time = new TimeIntervall(tf);
     }
 
     /**
@@ -45,19 +60,12 @@ public class ExportProperties {
     }
 
     /**
-     * Get the ClusterIDs that should be exported. Always only exports a Groupd of Sensors or a Group of Clusters. The other Option is Empty.
+     * Get the ClusterIDs that should be exported. Always only exports a Groupd of Sensors
+     * or a Group of Clusters. The other Option is Empty.
      * @return The Clusters that should be taken in the Export.
      */
     public Set<String> getClusters() {
         return this.clusters;
-    }
-
-    /**
-     * Get the SensorIDs that should be exported. Always only exports a Groupd of Sensors or a Group of Clusters. The other Option is Empty.
-     * @return The SensorIDs of the Data that should be exported.
-     */
-    public Set<String> getSensorIDs() {
-        return this.sensors;
     }
 
 }

@@ -50,8 +50,7 @@ public class ExporterServlet extends HttpServlet {
 			String tf = req.getParameter("timeFrame");
 			String ops = req.getParameter("observedProperties");
 			String cIDs = req.getParameter("clusters");
-			String sIDs = req.getParameter("sensors");
-			ExportProperties props = new ExportProperties(ext, tf, ops, cIDs, sIDs);
+			ExportProperties props = new ExportProperties(ext, tf, ops, cIDs);
 			FileExporter exporter = new FileExporter(props, dID);
 			exporter.createFile();
 		}
