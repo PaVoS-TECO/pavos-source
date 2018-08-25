@@ -4,18 +4,23 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import server.core.grid.config.Seperators;
+import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.exceptions.PointNotOnMapException;
+import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.polygon.GeoPolygon;
 import server.core.properties.KafkaTopicAdmin;
 import server.database.Facade;
 import server.transfer.data.ObservationData;
+import server.transfer.producer.GraphiteProducer;
 
 /**
  * A geographically oriented approach to a polygon-tiled map.<br>
@@ -29,8 +34,11 @@ public abstract class GeoGrid {
 	public final int MAX_LEVEL;
 	public final String GRID_ID;
 	protected List<GeoPolygon> polygons = new ArrayList<>();
+	protected Map<String, Point2D.Double> sensorsAndLocations = new HashMap<>();
 	protected Logger logger = LoggerFactory.getLogger(this.getClass());
 	private GeoGridManager manager = GeoGridManager.getInstance();
+	private final int CYCLES_UNTIL_RESET = 1;
+	private int cyclesDone = 0;
 	
 	public GeoGrid(Point2D.Double mapBounds, int rows, int columns, int maxLevel, String gridID) {
 		this.MAP_BOUNDS = mapBounds;
@@ -54,7 +62,7 @@ public abstract class GeoGrid {
 		try {
 			targetPolygon = getPolygonContaining(location, MAX_LEVEL);
 			targetPolygon.addObservation(data);
-			System.out.println(targetPolygon.ID + " -> " + location.toString());
+			this.sensorsAndLocations.put(data.sensorID, location);
 		} catch (PointNotOnMapException e) {
 			logger.warn("Could not add Observation to map. Point '" + location 
 					+ "' not in map boundaries! SensorID: " + data.sensorID + " " + e);
@@ -86,14 +94,14 @@ public abstract class GeoGrid {
 		return getPolygonContaining(point, level).ID;
 	}
 	
-	public ObservationData getSensorObservation(String sensorID, Point2D.Double point) throws PointNotOnMapException {
+	public ObservationData getSensorObservation(String sensorID, Point2D.Double point) throws PointNotOnMapException, SensorNotFoundException {
 		GeoPolygon polygon = getPolygonContaining(point, MAX_LEVEL);
 		for (ObservationData observation : polygon.getSensorDataList()) {
 			if (observation.sensorID == sensorID) {
 				return observation;
 			}
 		}
-		return new ObservationData();
+		throw new SensorNotFoundException(sensorID);
 	}
 	
 	/**
@@ -137,43 +145,54 @@ public abstract class GeoGrid {
 		return this.GRID_ID + ".out";
 	}
 	
+	public Point2D.Double getSensorLocation(String sensorID) throws SensorNotFoundException {
+		Point2D.Double result = this.sensorsAndLocations.get(sensorID);
+		if (result == null) throw new SensorNotFoundException(sensorID);
+		return result;
+	}
+	
 	/**
 	 * Returns the {@link GeoPolygon} that is associated with the specified {@link String} clusterID.
 	 * @param clusterID {@link String}
 	 * @return polygon {@link GeoPolygon}
+	 * @throws ClusterNotFoundException 
 	 */
-	public GeoPolygon getPolygon(String clusterID) {
-		String[] splitGridClusters = clusterID.split(Seperators.GRID_CLUSTER_SEPERATOR);
-		String[] clusters = splitGridClusters[1].split(Seperators.CLUSTER_SEPERATOR);
-		int levels = clusters.length;
-		
-		System.out.println(splitGridClusters[0] + " | " + splitGridClusters[1]);
-		System.out.println(clusters[0]);
-		
+	public GeoPolygon getPolygon(String clusterID) throws ClusterNotFoundException {
 		GeoPolygon result = null;
-		StringBuilder currentID = new StringBuilder();
-		currentID.append(GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR);
-		for (int i = 0; i < levels; i++) {
-			if (i == 0) {
-				currentID.append(clusters[i]);
-				for (GeoPolygon polygon : this.polygons) {
-					System.out.println("currentID: " + currentID.toString());
-					if (polygon.ID.equals(currentID.toString())) {
-						result = polygon;
-						break;
+		try {
+			String[] splitGridClusters = clusterID.split(Seperators.GRID_CLUSTER_SEPERATOR);
+			String[] clusters = splitGridClusters[1].split(Seperators.CLUSTER_SEPERATOR);
+			int levels = clusters.length;
+
+			StringBuilder currentID = new StringBuilder();
+			currentID.append(GRID_ID + Seperators.GRID_CLUSTER_SEPERATOR);
+			for (int i = 0; i < levels; i++) {
+				if (i == 0) {
+					currentID.append(clusters[i]);
+					for (GeoPolygon polygon : this.polygons) {
+						System.out.println("currentID: " + currentID.toString());
+						if (polygon.ID.equals(currentID.toString())) {
+							result = polygon;
+							break;
+						}
+
 					}
-					
-				}
-			} else {
-				currentID.append(Seperators.CLUSTER_SEPERATOR + clusters[i]);
-				for (GeoPolygon polygon : result.getSubPolygons()) {
-					System.out.println("currentID: " + currentID.toString());
-					if (polygon.ID.equals(currentID.toString())) {
-						result = polygon;
-						break;
+				} else {
+					currentID.append(Seperators.CLUSTER_SEPERATOR + clusters[i]);
+					for (GeoPolygon polygon : result.getSubPolygons()) {
+						System.out.println("currentID: " + currentID.toString());
+						if (polygon.ID.equals(currentID.toString())) {
+							result = polygon;
+							break;
+						}
 					}
 				}
 			}
+		} catch (NullPointerException e) {
+			throw new ClusterNotFoundException(clusterID);
+		}
+		if (result == null) {
+			throw new ClusterNotFoundException(clusterID);
 		}
 		return result;
 	}
@@ -216,8 +235,9 @@ public abstract class GeoGrid {
 		if (!kAdmin.existsTopic(topic)) {
 			kAdmin.createTopic(topic);
 		}
+		GraphiteProducer producer = new GraphiteProducer();
 		for (GeoPolygon polygon : polygons) {
-			polygon.produceSensorDataMessage(topic);
+			polygon.produceSensorDataMessage(topic, producer);
 		}
 	}
 	
@@ -232,6 +252,12 @@ public abstract class GeoGrid {
 	public void updateObservations() {
 		for (GeoPolygon polygon : polygons) {
 			polygon.updateObservations();
+		}
+		if (cyclesDone == CYCLES_UNTIL_RESET) {
+			this.sensorsAndLocations.clear();
+			cyclesDone = 0;
+		} else {
+			cyclesDone++;
 		}
 	}
 	

@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.joda.time.DateTime;
+
+import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
@@ -64,11 +67,7 @@ public abstract class GeoPolygon {
 		this.SCALE = 0;
 		this.LEVELS_AFTER_THIS = Math.max(levelsAfterThis, 0);;
 		
-		this.path = new Path2D.Double();
-		this.subPolygons = new ArrayList<>();
-		this.sensorValues = new HashMap<>();
-		this.observationData = new ObservationData();
-		setupObservationData();
+		commonConstructor();
 	}
 	
 	/**
@@ -93,12 +92,16 @@ public abstract class GeoPolygon {
 		this.SCALE = scale;
 		this.LEVELS_AFTER_THIS = Math.max(levelsAfterThis, 0);
 		
+		commonConstructor();
+	} 
+	
+	private void commonConstructor() {
 		this.path = new Path2D.Double();
 		this.subPolygons = new ArrayList<>();
 		this.sensorValues = new HashMap<>();
 		this.observationData = new ObservationData();
 		setupObservationData();
-	} 
+	}
 	
 	/**
 	 * Creates or overrides a map-entry with the new value in double-precision.
@@ -277,14 +280,15 @@ public abstract class GeoPolygon {
 	 * Returns the sub-{@link GeoPolygon} that is associated with the specified {@link String} clusterID.
 	 * @param clusterID {@link String}
 	 * @return polygon {@link GeoPolygon}
+	 * @throws ClusterNotFoundException 
 	 */
-	public GeoPolygon getSubPolygon(String clusterID) {
+	public GeoPolygon getSubPolygon(String clusterID) throws ClusterNotFoundException {
 		for (GeoPolygon polygon : this.subPolygons) {
 			if (polygon.ID == clusterID) {
 				return polygon;
 			}
 		}
-		return null;
+		throw new ClusterNotFoundException(clusterID);
 	}
 	
 	/**
@@ -299,9 +303,9 @@ public abstract class GeoPolygon {
 	 * Produces messages for the output kafka-topic.
 	 * This method Produces recursively and starts with the smallest clusters.
 	 * @param topic {@link String}
+	 * @param producer {@link GraphiteProducer}
 	 */
-	public void produceSensorDataMessage(String topic) {
-		GraphiteProducer producer = new GraphiteProducer();
+	public void produceSensorDataMessage(String topic, GraphiteProducer producer) {
 		producer.produceMessages(topic, getClusterObservations(topic));
 	}
 	
@@ -320,11 +324,12 @@ public abstract class GeoPolygon {
 			entry.updateObservations();
 		}
 		
+		boolean anyEntry = false;
 		ObservationData obs = new ObservationData();
 		obs.observationDate = TimeUtil.getUTCDateTimeNowString();
 		Set<Tuple3D<String, Integer, Double>> values = new HashSet<>();
 		Set<String> properties = new HashSet<>();
-		
+		DateTime dt = null;
 		// save properties found in sub-GeoPolygons and sensors
 		for (GeoPolygon entry : this.subPolygons) {
 			Map<String, String> obsTemp = entry.observationData.observations;
@@ -333,6 +338,10 @@ public abstract class GeoPolygon {
 						, Integer.valueOf(entry.getNumberOfSensors(property)), Double.valueOf(obsTemp.get(property))));
 				properties.add(property);
 			}
+			DateTime dtCheck = TimeUtil.getUTCDateTime(entry.observationData.observationDate).toDateTime();
+			if (dt == null || dt.isBefore(dtCheck)) {
+				dt = dtCheck;
+			}
 		}
 		for (ObservationData entry : this.sensorValues.values()) {
 			Map<String, String> obsTemp = entry.observations;
@@ -340,6 +349,10 @@ public abstract class GeoPolygon {
 				values.add(new Tuple3D<String, Integer, Double>(property
 						, Integer.valueOf(1), Double.valueOf(obsTemp.get(property))));
 				properties.add(property);
+			}
+			DateTime dtCheck = TimeUtil.getUTCDateTime(entry.observationDate).toDateTime();
+			if (dt == null || dt.isBefore(dtCheck)) {
+				dt = dtCheck;
 			}
 		}
 		
@@ -350,22 +363,29 @@ public abstract class GeoPolygon {
 			
 			for (Tuple3D<String, Integer, Double> tuple : values) {
 				if (tuple.getFirstValue().equals(property)) {
+					if (!anyEntry) anyEntry = true;
 					value += tuple.getThirdValue().doubleValue() * tuple.getSecondValue().doubleValue();
 					totalSensors += tuple.getSecondValue().intValue();
 				}
 			}
 			
 			value = value / (double) totalSensors;
-			obs.observations.put(property, String.valueOf(value));
+			if (anyEntry) {
+				obs.observations.put(property, String.valueOf(value));
+			} else {
+				obs.observations.put(property, null);
+			}
 		}
-		obs.clusterID = this.ID;
-		this.observationData = obs;
-		
-		resetDirectObservations();
+		if (anyEntry) {
+			obs.clusterID = this.ID;
+			this.observationData = obs;
+			obs.observationDate = TimeUtil.getUTCDateTimeString(dt.toLocalDateTime());
+			resetDirectObservations();
+		}
 	}
 	
 	private void resetDirectObservations() {
-		this.sensorValues = new HashMap<>();
+		this.sensorValues.clear();
 	}
 	
 	private void setupObservationData() {

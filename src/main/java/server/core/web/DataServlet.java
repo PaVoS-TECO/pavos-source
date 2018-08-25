@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import server.core.grid.GeoGrid;
 import server.core.grid.GeoGridManager;
+import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.exceptions.PointNotOnMapException;
+import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
 import server.database.Facade;
@@ -45,27 +47,30 @@ public class DataServlet  extends HttpServlet {
 	
 	private void getGeoJsonSensor(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 		String gridID = req.getParameter("gridID");
-		String clusterID = req.getParameter("clusterID");
 		String sensorID = req.getParameter("sensorID");
 		String keyProperty = req.getParameter("property");
-		String pointString = req.getParameter("location");
-		String[] coordinates = pointString.replaceAll("[", "").replaceAll("]", "").split(",");
-		Point2D.Double point = new Point2D.Double(Double.parseDouble(coordinates[0]), Double.parseDouble(coordinates[1]));
 		
-		String result = getLiveDataSensor(sensorID, gridID, point, keyProperty, clusterID, req, res);
+		String result = getLiveDataSensor(sensorID, gridID, keyProperty, req, res);
 		
 		res.setContentType("application/json");
 		res.setCharacterEncoding("UTF-8");
 	    res.getWriter().write(result);
 	}
 
-	private String getLiveDataSensor(String sensorID, String gridID, Point2D.Double point, String keyProperty, String clusterID,
-			HttpServletRequest req, HttpServletResponse res) throws ServletException {
+	private String getLiveDataSensor(String sensorID, String gridID, String keyProperty, HttpServletRequest req, HttpServletResponse res) throws ServletException {
 		final GeoGrid grid = getGrid(gridID);
+		Point2D.Double point;
+		try {
+			point = grid.getSensorLocation(sensorID);
+		} catch (SensorNotFoundException e) {
+			throw new ServletException("Sensor is not registrated in this grid. " + e.getSensor());
+		}
 		try {
 			return GeoJsonConverter.convertSensorObservations(grid.getSensorObservation(sensorID, point), keyProperty, point);
 		} catch (PointNotOnMapException e) {
-			throw new ServletException("Point is not on map.");
+			throw new ServletException("Point is not on map. " + e.getPoint() );
+		} catch (SensorNotFoundException e) {
+			throw new ServletException("Sensor was removed from grid during operation. " + e.getSensor());
 		}
 	}
 
@@ -158,7 +163,12 @@ public class DataServlet  extends HttpServlet {
 		Collection<GeoPolygon> polygons = new HashSet<>();
 		final GeoGrid grid = getGrid(gridID);
 		for (int i = 0; i < clusterIDs.length; i++) {
-			GeoPolygon polygon = grid.getPolygon(clusterIDs[i]);
+			GeoPolygon polygon = null;
+			try {
+				polygon = grid.getPolygon(clusterIDs[i]);
+			} catch (ClusterNotFoundException e) {
+				throw new ServletException("Cluster is not registrated in this grid. " + e.getCluster());
+			}
 			if (polygon != null) {
 				polygons.add(polygon);
 			}

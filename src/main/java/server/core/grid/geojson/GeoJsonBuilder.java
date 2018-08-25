@@ -7,8 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import server.core.grid.GeoGrid;
+import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.polygon.GeoPolygon;
 import server.transfer.data.ObservationData;
 import server.transfer.sender.util.TimeUtil;
@@ -22,6 +25,7 @@ public final class GeoJsonBuilder {
 	private StringBuilder builder;
 	private StringBuilder polygonsBuilder;
 	private StringBuilder sensorsBuilder;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public GeoJsonBuilder(String keyProperty, String type) {
 		this.keyProperty = keyProperty;
@@ -38,10 +42,16 @@ public final class GeoJsonBuilder {
 		
 		int countFeature = 1;
 		for (ObservationData data : observations) {
-			GeoPolygon geoPolygon = geoGrid.getPolygon(data.clusterID);
-			polyBuilder.append(geoPolygonToStringQuick(data, geoPolygon.getSubPolygons(), geoPolygon.getPoints()));
-			if (countFeature < geoPolygons.size()) {
-				polyBuilder.append(COMMA);
+			GeoPolygon geoPolygon;
+			try {
+				geoPolygon = geoGrid.getPolygon(data.clusterID);
+				polyBuilder.append(geoPolygonToStringQuick(data, geoPolygon.getSubPolygons(), geoPolygon.getPoints()));
+				if (countFeature < geoPolygons.size()) {
+					polyBuilder.append(COMMA);
+				}
+			} catch (ClusterNotFoundException e) {
+				logger.warn("Could not find cluster: " + e.getCluster() 
+				+ ". Decided to skip the cluster and continue the json-building process.", e);
 			}
 		}
 			
@@ -66,14 +76,14 @@ public final class GeoJsonBuilder {
 		polyBuilder.append("{ " + toSProperty("type", "Feature") + COMMA);
 		polyBuilder.append(toEntry("properties") + ": { ");
 		polyBuilder.append(toNProperty("value", data.observations.get(keyProperty)) + COMMA);
-		polyBuilder.append(toSProperty("clusterID", data.clusterID));
+		polyBuilder.append(toSProperty("sensorID", data.sensorID));
 		
 		polyBuilder.append("}" + COMMA);
 		polyBuilder.append(toEntry("geometry") + ": { ");
 		polyBuilder.append(toSProperty("type", "Point") + COMMA);
-		polyBuilder.append(toEntry("coordinates") + ": [ [ ");
+		polyBuilder.append(toEntry("coordinates") + ": ");
 		polyBuilder.append("[ " + point.getX() + COMMA + point.getY() + "]");
-		polyBuilder.append("] ] } }");
+		polyBuilder.append("} }");
 		return polyBuilder.toString();
 	}
 

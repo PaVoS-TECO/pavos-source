@@ -1,10 +1,14 @@
 package server.core.grid;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import server.core.grid.exceptions.GridNotFoundException;
+import server.core.grid.exceptions.PointNotOnMapException;
+import server.core.grid.exceptions.SensorNotFoundException;
 import server.transfer.data.ObservationData;
 
 public final class GeoGridManager {
@@ -69,13 +73,15 @@ public final class GeoGridManager {
 		return observations;
 	}
 	
-	public ObservationData getSensorObservation(String sensorID, String clusterID, String gridID) {
+	public ObservationData getSensorObservation(String sensorID, String gridID) 
+			throws GridNotFoundException, SensorNotFoundException, PointNotOnMapException {
 		for (GeoGrid grid : this.grids) {
 			if (grid.GRID_ID.equals(gridID)) {
-				return grid.getSensorObservation(sensorID, clusterID);
+				Point2D.Double point = grid.getSensorLocation(sensorID);
+				return grid.getSensorObservation(sensorID, point);
 			}
 		}
-		return new ObservationData();
+		throw new GridNotFoundException(gridID);
 	}
 	
 }
