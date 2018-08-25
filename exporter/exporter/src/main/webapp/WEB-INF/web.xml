@@ -3,7 +3,7 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-	<display-name>Archetype Created Web Application</display-name>
+	<display-name>ExporterServlet</display-name>
   
   	<servlet>
 		<servlet-name>ExporterServlet</servlet-name>
@@ -11,7 +11,7 @@
 	</servlet>
 	
 	<servlet-mapping>
-		<servlet-name>Exporter Servlet</servlet-name>
+		<servlet-name>ExporterServlet</servlet-name>
 		<url-pattern>/ExporterServlet</url-pattern>
 	</servlet-mapping>
 </web-app>
