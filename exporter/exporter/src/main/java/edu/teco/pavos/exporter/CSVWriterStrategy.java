@@ -63,39 +63,34 @@ public class CSVWriterStrategy implements FileWriterStrategy {
         kprops.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         kprops.put("schema.registry.url", "http://192.168.56.3:8081");
 
-        KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(kprops);
+        KafkaConsumer<String, JSONObject> consumer = new KafkaConsumer<>(kprops);
 
         consumer.subscribe(Arrays.asList("Observations"));
-
-        JSONObject obj;
         
         boolean continueGettingRecords = true;
 
         while (continueGettingRecords) {
-
-            final ConsumerRecords<String, GenericRecord> foi = consumer.poll(100);
-            System.out.println(foi.count());
-            foi.forEach(record -> {
-                record.value().get("FeatureOfInterest");
-                
-                //continueGettingRecords = processRecord("");
-                
+            final ConsumerRecords<String, JSONObject> obs = consumer.poll(100);
+            obs.forEach(record -> {
+                processRecord(record.value());
             });
+            // change ending condition
+            continueGettingRecords = false;
         }
         
         saveToFile();
 		
 	}
 	
-	private void processRecord(String record) {
+	private void processRecord(JSONObject record) {
+		JSONObject observation = (JSONObject) record.get("Observation");
 		
-		JSONObject observation = new JSONObject();
-		JSONObject featureOfInterest = new JSONObject();
-		JSONObject dataStream = new JSONObject();
-		JSONObject thing = new JSONObject();
-		JSONObject location = new JSONObject();
-		JSONObject observedProperty = new JSONObject();
-		JSONObject sensor = new JSONObject();
+		JSONObject featureOfInterest = (JSONObject) record.get("FeatureOfInterest");
+		JSONObject dataStream = (JSONObject) record.get("Datastream");
+		JSONObject thing = (JSONObject) record.get("Thing");
+		JSONObject location = (JSONObject) record.get("Location");
+		JSONObject observedProperty = (JSONObject) record.get("ObservedProperty");
+		JSONObject sensor = (JSONObject) record.get("Sensor");
 		
 		this.observations.add(observation);
 		this.features.put(featureOfInterest.get("iot.id").toString(), featureOfInterest);
@@ -110,8 +105,9 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 		String path = null;
 		try {
 			PrintWriter writer = new PrintWriter(path, "UTF-8");
+			ArrayList<String> lines;
 			
-			ArrayList<String> lines = getObservedPropertyLines();
+			lines = getObservedPropertyLines();
 			for (String line : lines) {
 				writer.println(line);
 			}
@@ -139,6 +135,8 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 			for (String line : lines) {
 				writer.println(line);
 			}
+			
+			writer.close();
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

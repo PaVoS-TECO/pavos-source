@@ -26,7 +26,6 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 	private static String THING = "thing";
 	private static String DATASTREAM = "dataStream";
 	private static String OBSERVATION = "observation";
-	private static String TITLE = "title";
 
     /**
      * Default constructor
@@ -65,9 +64,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 					} else if (separated[0].equals(OBSERVATION) && separated.length >= 7) {
 						this.importObservation(separated);
 					} else {
-						if (!separated[0].equals(TITLE)) {
-							this.errorlines++;
-						}
+						this.errorlines++;
 					}
 				} else {
 					this.errorlines++;
@@ -227,7 +224,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 		obj.put("@iot.id", iotIDImport + data[1]);
         obj.put("phenomenonTime", data[2]);
         obj.put("result", data[3]);
-        obj.put("resultTime", data[4].equals("null") ? null : data[4]);
+        obj.put("resultTime", nullify(data[4]));
         
         JSONObject dataStream = new JSONObject();
         dataStream.put("@iot.id", iotIDImport + data[5]);
@@ -235,7 +232,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         
         JSONObject featureOI = new JSONObject();
         featureOI.put("@iot.id", iotIDImport + data[6]);
-        //obj.put("FeatureOfInterest", featureOI);
+        obj.put("FeatureOfInterest", featureOI);
         
         JSONParser parser = new JSONParser();
 
@@ -258,6 +255,10 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         
         String json = obj.toJSONString();
         FrostSender.sendToFrostServer(this.url + "Observations", json);
+    }
+    
+    private String nullify(String in) {
+    	return in.equals("null") ? null : in;
     }
 
 }
