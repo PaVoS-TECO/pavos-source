@@ -36,8 +36,10 @@ public class ExportConsumer {
         props.put(AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
         props.put(SESSION_TIMEOUT_MS_CONFIG, "30000");
         props.put(KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-        		 KafkaAvroDeserializer.class.getName());
+       // props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+       // 		 KafkaAvroDeserializer.class.getName());
+      props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+    		  "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, "your_client_id");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -48,9 +50,9 @@ public class ExportConsumer {
 
 
 
-        KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
 //19
-        consumer.subscribe(Arrays.asList("AvroExport24"));
+        consumer.subscribe(Arrays.asList("AvroExport11"));
 
         System.out.println("Consumer A gestartet!");
 
@@ -59,34 +61,34 @@ public class ExportConsumer {
 
         while (true) {
 
-            final ConsumerRecords<String, GenericRecord> foi =
+            final ConsumerRecords<String, String> foi =
                     consumer.poll(100);
             System.out.println(foi.count());
             foi.forEach(record1 -> {
-            	GenericRecord rc= record1.value();
-            	JSONObject ds;
-				
-            	try {
-					JSONObject thing = (JSONObject) new JSONParser().parse(toJson(rc, "Datastream", "Sensor"));
-					System.out.println(thing.get("name").toString());
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
- 
-                
-//               try {
-//					JSONObject obs = (JSONObject) new JSONParser().parse(record1.value());
-//
-//
-//					JSONObject foiI =  (JSONObject) new JSONParser().parse((String) obs.get("FeatureOfInterest"));
-//					JSONObject dataS =  (JSONObject) new JSONParser().parse((String) obs.get("Datastream"));
-//					
-//					System.out.println(dataS.get("iotId"));
+//            	GenericRecord rc= record1.value();
+//            	JSONObject ds;
+//				
+//            	try {
+//					JSONObject thing = (JSONObject) new JSONParser().parse(toJson(rc, "Datastream", "Thing"));
+//					System.out.println(thing.get("name").toString());
 //				} catch (ParseException e) {
 //					// TODO Auto-generated catch block
-//				e.printStackTrace();
+//					e.printStackTrace();
 //				}
+ 
+                
+               try {
+					JSONObject obs = (JSONObject) new JSONParser().parse(record1.value());
+
+
+					JSONObject foiI =  (JSONObject) new JSONParser().parse((String) obs.get("FeatureOfInterest"));
+					JSONObject dataS =  (JSONObject) new JSONParser().parse((String) obs.get("Datastream"));
+					
+					System.out.println(dataS.get("iotId"));
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+				e.printStackTrace();
+				}
 
 
             });

@@ -131,63 +131,75 @@ public class ExportMergeProcess implements ProcessInterface, Runnable {
 		},JoinWindows.of(100000));
 
 		// get ThingsStream
-		final KStream<String, GenericRecord> ThingStream = builder.stream("Things");
+		final KTable<String, GenericRecord> ThingStream = builder.table("Things");
 		// Tranfrom mergedFoIObsData to Equals Key to Things
 		final KStream<String, GenericRecord> mergedKeyThing = mergedFoIObsData
 				.map((key, value) -> KeyValue.pair(toJson(value, "Datastream", "Thing"), value));
-
-		// Join ThingsStream with MergedStream
+		
+		
+		 //Join ThingsStream with MergedStream
 		final KStream<String, GenericRecord> mergedFoIObsDataThing = mergedKeyThing.join(ThingStream,
 				(value, thing) -> {
 					JSONObject ds = toJson(value, "Datastream");
 					ds.put("Thing", thing.toString());
 
 					value.put("Datastream", ds.toString());
-					// JSONObject jo = (JSONObject) new JSONParser().parse(value.toString());
+					
 					return value;
 
-				},JoinWindows.of(100000));
+				});
 
 		// get SensorStream
-		final KStream<String, GenericRecord> SensorStream = builder.stream("Sensors");
+		final KTable<String, GenericRecord> SensorStream = builder.table("Sensors");
 		// Tranfrom mergedFoIObsData to Equals Key to Sensor
 		final KStream<String, GenericRecord> mergedFoIObsDataThingKey = mergedFoIObsDataThing
 				.map((key, value) -> KeyValue.pair(toJson(value, "Datastream", "Sensor"), value));
 
 		// Join ThingsStream with MergedStream
-		final KStream<String, GenericRecord> mergedFoIObsDataThingSensor = mergedFoIObsDataThingKey.join(SensorStream,
+		final KStream<String, GenericRecord> mergedFoIObsDataThingSensor = mergedFoIObsDataThingKey.leftJoin(SensorStream,
 				(value, thing) -> {
-					JSONObject ds = toJson(value, "Datastream");
-					ds.put("Sensor", thing.toString());
 
-					value.put("Datastream", ds.toString());
+					JSONObject ds = toJson(value, "Datastream");
+					if(thing!= null) {
+						ds.put("Sensor", thing.toString());
+						value.put("Datastream", ds.toString());
+					}else {
+						value.put("Datastream", "NO Sensor VALUE FOUND");
+					}
+					
+
+					
 					// JSONObject jo = (JSONObject) new JSONParser().parse(value.toString());
 					return value;
 
-				},JoinWindows.of(100000));
-		if(obsPro) {
-			// get SensorStream
-			final KStream<String, GenericRecord> propertyStream = builder.stream("ObservedProperty");
+				});
+		
+			// get ObsPro
+			final KStream<String, GenericRecord> propertyStream = builder.stream("ObservedProperties");
 			// Tranfrom mergedFoIObsData to Equals Key to Sensor
 			final KStream<String, GenericRecord> mergedFoIObsDataThingSensorKey = mergedFoIObsDataThingSensor
 					.map((key, value) -> KeyValue.pair(toJson(value, "Datastream", "ObservedProperty"), value));
 
 			// Join ThingsStream with MergedStream
-			final KStream<String, GenericRecord> finalStream = mergedFoIObsDataThingSensorKey.join(propertyStream,
+			final KStream<String, String> finalStream = mergedFoIObsDataThingSensorKey.join(propertyStream,
 					(value, thing) -> {
-						JSONObject ds = toJson(value, "Datastream");
-						ds.put("ObservedProperty", thing.toString());
-
-						value.put("Datastream", ds.toString());
-						// JSONObject jo = (JSONObject) new JSONParser().parse(value.toString());
-						return value;
+						
+						if(thing!= null) {
+							JSONObject ds = toJson(value, "Datastream");
+							ds.put("ObservedProperty", thing.toString());
+							value.put("Datastream", ds.toString());
+						}else {
+							value.put("Datastream", "NO ObservedProperty VALUE FOUND");
+						}
+						return toJson(value).toJSONString();
 
 					},JoinWindows.of(100000));
-			finalStream.to("AvroExport");
-			
-		}else {
-			mergedFoIObsDataThingSensor.to("AvroExport");
-		}
+	
+		
+		final Serde<String> stringSerde = Serdes.String();
+
+			finalStream.to("AvroExport",Produced.with(stringSerde, stringSerde));
+		
 		
 
 
@@ -227,6 +239,25 @@ public class ExportMergeProcess implements ProcessInterface, Runnable {
 		JSONObject ds;
 		try {
 			ds = (JSONObject) new JSONParser().parse(record.get(Stream).toString());
+
+			return ds;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	/**
+	 * Transform GenericRecord to Json
+	 * @param record
+	 * @return
+	 */
+	public JSONObject toJson(GenericRecord record ){
+		JSONObject ds;
+		try {
+			ds = (JSONObject) new JSONParser().parse(record.toString());
 
 			return ds;
 		} catch (ParseException e) {

@@ -199,9 +199,8 @@ public class GridProcess implements ProcessInterface, Runnable {
 					double coord2 = Double.parseDouble(value.get("FeatureOfInterest").toString().split(",")[1]);
 
 					Point2D.Double location = new Point2D.Double(coord1, coord2);
-
+					System.out.println(data);
 					grid.addObservation(location, data);
-					grid.updateObservations();
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -210,7 +209,7 @@ public class GridProcess implements ProcessInterface, Runnable {
 			});
 		}
 
-		grid.produceSensorDataMessages();
+		//grid.produceSensorDataMessages();
 
 	}
 
