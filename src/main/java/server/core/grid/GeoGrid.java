@@ -256,11 +256,18 @@ public abstract class GeoGrid {
 			polygon.updateObservations();
 		}
 		
+		// Live data
+		
 		List<String> topics = produceSensorDataMessages();
 		System.out.println("Topics: " + topics);
 		transferToGraphite(topics);
 		
-		// ONLY RESET AT THE END //
+		// send to database
+		
+		updateDatabase();
+		
+		
+		// ONLY RESET AT THE END
 		
 		if (cyclesDone == CYCLES_UNTIL_RESET) {
 			resetObservations();
