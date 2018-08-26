@@ -9,14 +9,14 @@ import web.grid.Grid;
  */
 public class Facade {
 
-	private KafkaToStorageProcessor storageProcessor;
+	private ObservationDataToStorageProcessor storageProcessor;
 	
     /**
      * Default constructor
      */
     public Facade() {
     	// TODO set host by property list
-    	storageProcessor = new KafkaToStorageProcessor("localhost");
+    	storageProcessor = new ObservationDataToStorageProcessor("localhost");
     }
     
     /**
@@ -40,18 +40,6 @@ public class Facade {
     		addObservationData(obsDataObject);
     	}
     }
-
-    /**
-     * Returns an appropriate grid of clusters in the requested grid section for the specified ZoomLevel and time. The (first) two values of the ClusterID array define the grid section from which to get the data.
-     * @param clusters An array of ClusterIDs from which the first two entries are taken to compute the section of the Grid to get the data from.
-     * @param zoom The ZoomLevel from which to get the data.
-     * @param time The point in time.
-     * @return A grid with the computed data.
-     */
-    public Grid getGrid(ClusterID[] clusters, ZoomLevel zoom, String timestamp) {
-        // TODO implement here
-        return null;
-    }
     
     /**
      * Get the value of an observedProperty from a clusterID at or before the given timestamp.
@@ -69,6 +57,15 @@ public class Facade {
      */
     public String getObservationData(String clusterID, String timestamp, String observedProperty) {
     	return storageProcessor.get(clusterID, timestamp, observedProperty);
+    }
+    
+    /**
+	 * Add a memcached server to the server cluster.
+	 * @param address The address of the server
+	 * @param port The port for memcached
+	 */
+    public void addMemcachedServer(String address, int port) {
+    	storageProcessor.addServer(address, port);
     }
 
 }
