@@ -31,11 +31,11 @@ public class ExporterServlet extends HttpServlet {
 			throws ServletException, IOException {
 		String type = req.getParameter("requestType");
 		if (type.equals("newExport")) {
-			this.export(req, res);
+			//this.export(req, res);
 		} else if (type.equals("getStatus")) {
-			this.status(req, res);
+			//this.status(req, res);
 		} else if (type.equals("tryDownload")) {
-			this.download(req, res);
+			//this.download(req, res);
 		} else if (type.equals("getExtensions")) {
 			this.extensions(req, res);
 		}
