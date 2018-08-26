@@ -24,8 +24,6 @@ public class RuntimeGenerator {
 						sleep(2);
 						grid.addObservation(randomLocation(), generateRandom(randomSensor(), "pM_10", 40.0));
 						sleep(2);
-						grid.updateObservations();
-						sleep(6);
 					}
 			}
 		});
