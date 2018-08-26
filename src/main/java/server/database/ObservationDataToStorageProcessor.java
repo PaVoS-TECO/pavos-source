@@ -84,7 +84,7 @@ public class ObservationDataToStorageProcessor {
 	}
 	
 	/**
-	 * Converts a String timestamp of the format YYYY-MM-DDTHH:MM:SSZ into a LocalDateTime object.
+	 * Converts a String timestamp of the format {@code YYYY-MM-DDTHH:MM:SSZ} into a LocalDateTime object.
 	 * This enables comparison of timestamps.
 	 * @param timestamp The timestamp to convert
 	 * @return A LocalDateTime object representing the time in the timestamp
