@@ -1,10 +1,10 @@
 package server.core.controller;
 
-import java.awt.geom.Point2D;
+
 
 import org.python.modules.thread.thread;
 
-import server.core.controller.testClasses.DummyTable;
+
 import server.core.grid.GeoGrid;
 
 import server.core.grid.config.WorldMapData;
@@ -22,7 +22,7 @@ public class Main {
 		//Thread.sleep(5000);
 		//GridProcess gridProcess = new GridProcess();
 		//gridProcess.kafkaStreamStart();
-		ExportMergeProcess exportMergeProcess = new ExportMergeProcess();
+		ExportMergeProcess exportMergeProcess = new ExportMergeProcess(false);
 		exportMergeProcess.kafkaStreamStart();
 
 		

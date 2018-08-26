@@ -27,8 +27,13 @@ import server.core.properties.PropertiesFileManager;
 import server.transfer.data.ObservationData;
 import server.transfer.sender.util.TimeUtil;
 
-public class GridProcess implements ProcessInterface,Runnable{
-	
+/**
+ * This Class is for The Processing of the Data for Graphite and the View , to
+ * represente the Sensors
+ */
+
+public class GridProcess implements ProcessInterface, Runnable {
+
 	private Properties props;
 	private int timeIntervall;
 	private String inputTopic;
@@ -38,22 +43,44 @@ public class GridProcess implements ProcessInterface,Runnable{
 	private boolean threadBoolean = true;
 	private Thread thread;
 
-    private CountDownLatch countdownLatch = null;
-    private volatile GeoGrid grid ;
+	private CountDownLatch countdownLatch = null;
+	private volatile GeoGrid grid;
+
+	
+	
+	/**
+	 * 
+	 * This initialize the Grid Process with Different Parameters as it should be
+	 * @param inputTopic
+	 * @param timeIntervall
+	 */
 	
 	public GridProcess(String inputTopic, int timeIntervall) {
 		PropertiesFileManager propManager = PropertiesFileManager.getInstance();
 		this.props = propManager.getGridStreamProperties();
 		this.timeIntervall = timeIntervall;
 		this.inputTopic = inputTopic;
-		System.out.println("Creating " +  threadName );
+		System.out.println("Creating " + threadName);
 	}
+
+	/**
+	 * Default Constructor
+	 */
 	
 	public GridProcess() {
 		this("ObservationsMergesGeneric", 10000);
 	}
+	
+	
 
-	private  Map<String, String> setPropetysSensoring(JSONObject json) {
+	/**
+	 * 
+	 * This Methode generates a Map out of a Json
+	 * @param json 
+	 * @return Map<String,String>
+	 */
+	
+	private Map<String, String> setPropetysSensoring(JSONObject json) {
 		Map<String, String> map = new HashMap<String, String>();
 		try {
 
@@ -62,7 +89,6 @@ public class GridProcess implements ProcessInterface,Runnable{
 			// convert JSON string to Map
 			map = mapper.readValue(json.toJSONString(), new TypeReference<Map<String, String>>() {
 			});
-			//System.out.println(map);
 			return map;
 
 		} catch (JsonGenerationException e) {
@@ -76,42 +102,15 @@ public class GridProcess implements ProcessInterface,Runnable{
 		return map;
 	}
 
-	public void updateGrid() {
-		Thread t = new Thread(new Runnable() {
-			
-
-
-			@Override
-			public void run() {
-				while(threadBoolean) {
-
-					
-					if(grid != null) {
-						System.out.println("rounds " +roundsCounter ++);
-						grid.updateObservations();
-						grid.produceSensorDataMessages();
-						
-						try {
-							Thread.sleep(10000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
-				
-			}
-		});
-		t.start();
-		System.out.println("GridUpdate started");
-		
-	}
-	
-	
-	//todo Threading
+	/**
+	 * This Method is used to explicitly start the Kafka Stream thread. So that
+	 * theProcessing need to get started.
+	 * 
+	 * @return true if the Kafka Stream Started false otherwise
+	 */
 	public boolean kafkaStreamStart() {
 		System.out.println("Starting " + threadName);
-		if(thread == null) {
+		if (thread == null) {
 			thread = new Thread(this, threadName);
 
 			countdownLatch = new CountDownLatch(1);
@@ -121,42 +120,53 @@ public class GridProcess implements ProcessInterface,Runnable{
 		}
 		return false;
 	}
+	/**
+	 * This Method is used to explicitly close the Kafka Stream thread. So that the
+	 * Processing stops.
+	 * 
+	 * @return true if the Kafka Stream closed, false otherwise
+	 */
 
-	
 	public boolean kafkaStreamClose() {
 		System.out.println("Closing " + threadName);
-		if(countdownLatch != null) {
+		if (countdownLatch != null) {
 			countdownLatch.countDown();
 		}
-		if(grid != null) {
+		if (grid != null) {
 			grid.close();
 		}
-		
-		if(thread != null) {
+
+		if (thread != null) {
 			this.threadBoolean = false;
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
-				
+
 				e.printStackTrace();
 			}
-			
+
 			System.out.println(threadName + "successfully stopped.");
 			return true;
-			
+
 		}
 		return false;
 	}
-
 	
+	/**
+	 * This Methode definite the Process of the Application. What Application does
+	 * specificly.
+	 * 
+	 * @param streambuilder
+	 * @return true if the Graphite Process got Successfully worked
+	 */
+
 	public void apply(StreamsBuilder builder) {
-		
-		
+
 		KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(props);
 		consumer.subscribe(Arrays.asList(inputTopic));
 		System.out.println("Consumer Grid gestartet!");
-		grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),
-				2, 2, 3);
+		grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2), 2, 2,
+				3);
 
 		try {
 			Thread.sleep(1000);
@@ -168,7 +178,7 @@ public class GridProcess implements ProcessInterface,Runnable{
 		while (this.threadBoolean) {
 
 			final ConsumerRecords<String, GenericRecord> observations = consumer.poll(100);
-			//System.out.println(observations.count());
+			// System.out.println(observations.count());
 			observations.forEach(record1 -> {
 				GenericRecord value = (record1.value());
 
@@ -202,18 +212,47 @@ public class GridProcess implements ProcessInterface,Runnable{
 
 		grid.produceSensorDataMessages();
 
-		
-		
 	}
 
 	@Override
 	public void run() {
-		System.out.println("Running " +  threadName );
-		updateGrid();
-		
+		System.out.println("Running " + threadName);
+		// updateGrid();
+
 		apply(null);
-		
-		
+
 	}
+	
+//	public void updateGrid() {
+//	Thread t = new Thread(new Runnable() {
+//		
+//
+//
+//		@Override
+//		public void run() {
+//			while(threadBoolean) {
+//
+//				
+//				if(grid != null) {
+//					System.out.println("rounds " +roundsCounter ++);
+//					grid.updateObservations();
+//					grid.produceSensorDataMessages();
+//					
+//					try {
+//						Thread.sleep(10000);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//			
+//		}
+//	});
+//	t.start();
+//	System.out.println("GridUpdate started");
+//	
+//}
+
 
 }

@@ -1,6 +1,7 @@
 package server.core.controller;
 
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serde;
@@ -19,34 +20,86 @@ import org.json.simple.parser.ParseException;
 
 import server.core.properties.PropertiesFileManager;
 
-public class ExportMergeProcess implements ProcessInterface {
+/**
+ * @author Patrick
+ * 
+ * This Class generates a Merged Topic from Observations,Thing,Datastream,ObservedProperty and FeatureOfInterest
+ *
+ */
+public class ExportMergeProcess implements ProcessInterface, Runnable {
 
 	private Properties props;
 	private KafkaStreams kafkaStreams;
 	private final String threadName = "ExportProcess";
 	private boolean obsPro = false;
 
-	public ExportMergeProcess() {
+
+	private Thread thread;
+	private CountDownLatch countdownLatch = null;
+
+	/**
+	 * Default Constructor
+	 */
+	public ExportMergeProcess(Boolean obsPro) {
+		this.obsPro = obsPro;
 		PropertiesFileManager propManager = PropertiesFileManager.getInstance();
 		this.props = propManager.getExportStreamProperties();
+		System.out.println("Creating " + threadName);
 	}
 
+	/* (non-Javadoc)
+	 * @see server.core.controller.ProcessInterface#kafkaStreamStart()
+	 */
 	@Override
 	public boolean kafkaStreamStart() {
-		StreamsBuilder builder = new StreamsBuilder();
+		
+		
+		
+		System.out.println("Starting " + threadName);
+		if (thread == null) {
+			thread = new Thread(this, threadName);
 
-		apply(builder);
-		kafkaStreams = new KafkaStreams(builder.build(), props);
-		kafkaStreams.start();
+			countdownLatch = new CountDownLatch(1);
+			thread.start();
+
+			return true;
+		}
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see server.core.controller.ProcessInterface#kafkaStreamClose()
+	 */
 	@Override
 	public boolean kafkaStreamClose() {
-		// TODO Auto-generated method stub
+
+		System.out.println("Closing " + threadName);
+		if(countdownLatch != null) {
+			countdownLatch.countDown();
+		}
+		
+		if(thread != null) {
+			try {
+				thread.join();
+				if (kafkaStreams == null) {
+					System.out.println("Applikation 'Export' is not Running");
+					return false;
+				}
+				Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			}
+			System.out.println(threadName + "successfully stopped.");
+			return true;
+			
+		}
 		return false;
 	}
 
+	/* (non-Javadoc)
+	 * @see server.core.controller.ProcessInterface#apply(org.apache.kafka.streams.StreamsBuilder)
+	 */
 	@Override
 	public void apply(StreamsBuilder builder) {
 		final KStream<String, GenericRecord> observationStream = builder.stream("Observations");
@@ -130,14 +183,25 @@ public class ExportMergeProcess implements ProcessInterface {
 						return value;
 
 					},JoinWindows.of(100000));
+			finalStream.to("AvroExport");
+			
+		}else {
+			mergedFoIObsDataThingSensor.to("AvroExport");
 		}
 		
 
-		final Serde<String> stringSerde = Serdes.String();
 
-		mergedFoIObsDataThingSensor.to("TestExport4");
+
+		
 	}
 
+	/**
+	 * This Methode generates a key String from a GenericRecord
+	 * @param record 
+	 * @param Stream Name
+	 * @param key Name
+	 * @return
+	 */
 	public String toJson(GenericRecord record, String Stream, String key) {
 		JSONObject ds;
 		try {
@@ -152,6 +216,13 @@ public class ExportMergeProcess implements ProcessInterface {
 
 	}
 
+	/**
+	 * 
+	 * This Method generation a JSONOject from a Generic Record
+	 * @param record
+	 * @param Stream
+	 * @return
+	 */
 	public JSONObject toJson(GenericRecord record, String Stream) {
 		JSONObject ds;
 		try {
@@ -164,6 +235,18 @@ public class ExportMergeProcess implements ProcessInterface {
 		}
 		return null;
 
+	}
+
+	@Override
+	public void run() {
+		System.out.println("Running " +  threadName );
+		StreamsBuilder builder = new StreamsBuilder();
+
+		apply(builder);
+		kafkaStreams = new KafkaStreams(builder.build(), props);
+		kafkaStreams.start();
+		
+		
 	}
 
 }
