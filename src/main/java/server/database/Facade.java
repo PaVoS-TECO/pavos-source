@@ -58,5 +58,14 @@ public class Facade {
     public String getObservationData(String clusterID, String timestamp, String observedProperty) {
     	return storageProcessor.get(clusterID, timestamp, observedProperty);
     }
+    
+    /**
+	 * Add a memcached server to the server cluster.
+	 * @param address The address of the server
+	 * @param port The port for memcached
+	 */
+    public void addMemcachedServer(String address, int port) {
+    	storageProcessor.addServer(address, port);
+    }
 
 }

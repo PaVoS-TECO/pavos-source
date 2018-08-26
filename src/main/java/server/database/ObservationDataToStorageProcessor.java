@@ -189,4 +189,17 @@ public class ObservationDataToStorageProcessor {
 		}
 	}
 
+	/**
+	 * Add a memcached server to the server cluster.
+	 * @param address The address of the server
+	 * @param port The port for memcached
+	 */
+	public void addServer(String address, int port) {
+		try {
+			cli.addServer(address, port);
+		} catch (IOException e) {
+			logger.warn("Could not add Memcached server", e);
+		}
+	}
+
 }
