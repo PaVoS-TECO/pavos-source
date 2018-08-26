@@ -38,14 +38,13 @@ public final class PythonMetricUtil {
      * @param logger The logger documents 
      */
     public static void addFloatMetric(ConsumerRecord<String, ObservationData> record, 
-    		PyList list, Map<String, String> observations, String graphTopic) {
+    		PyList list, Map<String, String> observations) {
 		for (Map.Entry<String, String> entry : observations.entrySet()) {
-			String key = entry.getKey();
 			String value = entry.getValue();
-			if (key != null && value != null) {
+			if (value != null) {
 				
 				LocalDateTime ldc = LocalDateTime.parse(record.value().observationDate, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
-				PyString metricName = new PyString(graphTopic + "." + key);
+				PyString metricName = new PyString(record.topic() + "." + entry.getKey());
 				PyInteger timestamp = new PyInteger((int) (ldc.toDateTime(DateTimeZone.UTC).getMillis() / 1000));
 				PyFloat metricValue = new PyFloat(Double.parseDouble(value));
 				PyTuple metric = new PyTuple(metricName, new PyTuple(timestamp, metricValue));

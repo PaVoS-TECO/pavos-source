@@ -18,6 +18,7 @@ import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
 import server.transfer.producer.GraphiteProducer;
+import server.transfer.producer.util.GridTopicTranslator;
 import server.transfer.sender.util.TimeUtil;
 
 /**
@@ -304,9 +305,44 @@ public abstract class GeoPolygon {
 	 * This method Produces recursively and starts with the smallest clusters.
 	 * @param topic {@link String}
 	 * @param producer {@link GraphiteProducer}
+	 * @return topics {@link List} of {@link String}s that define KafkaTopics
 	 */
-	public void produceSensorDataMessage(String topic, GraphiteProducer producer) {
-		producer.produceMessages(topic, getClusterObservations(topic));
+	public List<String> produceSensorDataMessages(GraphiteProducer producer) {
+		List<String> topics = new ArrayList<>();
+		
+		for (GeoPolygon subPolygon : subPolygons) {
+			topics.addAll(subPolygon.produceSensorDataMessages(producer));
+		}
+		
+		if (!sensorValues.isEmpty()) {
+			Collection<String> sensorIDs = sensorValues.keySet();
+			Map<String, String> sensorTopicMap = GridTopicTranslator.getTopic(sensorIDs, this);
+			for (String sensorID : sensorIDs) {
+				String topic = sensorTopicMap.get(sensorID);
+				producer.produceMessage(topic, sensorValues.get(sensorID));
+				topics.add(topic);
+			}
+		}
+		return topics;
+	}
+	
+	public Collection<String> getAllProperties() {
+		Collection<String> properties = new HashSet<>();
+		
+		for (GeoPolygon entry : this.subPolygons) {
+			Map<String, String> obsTemp = entry.observationData.observations;
+			for (String property : obsTemp.keySet()) {
+				properties.add(property);
+			}
+		}
+		for (ObservationData entry : this.sensorValues.values()) {
+			Map<String, String> obsTemp = entry.observations;
+			for (String property : obsTemp.keySet()) {
+				properties.add(property);
+			}
+		}
+		
+		return properties;
 	}
 	
 	/**
@@ -380,11 +416,13 @@ public abstract class GeoPolygon {
 			obs.clusterID = this.ID;
 			this.observationData = obs;
 			obs.observationDate = TimeUtil.getUTCDateTimeString(dt.toLocalDateTime());
-			resetDirectObservations();
 		}
 	}
 	
-	private void resetDirectObservations() {
+	public void resetObservations() {
+		for (GeoPolygon subPolygon : subPolygons) {
+			subPolygon.resetObservations();
+		}
 		this.sensorValues.clear();
 	}
 	
@@ -420,10 +458,10 @@ public abstract class GeoPolygon {
 	 * @param topic {@link String}
 	 * @param recursive {@link boolean}
 	 */
-	protected Collection<ObservationData> getClusterObservations(String topic) {
+	protected Collection<ObservationData> getClusterObservations() {
 		Collection<ObservationData> result = new HashSet<>();
 		for (GeoPolygon polygon : subPolygons) {
-			result.addAll(polygon.getClusterObservations(topic));
+			result.addAll(polygon.getClusterObservations());
 		}
 		result.add(cloneObservation());
 		return result;

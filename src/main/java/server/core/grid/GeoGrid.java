@@ -17,8 +17,9 @@ import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.polygon.GeoPolygon;
-import server.core.properties.KafkaTopicAdmin;
 import server.database.Facade;
+import server.transfer.Destination;
+import server.transfer.TransferManager;
 import server.transfer.data.ObservationData;
 import server.transfer.producer.GraphiteProducer;
 
@@ -228,18 +229,19 @@ public abstract class GeoGrid {
 	 * Produces messages for the output kafka-topic.
 	 * Each message contains a single {@link ObservationData} object.
 	 * This method Produces recursively and starts with the smallest clusters.
+	 * @return 
 	 */
-	public void produceSensorDataMessages() {
-		String topic = getOutputTopic();
-		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
-		if (!kAdmin.existsTopic(topic)) {
-			kAdmin.createTopic(topic);
-		}
+	public List<String> produceSensorDataMessages() {
 		GraphiteProducer producer = new GraphiteProducer();
+		List<String> topics = new ArrayList<>();
 		for (GeoPolygon polygon : polygons) {
-			polygon.produceSensorDataMessage(topic, producer);
+			topics.addAll(polygon.produceSensorDataMessages(producer));
 		}
+		producer.close();
+		return topics;
 	}
+	
+	
 	
 	/**
 	 * Updates all values of this {@link GeoGrid} and it's {@link GeoPolygon}s.<p>
@@ -253,12 +255,32 @@ public abstract class GeoGrid {
 		for (GeoPolygon polygon : polygons) {
 			polygon.updateObservations();
 		}
+		
+		List<String> topics = produceSensorDataMessages();
+		System.out.println("Topics: " + topics);
+		transferToGraphite(topics);
+		
+		// ONLY RESET AT THE END //
+		
 		if (cyclesDone == CYCLES_UNTIL_RESET) {
+			resetObservations();
 			this.sensorsAndLocations.clear();
 			cyclesDone = 0;
 		} else {
 			cyclesDone++;
 		}
+	}
+	
+	private void resetObservations() {
+		for (GeoPolygon polygon : polygons) {
+			polygon.resetObservations();
+		}
+	}
+	
+	private void transferToGraphite(List<String> topics) {
+		TransferManager tm = new TransferManager();
+		tm.startDataTransfer(topics, Destination.GRAPHITE);
+		tm.stopDataTransfer();
 	}
 	
 	/**

@@ -35,7 +35,7 @@ public final class RandomValueGraphiteGenerator {
 						data = generateRandomData(data, MAX_VALUE);
 						
 						try {
-							TimeUnit.MILLISECONDS.sleep(9900);;
+							TimeUnit.MILLISECONDS.sleep(9900);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
