@@ -16,9 +16,9 @@ import net.rubyeye.xmemcached.exception.MemcachedException;
 import server.transfer.data.ObservationData;
 
 /**
- * This class converts KafkaStream records to data that can be inserted into the StorageSolution.
+ * This class provides methods to add or get ObservationData objects to or from the storage solution.
  */
-public class KafkaToStorageProcessor {
+public class ObservationDataToStorageProcessor {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private MemcachedClient cli;
@@ -26,7 +26,7 @@ public class KafkaToStorageProcessor {
     /**
      * Default constructor
      */
-    public KafkaToStorageProcessor(String host) {
+    public ObservationDataToStorageProcessor(String host) {
         try {
             cli = new XMemcachedClient(host, 11211);
         } catch (IOException e) {
@@ -84,7 +84,7 @@ public class KafkaToStorageProcessor {
 	}
 	
 	/**
-	 * Converts a String timestamp of the format YYYY-MM-DDTHH:MM:SSZ into a LocalDateTime object.
+	 * Converts a String timestamp of the format {@code YYYY-MM-DDTHH:MM:SSZ} into a LocalDateTime object.
 	 * This enables comparison of timestamps.
 	 * @param timestamp The timestamp to convert
 	 * @return A LocalDateTime object representing the time in the timestamp
@@ -186,6 +186,19 @@ public class KafkaToStorageProcessor {
 			return obs.get(observedProperty);
 		} else {
 			return null;
+		}
+	}
+
+	/**
+	 * Add a memcached server to the server cluster.
+	 * @param address The address of the server
+	 * @param port The port for memcached
+	 */
+	public void addServer(String address, int port) {
+		try {
+			cli.addServer(address, port);
+		} catch (IOException e) {
+			logger.warn("Could not add Memcached server", e);
 		}
 	}
 
