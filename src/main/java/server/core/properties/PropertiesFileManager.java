@@ -21,16 +21,34 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde;
 import server.transfer.data.ObservationDataSerializer;
 
+/**
+ * @author Patrick
+ *
+ */
+/**
+ * The PropertyFile is a special form of associative memory in which
+ * key-value pairs are always of type string. Since the entries can be stored in
+ * a file and read out again, hardwired character strings can be externalized
+ * from the program text so that the values ​​can be easily changed without
+ * retranslation.
+ */
 public final class PropertiesFileManager {
 
 	private Properties properties;
 	private String kafkaPropertyFilePath = "src/main/resources/KafkaCore.properties";
 	private static PropertiesFileManager instance;
 	
+	/**
+	 * Default Constructor
+	 */
 	private PropertiesFileManager() {
 		loadKafkaCoreProperties();
 	}
 	
+	/**
+	 * 
+	 * @return it Self
+	 */
 	public static PropertiesFileManager getInstance() {
 		if (instance == null) {
 			instance = new PropertiesFileManager();
@@ -38,6 +56,9 @@ public final class PropertiesFileManager {
 		return instance;
 	}
 
+	/**
+	 * @return Merge Stream Properties
+	 */
 	public Properties getMergeStreamProperties() {
 		Properties props = new Properties();
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
@@ -50,6 +71,25 @@ public final class PropertiesFileManager {
 		return props;
 	}
 	
+	/**
+	 * @return Export Stream Properties
+	 */
+	public Properties getExportStreamProperties() {
+		Properties props = new Properties();
+		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
+		props.put(StreamsConfig.APPLICATION_ID_CONFIG, getProperty("E_APPLICATION_ID_CONFIG"));
+		props.put(StreamsConfig.CLIENT_ID_CONFIG, getProperty("E_CLIENT_ID_CONFIG"));
+		props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+		props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class);
+		props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, getProperty("SCHEMA_REGISTRY_URL_CONFIG"));
+		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getProperty("E_AUTO_OFFSET_RESET_CONFIG"));
+		return props;
+	}
+	
+	/**
+	 * @return Default/Test Stream Properties
+	 */
+	
 	public Properties getDummyStreamProperties() {
 		Properties props = new Properties();
 		props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
@@ -61,6 +101,9 @@ public final class PropertiesFileManager {
 		return props;
 	}
 
+	/**
+	 * @return Graphite Stream Properties
+	 */
 
 	public Properties getGraphiteStreamProperties() {
 		Properties props = new Properties();
@@ -73,6 +116,10 @@ public final class PropertiesFileManager {
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, getProperty("P_AUTO_OFFSET_RESET_CONFIG"));
 		return props;
 	}
+	
+	/**
+	 * @return Grid Stream Properties
+	 */
 	
 	public Properties getGridStreamProperties() {
 		Properties props = new Properties();
@@ -91,6 +138,10 @@ public final class PropertiesFileManager {
 		return props;
 	}
 	
+	/**
+	 * @return Simple Producer Properties
+	 */
+	
 	public Properties getProducerGridProperties() {
     	Properties configProperties = new Properties();
     	configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getProperty("BOOTSTRAP_SERVERS_CONFIG"));
@@ -100,10 +151,17 @@ public final class PropertiesFileManager {
         configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         return configProperties;
     }
+	
+	/**
+	 * @return Prpoerty from selected key
+	 */
 
 	public String getProperty(String key) {
 		return properties.getProperty(key);
 	}
+	/**
+	 * Load from File Properties
+	 */
 	
 	private void loadKafkaCoreProperties() {
 		try {

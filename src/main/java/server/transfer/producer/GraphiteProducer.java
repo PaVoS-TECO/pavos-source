@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import server.core.properties.KafkaTopicAdmin;
 import server.core.properties.PropertiesFileManager;
 import server.transfer.data.ObservationData;
 
@@ -13,18 +14,26 @@ public class GraphiteProducer {
 	
 	private KafkaProducer<String, ObservationData> producer;
 	
-	public void produceMessage(String topic, ObservationData data) {
+	public GraphiteProducer() {
 		producer = new KafkaProducer<>(getProducerProperties());
+	}
+	
+	public void produceMessage(String topic, ObservationData data) {
+		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
+		if (!kAdmin.existsTopic(topic)) {
+			kAdmin.createTopic(topic);
+		}
 		producer.send(new ProducerRecord<String, ObservationData>(topic, data));
-		producer.close();
 	}
 	
 	public void produceMessages(String topic, Collection<ObservationData> dataSet) {
-		producer = new KafkaProducer<>(getProducerProperties());
+		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
+		if (!kAdmin.existsTopic(topic)) {
+			kAdmin.createTopic(topic);
+		}
 		for (ObservationData data : dataSet) {
 			producer.send(new ProducerRecord<String, ObservationData>(topic, data));
 		}
-		producer.close();
 	}
 	
 	private Properties getProducerProperties() {
@@ -32,5 +41,9 @@ public class GraphiteProducer {
 		Properties props = propManager.getProducerGridProperties();
 		return props;
     }
+	
+	public void close() {
+		producer.close();
+	}
 	
 }
