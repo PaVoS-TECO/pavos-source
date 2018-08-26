@@ -1,4 +1,4 @@
-package server.core.controller;
+package server.core.controller.Process;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
