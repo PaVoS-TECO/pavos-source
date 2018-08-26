@@ -150,7 +150,7 @@ public class CSVWriterStrategy implements FileWriterStrategy {
 	private boolean isContainedInClusters(JSONObject location) {
 		// TODO
 		// uses this.clusters to check
-		return false;
+		return true;
 	}
 	
 	private void saveToFile() {
