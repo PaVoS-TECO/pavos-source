@@ -18,6 +18,8 @@ public class FileExporter {
     public FileExporter(ExportProperties properties, String downloadID) {
     	this.properties = properties;
     	this.ads =  new AlterableDownloadState(downloadID);
+    	this.ads.setFilePreparingForDownload();
+    	this.ads.savePersistent();
     }
 
     /**

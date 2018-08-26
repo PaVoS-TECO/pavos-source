@@ -30,6 +30,13 @@ public class AlterableDownloadState extends DownloadState {
     public void setFileReadyForDownload() {
         super.ready = "true";
     }
+
+    /**
+     * Validate, that the File is ready to be downloaded.
+     */
+    public void setFilePreparingForDownload() {
+        super.ready = "false";
+    }
     
     /**
      * Validate, that the File had an error and can not be downloaded.
