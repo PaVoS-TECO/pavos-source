@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import server.core.grid.exceptions.GridNotFoundException;
 import server.core.grid.exceptions.PointNotOnMapException;
@@ -19,27 +18,19 @@ public final class GeoGridManager {
 	
 	private static GeoGridManager instance;
 	private List<GeoGrid> grids = new ArrayList<>();
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-	private Thread updateThread = new Thread(new Runnable() {
+	private ScheduledExecutorService execUpdate = Executors.newSingleThreadScheduledExecutor();
+	
+	private GeoGridManager() {
+		execUpdate.scheduleAtFixedRate(new Runnable() {
 
-		@Override
-		public void run() {
-			while(true) {
+			@Override
+			public void run() {
 				for (GeoGrid grid : grids) {
 					grid.updateObservations();
 				}
-				try {
-					TimeUnit.SECONDS.sleep(10);
-				} catch (InterruptedException e) {
-					logger.info("Process [Update Observations] sleeping schedule was interrupted. Attempting to run now." + e);
-				}
 			}
-		}
-		
-	});
-	
-	private GeoGridManager() {
-		updateThread.start();
+			
+		}, 0, 10, TimeUnit.SECONDS);
 	}
 	
 	public static GeoGridManager getInstance() {
