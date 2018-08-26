@@ -31,7 +31,7 @@ public class FileExporter {
     	try {
 			FileWriterStrategy fileWriter = fileType.getFileWriter();
 			String filename = this.ads.getID() + "." + extension;
-			String dirPath = System.getProperty("user.dir") + File.separator + "exports";
+			String dirPath = System.getProperty("user.home") + File.separator + "exports";
 	    	String path = dirPath + File.separator + filename;
 	    	File directory = new File(dirPath);
 	    	if (!directory.exists()) {
