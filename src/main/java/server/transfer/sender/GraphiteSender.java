@@ -66,6 +66,7 @@ public class GraphiteSender extends Sender {
 			outputStream.write(header);
 			outputStream.write(payload.toBytes());
 			outputStream.flush();
+			outputStream.close();
 		} catch (IOException e) {
 			logger.error("Failed writing to Graphite.", e);
 			return false;
@@ -101,6 +102,7 @@ public class GraphiteSender extends Sender {
 			outputStream.write(header);
 			outputStream.write(payload.toBytes());
 			outputStream.flush();
+			outputStream.close();
 		} catch (IOException e) {
 			logger.error("Failed writing to Graphite.", e);
 			return false;
