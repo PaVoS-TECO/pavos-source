@@ -20,10 +20,9 @@ public class RuntimeGenerator {
 			public void run() {
 				
 					while (true) {
+						sleep(8);
 						grid.addObservation(randomLocation(), generateRandom(randomSensor(), "temperature_celsius", 40.0));
-						sleep(2);
 						grid.addObservation(randomLocation(), generateRandom(randomSensor(), "pM_10", 40.0));
-						sleep(2);
 					}
 			}
 		});

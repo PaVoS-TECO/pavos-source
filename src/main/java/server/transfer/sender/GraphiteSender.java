@@ -45,19 +45,22 @@ public class GraphiteSender extends Sender {
 	 * @return 
 	 */
 	public boolean send(Collection<ObservationData> records) {
+		PyList list = new PyList();
+		
+		for (ObservationData record : records) {
+			GraphiteConverter.addObservations(record, list);
+		}
+		
+		System.out.println(records);
+		System.out.println(list);
+		
+		PyString payload = cPickle.dumps(list);
+		byte[] header = ByteBuffer.allocate(4).putInt(payload.__len__()).array();
+		
 		if (som.isConnectionClosed()) {
 			som.reconnect();
 		}
 		
-		PyList list = new PyList();
-
-		records.forEach((data) -> {
-			GraphiteConverter.addObservations(data, list);
-		});
-
-		PyString payload = cPickle.dumps(list);
-		byte[] header = ByteBuffer.allocate(4).putInt(payload.__len__()).array();
-
 		try {
 			OutputStream outputStream = som.getOutputStream();
 			outputStream.write(header);
