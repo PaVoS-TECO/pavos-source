@@ -13,6 +13,8 @@ public class SimpleGradient {
 	}
 	
 	public Color getColorAt(double position) {
+		if (position < 0.0) position = 0.0;
+		if (position > 1.0) position = 1.0;
 		float r = getValueInBetween(cStart.getRed(), cEnd.getRed(), position);
 		float g = getValueInBetween(cStart.getGreen(), cEnd.getGreen(), position);
 		float b = getValueInBetween(cStart.getBlue(), cEnd.getBlue(), position);
