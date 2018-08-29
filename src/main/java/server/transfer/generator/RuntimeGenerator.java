@@ -1,6 +1,7 @@
 package server.transfer.generator;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.concurrent.TimeUnit;
 
 import server.core.grid.GeoGrid;
@@ -11,7 +12,7 @@ import server.transfer.sender.util.TimeUtil;
 
 public class RuntimeGenerator {
 	
-	private static GeoGrid grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
+	private static GeoGrid grid = new GeoRecRectangleGrid(new Rectangle2D.Double(- WorldMapData.lngRange, - WorldMapData.latRange, WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
 	
 	public static void main(String[] args) {
 		

@@ -33,6 +33,7 @@ public class WebWorker implements Runnable {
 	private BufferedReader in;
 	private PrintWriter out;
 	private int statusCode = HttpStatus.SC_OK;
+	private String[] req;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
     public WebWorker(Socket socket) {
@@ -49,20 +50,24 @@ public class WebWorker implements Runnable {
 	        String request = in.readLine();
 	        if (request.startsWith("GET /") && request.endsWith(" HTTP/1.1")) {
 	        	request = request.replaceFirst("GET /", "").replaceFirst(" HTTP/1.1", "");
+	        } else {
+	        	statusCode = HttpStatus.SC_FORBIDDEN;
+				printOut(null);
+	        	shutdownConnection();
 	        }
 	        
-	        String[] splitRequest = request.split("\\?", 2);
-	        String type = splitRequest[0];
+	        req = request.split("\\?", 2);
+	        String type = req[0];
 			try {
-				splitRequest = splitRequest[1].split("&");
+				req = req[1].split("&");
 				if (type.equals("getGeoJsonCluster")) {
-					getGeoJsonCluster(splitRequest, out);
+					getGeoJsonCluster(out);
 				} else if (type.equals("getGeoJsonSensor")) {
-					getGeoJsonSensor(splitRequest, out);
+					getGeoJsonSensor(out);
 				} else if (type.equals("reportSensor")) {
-					reportSensor(splitRequest, out);
+					reportSensor(out);
 				} else if (type.equals("getObservationTypes")) {
-					getObservationTypes(splitRequest, out);
+					getObservationTypes(out);
 				}
 			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException | NullPointerException e) {
 				statusCode = HttpStatus.SC_BAD_REQUEST;
@@ -72,12 +77,12 @@ public class WebWorker implements Runnable {
 	        shutdownConnection();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Processing socket request was interrupted. Attempting to close socket now.", e);
         } finally {
             try {
                 clientSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Could not close socket!", e);
             }
         }
 	}
@@ -96,25 +101,25 @@ public class WebWorker implements Runnable {
 		}
 	}
 	
-	private void getObservationTypes(String[] req, PrintWriter out) {
+	private void getObservationTypes(PrintWriter out) {
 		GeoGridManager manager = GeoGridManager.getInstance();
 	    printOut(manager.getAllProperties().toString());
 	}
 
-	private void reportSensor(String[] req, PrintWriter out) {
-		String sensor = getParameter(req, "sensorID");
-		String reason = getParameter(req, "reason");
+	private void reportSensor(PrintWriter out) {
+		String sensor = getParameter("sensorID");
+		String reason = getParameter("reason");
 		InetAddress ip = clientSocket.getInetAddress();
 		logger.info("[Webinterface][Sensor-Reported] Sensor = " + sensor + ", reason = " + reason + ", ip = " + ip.getHostAddress());
 	    printOut("Sensor reported successfully!");
 	}
 
-	private void getGeoJsonSensor(String[] req, PrintWriter out) {
+	private void getGeoJsonSensor(PrintWriter out) {
 		String result = null;
 		try {
-		String gridID = getParameter(req, "gridID");
-		String sensorID = getParameter(req, "sensorID");
-		String keyProperty = getParameter(req, "property");
+		String gridID = getParameter("gridID");
+		String sensorID = getParameter("sensorID");
+		String keyProperty = getParameter("property");
 		
 		result = getLiveDataSensor(sensorID, gridID, keyProperty);
 		} catch (IllegalArgumentException e) {
@@ -123,9 +128,9 @@ public class WebWorker implements Runnable {
 	    printOut(result);
 	}
 
-	private void getGeoJsonCluster(String[] req, PrintWriter out) throws IllegalArgumentException {
-		String fusedClusterIDs = getParameter(req, "clusterID");
-		String keyProperty = getParameter(req, "property");
+	private void getGeoJsonCluster(PrintWriter out) throws IllegalArgumentException {
+		String fusedClusterIDs = getParameter("clusterID");
+		String keyProperty = getParameter("property");
 		String[] clusterIDs = fusedClusterIDs.split(",");
 		String gridID = null;
 		for (int i = 0; i < clusterIDs.length; i++) {
@@ -141,11 +146,11 @@ public class WebWorker implements Runnable {
 		
 		String result = null;
 		try {
-			String fusedTime = getParameter(req, "time");
+			String fusedTime = getParameter("time");
 			
 			String[] time = fusedTime.split(",");
 			
-			String stepsString = getParameter(req, "steps");
+			String stepsString = getParameter("steps");
 			
 			result = getDatabaseDataCluster(gridID, keyProperty, clusterIDs, time, stepsString);
 		} catch(IllegalArgumentException e) {
@@ -247,10 +252,10 @@ public class WebWorker implements Runnable {
 		return gridManager.getGrid(gridID);
 	}
 	
-	private String getParameter(String[] source, String parameter) throws IllegalArgumentException {
-		for (int i = 0; i < source.length; i++) {
-			if (source[i].startsWith(parameter + "=")) {
-				return source[i].replaceFirst(parameter + "=", "");
+	private String getParameter(String parameter) throws IllegalArgumentException {
+		for (int i = 0; i < req.length; i++) {
+			if (req[i].startsWith(parameter + "=")) {
+				return req[i].replaceFirst(parameter + "=", "");
 			}
 		}
 		throw new IllegalArgumentException(parameter);
@@ -274,6 +279,9 @@ public class WebWorker implements Runnable {
 		switch (statusCode) {
 		case HttpStatus.SC_BAD_REQUEST:
 			out.write("Error " + statusCode + " - Requested parameters do not match internal data.");
+			break;
+		case HttpStatus.SC_FORBIDDEN:
+			out.write("Error " + statusCode + " - Forbidden.");
 			break;
 		}
 	}

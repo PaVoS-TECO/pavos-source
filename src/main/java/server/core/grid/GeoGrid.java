@@ -2,6 +2,7 @@ package server.core.grid;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ import server.transfer.producer.GraphiteProducer;
  */
 public abstract class GeoGrid {
 	
-	public final Point2D.Double MAP_BOUNDS;
+	public final Rectangle2D.Double MAP_BOUNDS;
 	public final int ROWS;
 	public final int COLUMNS;
 	public final int MAX_LEVEL;
@@ -43,7 +44,7 @@ public abstract class GeoGrid {
 	private final int CYCLES_UNTIL_RESET = 1;
 	private int cyclesDone = 0;
 	
-	public GeoGrid(Point2D.Double mapBounds, int rows, int columns, int maxLevel, String gridID) {
+	public GeoGrid(Rectangle2D.Double mapBounds, int rows, int columns, int maxLevel, String gridID) {
 		this.MAP_BOUNDS = mapBounds;
 		this.ROWS = rows;
 		this.COLUMNS = columns;

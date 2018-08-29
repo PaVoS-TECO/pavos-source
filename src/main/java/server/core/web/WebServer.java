@@ -1,6 +1,7 @@
 package server.core.web;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -19,13 +20,13 @@ public class WebServer {
 	private static WebServer instance;
 	
 	private WebServer() {
-		GeoGrid grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
+		GeoGrid grid = new GeoRecRectangleGrid(new Rectangle2D.Double(- WorldMapData.lngRange, - WorldMapData.latRange, WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
 		
 		ObservationData result = new ObservationData();
 		result.observationDate = TimeUtil.getUTCDateTimeNowString();
 		result.sensorID = "sensor12345";
 		result.observations.put("temperature_celsius", "40.0");
-		grid.addObservation(new Point2D.Double(50, 70), result);
+		grid.addObservation(new Point2D.Double(-50, -70), result);
 		
 		result = new ObservationData();
 		result.observationDate = TimeUtil.getUTCDateTimeNowString();
