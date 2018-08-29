@@ -71,6 +71,13 @@
       <version>5.0.0</version>
   	</dependency>
 
+	<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
+	<dependency>
+	  <groupId>org.apache.httpcomponents</groupId>
+	  <artifactId>httpcore</artifactId>
+	  <version>4.4.10</version>
+	</dependency>
+  	
     <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka -->
 	<dependency>
       <groupId>org.apache.kafka</groupId>

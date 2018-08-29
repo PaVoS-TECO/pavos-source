@@ -100,7 +100,7 @@ public abstract class GeoGrid {
 	public ObservationData getSensorObservation(String sensorID, Point2D.Double point) throws PointNotOnMapException, SensorNotFoundException {
 		GeoPolygon polygon = getPolygonContaining(point, MAX_LEVEL);
 		for (ObservationData observation : polygon.getSensorDataList()) {
-			if (observation.sensorID == sensorID) {
+			if (observation.sensorID.equals(sensorID)) {
 				return observation;
 			}
 		}
@@ -173,7 +173,6 @@ public abstract class GeoGrid {
 				if (i == 0) {
 					currentID.append(clusters[i]);
 					for (GeoPolygon polygon : this.polygons) {
-						System.out.println("currentID: " + currentID.toString());
 						if (polygon.ID.equals(currentID.toString())) {
 							result = polygon;
 							break;
@@ -183,7 +182,6 @@ public abstract class GeoGrid {
 				} else {
 					currentID.append(Seperators.CLUSTER_SEPERATOR + clusters[i]);
 					for (GeoPolygon polygon : result.getSubPolygons()) {
-						System.out.println("currentID: " + currentID.toString());
 						if (polygon.ID.equals(currentID.toString())) {
 							result = polygon;
 							break;

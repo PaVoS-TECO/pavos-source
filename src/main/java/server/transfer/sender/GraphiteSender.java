@@ -51,9 +51,6 @@ public class GraphiteSender extends Sender {
 			GraphiteConverter.addObservations(record, list);
 		}
 		
-		System.out.println(records);
-		System.out.println(list);
-		
 		PyString payload = cPickle.dumps(list);
 		byte[] header = ByteBuffer.allocate(4).putInt(payload.__len__()).array();
 		
