@@ -11,6 +11,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 
+/**
+ * Test of the CSVReaderStrategy
+ * @author Jean Baumgarten
+ */
 public class CSVReaderStrategyTest {
 
 	@Test
@@ -30,7 +34,7 @@ public class CSVReaderStrategyTest {
 			JSONParser parser = new JSONParser();
 			JSONObject obj = (JSONObject) parser.parse(json);
 			
-			assertTrue(((String) obj.get("@iot.id")).equals("import/1"));
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
 			assertTrue(((String) obj.get("name")).equals("name"));
 			assertTrue(((String) obj.get("description")).equals("description"));
 			assertTrue(((String) obj.get("definition")).equals("definition"));
@@ -74,7 +78,7 @@ public class CSVReaderStrategyTest {
 			JSONParser parser = new JSONParser();
 			JSONObject obj = (JSONObject) parser.parse(json);
 			
-			assertTrue(((String) obj.get("@iot.id")).equals("import/1"));
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
 			assertTrue(((String) obj.get("name")).equals("name"));
 			assertTrue(((String) obj.get("description")).equals("description"));
 			assertTrue(((String) obj.get("encodingType")).equals("encodingType"));
@@ -119,7 +123,7 @@ public class CSVReaderStrategyTest {
 			JSONParser parser = new JSONParser();
 			JSONObject obj = (JSONObject) parser.parse(json);
 			
-			assertTrue(((String) obj.get("@iot.id")).equals("import/1"));
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
 			assertTrue(((String) obj.get("name")).equals("name"));
 			assertTrue(((String) obj.get("description")).equals("description"));
 			assertTrue(((String) obj.get("encodingType")).equals("encodingType"));
@@ -164,7 +168,7 @@ public class CSVReaderStrategyTest {
 			JSONParser parser = new JSONParser();
 			JSONObject obj = (JSONObject) parser.parse(json);
 			
-			assertTrue(((String) obj.get("@iot.id")).equals("import/1"));
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
 			assertTrue(((String) obj.get("name")).equals("name"));
 			assertTrue(((String) obj.get("description")).equals("description"));
 			assertTrue(((String) obj.get("encodingType")).equals("encodingType"));
@@ -206,21 +210,18 @@ public class CSVReaderStrategyTest {
 			method = CSVReaderStrategy.class.getDeclaredMethod("getThing", String[].class);
 			method.setAccessible(true);
 			String json = (String) method.invoke(reader, new Object[] { data });
-			System.out.println(json);
 			JSONParser parser = new JSONParser();
 			JSONObject obj = (JSONObject) parser.parse(json);
 			
 			assertTrue(true);
-			assertTrue(((String) obj.get("@iot.id")).equals("import/1"));
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
 			assertTrue(((String) obj.get("name")).equals("name"));
 			assertTrue(((String) obj.get("description")).equals("description"));
 			assertTrue(((JSONObject) obj.get("properties")).toJSONString().equals("{\"a\":\"1\"}"));
 			JSONArray a = (JSONArray) obj.get("Locations");
-			System.out.println(a);
 			for (int i = 0; i < a.size(); i++) {
 				String o = "" + a.get(i);
-				System.out.println(o);
-				assertTrue(o.equals("{\"@iot.id\":\"import\\/1\"}") || o.equals("{\"@iot.id\":\"import\\/2\"}"));
+				assertTrue(o.equals("{\"@iot.id\":\"1\"}") || o.equals("{\"@iot.id\":\"2\"}"));
 			}
 			
 		} catch (NoSuchMethodException e) {

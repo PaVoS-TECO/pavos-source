@@ -23,4 +23,24 @@ public class NetCDFReaderStrategy implements FileReaderStrategy {
         // TODO implement here
     }
 
+    /**
+     * Set the prefix for the iot id of imported data
+     * @param prefix for imported data
+     */
+	@Override
+	public void setIotIdPrefix(String prefix) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+     * Set the dataTable of the Import
+     * @param dataTable of the Import
+     */
+	@Override
+	public void setDataTable(DataTable dataTable) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

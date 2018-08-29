@@ -71,6 +71,7 @@ public class DataTable extends AbstractTableModel {
 	public void setProgress(String file, int percent) {
 		
 		this.fileProgress.put(file, percent);
+		this.fireTableDataChanged();
 		
 	}
 

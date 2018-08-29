@@ -32,6 +32,7 @@ public class DataImporter implements ActionListener {
 	private ArrayList<String> files = new ArrayList<String>();
 
 	private JTextField urlField;
+	private JTextField prefixField;
 
 
 	/**
@@ -46,13 +47,13 @@ public class DataImporter implements ActionListener {
      */
     public void startImportingFileData() {
     	
-    	this.frame = new JFrame("PaVoS Importer");
+    	this.frame = new JFrame("PaVoS Import Manager");
         this.contentPane = this.frame.getContentPane();
         this.layout = new SpringLayout();
         this.contentPane.setLayout(layout);
         
         int w = 180;
-        int h = 80;
+        int h = 40;
         
         this.urlField = new JTextField("http://pavos-master.teco.edu/FROST-Server/v1.0/");
         contentPane.add(this.urlField);
@@ -60,13 +61,19 @@ public class DataImporter implements ActionListener {
         layout.putConstraint(SpringLayout.EAST, this.urlField, -20, SpringLayout.EAST, this.contentPane);
         layout.putConstraint(SpringLayout.NORTH, this.urlField, 20, SpringLayout.NORTH, this.contentPane);
         
+        this.prefixField = new JTextField("import/");
+        contentPane.add(this.prefixField);
+        layout.putConstraint(SpringLayout.WEST, this.prefixField, 20, SpringLayout.WEST, this.contentPane);
+        layout.putConstraint(SpringLayout.EAST, this.prefixField, -20, SpringLayout.EAST, this.contentPane);
+        layout.putConstraint(SpringLayout.NORTH, this.prefixField, 20, SpringLayout.SOUTH, this.urlField);
+        
         this.chooserButton = new JButton("Choose Files");
         chooserButton.setName("chooserButton");
         this.contentPane.add(chooserButton);
         this.layout.putConstraint(SpringLayout.WEST, chooserButton, 20, SpringLayout.WEST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, chooserButton, w + 20, SpringLayout.WEST, this.contentPane);
-        this.layout.putConstraint(SpringLayout.NORTH, chooserButton, 20, SpringLayout.SOUTH, this.urlField);
-        this.layout.putConstraint(SpringLayout.SOUTH, chooserButton, h + 20, SpringLayout.NORTH, this.contentPane);
+        this.layout.putConstraint(SpringLayout.NORTH, chooserButton, 20, SpringLayout.SOUTH, this.prefixField);
+        this.layout.putConstraint(SpringLayout.SOUTH, chooserButton, h + 20, SpringLayout.SOUTH, this.prefixField);
         chooserButton.addActionListener(this);
         
         this.importButton = new JButton("Import Files");
@@ -74,8 +81,8 @@ public class DataImporter implements ActionListener {
         this.contentPane.add(importButton);
         this.layout.putConstraint(SpringLayout.WEST, importButton, -(w + 20), SpringLayout.EAST, this.contentPane);
         this.layout.putConstraint(SpringLayout.EAST, importButton, -20, SpringLayout.EAST, this.contentPane);
-        this.layout.putConstraint(SpringLayout.NORTH, importButton, 20, SpringLayout.SOUTH, this.urlField);
-        this.layout.putConstraint(SpringLayout.SOUTH, importButton, h + 20, SpringLayout.NORTH, this.contentPane);
+        this.layout.putConstraint(SpringLayout.NORTH, importButton, 20, SpringLayout.SOUTH, this.prefixField);
+        this.layout.putConstraint(SpringLayout.SOUTH, importButton, h + 20, SpringLayout.SOUTH, this.prefixField);
         importButton.addActionListener(this);
         
         this.dataTable = new DataTable(this.chooserButton, this.importButton);
@@ -96,7 +103,7 @@ public class DataImporter implements ActionListener {
         
         this.frame.setSize(420, 360);
         this.frame.setResizable(false);
-        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // überschreiben wenn der Import läuft
+        this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setLocationRelativeTo(null);
         this.frame.setVisible(true);
         
@@ -133,6 +140,7 @@ public class DataImporter implements ActionListener {
             File[] files = opener.getSelectedFiles();
             for (File file : files) {
             	this.files.add(file.getAbsolutePath());
+            	this.dataTable.setFiles(this.files);
             }
             
             this.dataTable.fireTableDataChanged();
@@ -145,7 +153,6 @@ public class DataImporter implements ActionListener {
 		
 		this.chooserButton.setEnabled(false);
 		this.importButton.setEnabled(false);
-		this.frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
 		for (final String file : this.files) {
 			
@@ -153,7 +160,7 @@ public class DataImporter implements ActionListener {
 				
 	            public void run() {
 	            	
-	                FileImporter importer = new FileImporter(urlField.getText(), dataTable);
+	                FileImporter importer = new FileImporter(urlField.getText(), dataTable, prefixField.getText());
 	                importer.addFileData(new File(file));
 	                
 	            }

@@ -36,7 +36,7 @@ public class CSVReaderStrategy implements FileReaderStrategy {
     public CSVReaderStrategy(String url) {
     	
     	this.url = url;
-    	this.iotIDImport = ""; //import.date.YYYY/MM/DD.from.file.filename.csv/
+    	this.iotIDImport = "";
     	
     }
     
@@ -69,12 +69,24 @@ public class CSVReaderStrategy implements FileReaderStrategy {
     	
 		try {
 			
+			BufferedReader cbr = new BufferedReader(new FileReader(file));
+			int total = 0;
+			while (cbr.readLine() != null) {
+				total++;
+			}
+			
+			
 			BufferedReader br = new BufferedReader(new FileReader(file));
+			int number = 0;
 			String line;
 			
 			while ((line = br.readLine()) != null) {
 				
+				number++;
+				int percent = number * 100 / total;
+				this.dataTable.setProgress(file.getAbsolutePath(), percent);
 				String[] s = line.split("Ϣ");
+				
 				if (s.length >= 2) {
 					
 					if (s[0].equals(OBSERVED_PROPERTY) && s.length >= 5) {
@@ -345,8 +357,9 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         dataStream.put("@iot.id", iotIDImport + data[5]);
         obj.put("Datastream", dataStream);
         
+        // Here there has to be done a change
         JSONObject featureOI = new JSONObject();
-        featureOI.put("@iot.id", iotIDImport + data[6]);
+        featureOI.put("@iot.id", iotIDImport + "8828643"); // iotIDImport + data[6]
         obj.put("FeatureOfInterest", featureOI);
         
         JSONParser parser = new JSONParser();

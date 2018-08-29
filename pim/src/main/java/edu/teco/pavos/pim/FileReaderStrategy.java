@@ -16,8 +16,16 @@ public interface FileReaderStrategy {
      */
     void sendFileData(File file);
     
+    /**
+     * Set the prefix for the iot id of imported data
+     * @param prefix for imported data
+     */
     void setIotIdPrefix(String prefix);
     
-    public void setDataTable(DataTable dataTable);
+    /**
+     * Set the dataTable of the Import
+     * @param dataTable of the Import
+     */
+    void setDataTable(DataTable dataTable);
 
 }
