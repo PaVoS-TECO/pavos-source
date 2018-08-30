@@ -23,6 +23,9 @@ import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
+import server.core.visualization.GradientManager;
+import server.core.visualization.GradientRange;
+import server.core.visualization.gradients.MultiGradient;
 import server.database.Facade;
 import server.transfer.data.ObservationData;
 import server.transfer.sender.util.TimeUtil;
@@ -61,13 +64,17 @@ public class WebWorker implements Runnable {
 			try {
 				req = req[1].split("&");
 				if (type.equals("getGeoJsonCluster")) {
-					getGeoJsonCluster(out);
+					getGeoJsonCluster();
 				} else if (type.equals("getGeoJsonSensor")) {
-					getGeoJsonSensor(out);
+					getGeoJsonSensor();
 				} else if (type.equals("reportSensor")) {
-					reportSensor(out);
+					reportSensor();
 				} else if (type.equals("getObservationTypes")) {
-					getObservationTypes(out);
+					getObservationTypes();
+				} else if (type.equals("getGradient")) {
+					getGradient();
+				} else if (type.equals("getGradientRange")) {
+					getGradientRange();
 				}
 			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException | NullPointerException e) {
 				statusCode = HttpStatus.SC_BAD_REQUEST;
@@ -87,6 +94,21 @@ public class WebWorker implements Runnable {
         }
 	}
 	
+	private void getGradientRange() {
+		String gradientName = getParameter("gradientName");
+		String rangeName = getParameter("rangeName");
+		GradientManager manager = GradientManager.getInstance();
+		GradientRange range = manager.getRangeFromName(gradientName, rangeName);
+		out.write(range.toString());
+	}
+
+	private void getGradient() {
+		String name = getParameter("name");
+		GradientManager manager = GradientManager.getInstance();
+		MultiGradient gradient = manager.getGradient(name);
+		out.write(gradient.toString());
+	}
+
 	private void shutdownConnection() {
 		out.close();
         try {
@@ -101,12 +123,12 @@ public class WebWorker implements Runnable {
 		}
 	}
 	
-	private void getObservationTypes(PrintWriter out) {
+	private void getObservationTypes() {
 		GeoGridManager manager = GeoGridManager.getInstance();
 	    printOut(manager.getAllProperties().toString());
 	}
 
-	private void reportSensor(PrintWriter out) {
+	private void reportSensor() {
 		String sensor = getParameter("sensorID");
 		String reason = getParameter("reason");
 		InetAddress ip = clientSocket.getInetAddress();
@@ -114,7 +136,7 @@ public class WebWorker implements Runnable {
 	    printOut("Sensor reported successfully!");
 	}
 
-	private void getGeoJsonSensor(PrintWriter out) {
+	private void getGeoJsonSensor() {
 		String result = null;
 		try {
 		String gridID = getParameter("gridID");
@@ -128,7 +150,7 @@ public class WebWorker implements Runnable {
 	    printOut(result);
 	}
 
-	private void getGeoJsonCluster(PrintWriter out) throws IllegalArgumentException {
+	private void getGeoJsonCluster() throws IllegalArgumentException {
 		String fusedClusterIDs = getParameter("clusterID");
 		String keyProperty = getParameter("property");
 		String[] clusterIDs = fusedClusterIDs.split(",");

@@ -4,11 +4,15 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import server.core.visualization.util.ColorUtil;
+
 public class MultiGradient {
 	
 	private List<SimpleGradient> gradients = new ArrayList<>();
+	public final String NAME;
 	
-	public MultiGradient(Color... colors) {
+	public MultiGradient(String name, Color... colors) {
+		this.NAME = name;
 	    if (colors.length < 1) {
 	    	gradients.add(new SimpleGradient(new Color(0, 0, 0), new Color(0, 0, 0)));
 	    } else if (colors.length == 1) {
@@ -18,6 +22,34 @@ public class MultiGradient {
 				gradients.add(new SimpleGradient(colors[i], colors[i + 1]));
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		Color[] colors = getColors();
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < colors.length - 1; i++) {
+			builder.append(ColorUtil.getHexFromColor(colors[i]) + ",");
+		}
+		builder.append(ColorUtil.getHexFromColor(colors[colors.length - 1]));
+		return builder.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (!o.getClass().equals(this.getClass())) return false;
+		MultiGradient oGrad = (MultiGradient) o;
+		if (!oGrad.NAME.equals(this.NAME)) return false;
+		return true;
+	}
+	
+	public Color[] getColors() {
+		Color[] colors = new Color[gradients.size() + 1];
+		colors[0] = gradients.get(0).cStart;
+		for (int i = 0; i < gradients.size(); i++) {
+			colors[i + 1] = gradients.get(i).cEnd;
+		}
+		return colors;
 	}
 	
 	public Color getColorAt(double position) {
