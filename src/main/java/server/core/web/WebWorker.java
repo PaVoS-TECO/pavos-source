@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Properties;
 
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
@@ -23,6 +24,8 @@ import server.core.grid.exceptions.PointNotOnMapException;
 import server.core.grid.exceptions.SensorNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
 import server.core.grid.polygon.GeoPolygon;
+import server.core.properties.GradientPropertiesFileManager;
+import server.core.properties.PropertyFileReader;
 import server.core.visualization.GradientManager;
 import server.core.visualization.GradientRange;
 import server.core.visualization.gradients.MultiGradient;
@@ -75,6 +78,8 @@ public class WebWorker implements Runnable {
 					getGradient();
 				} else if (type.equals("getGradientRange")) {
 					getGradientRange();
+				} else if (type.equals("getAllGradients")) {
+					getAllGradients();
 				}
 			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException | NullPointerException e) {
 				statusCode = HttpStatus.SC_BAD_REQUEST;
@@ -94,6 +99,12 @@ public class WebWorker implements Runnable {
         }
 	}
 	
+	private void getAllGradients() {
+		GradientPropertiesFileManager manager = GradientPropertiesFileManager.getInstance();
+		Properties prop = PropertyFileReader.readPropertyFile(manager.gradientPropertyFilePath);
+		out.write(prop.toString());
+	}
+
 	private void getGradientRange() {
 		String gradientName = getParameter("gradientName");
 		String rangeName = getParameter("rangeName");

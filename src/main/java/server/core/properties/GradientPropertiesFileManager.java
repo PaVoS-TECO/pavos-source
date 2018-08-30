@@ -6,7 +6,7 @@ import java.util.Properties;
 public class GradientPropertiesFileManager {
 	
 	private Properties properties;
-	private String kafkaPropertyFilePath = "src/main/resources/defaultGradients.properties";
+	public final String gradientPropertyFilePath = "src/main/resources/defaultGradients.properties";
 	private static GradientPropertiesFileManager instance;
 	
 	/**
@@ -36,7 +36,7 @@ public class GradientPropertiesFileManager {
 	
 	private void loadGradientProperties() {
 		try {
-			properties = PropertyFileReader.readPropertyFile(kafkaPropertyFilePath);
+			properties = PropertyFileReader.readPropertyFile(gradientPropertyFilePath);
 
 			// check if properties file is missing keys
 
