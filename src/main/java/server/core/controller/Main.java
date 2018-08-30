@@ -4,9 +4,9 @@ package server.core.controller;
 
 import org.python.modules.thread.thread;
 
-import server.core.controller.Process.ExportMergeProcess;
-import server.core.controller.Process.GridProcess;
-import server.core.controller.Process.MergeObsToFoiProcess;
+import server.core.controller.process.ExportMergeProcess;
+import server.core.controller.process.GridProcess;
+import server.core.controller.process.MergeObsToFoiProcess;
 import server.core.grid.GeoGrid;
 
 import server.core.properties.KafkaTopicAdmin;

@@ -1,4 +1,4 @@
-package server.core.controller.Process;
+package server.core.controller.process;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
@@ -19,6 +19,8 @@ import org.codehaus.jackson.type.TypeReference;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import server.core.grid.GeoGrid;
 import server.core.grid.GeoRecRectangleGrid;
@@ -34,15 +36,14 @@ import server.transfer.sender.util.TimeUtil;
 
 public class GridProcess implements ProcessInterface, Runnable {
 
-	private Properties props;
-	private int timeIntervall;
-	private String inputTopic;
-	private int roundsCounter;
-	private final String threadName = "GridProcess";
-
+	private static final String threadName = "GridProcess";
 	private boolean threadBoolean = true;
+	private int roundsCounter;
+	private int timeIntervall;	
+	private String inputTopic;
+	private Properties props;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	private Thread thread;
-
 	private CountDownLatch countdownLatch = null;
 	private volatile GeoGrid grid;
 

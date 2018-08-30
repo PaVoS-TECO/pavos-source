@@ -1,4 +1,4 @@
-package server.core.controller.Process;
+package server.core.controller.process;
 
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;

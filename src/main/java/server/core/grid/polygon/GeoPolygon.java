@@ -17,6 +17,7 @@ import org.joda.time.DateTime;
 
 import server.core.grid.exceptions.ClusterNotFoundException;
 import server.core.grid.geojson.GeoJsonConverter;
+import server.core.grid.polygon.math.Tuple2D;
 import server.core.grid.polygon.math.Tuple3D;
 import server.transfer.data.ObservationData;
 import server.transfer.data.util.GridTopicTranslator;
@@ -348,7 +349,11 @@ public abstract class GeoPolygon {
 			for (Tuple3D<String, Integer, Double> tuple : values) {
 				if (tuple.getFirstValue().equals(property)) {
 					if (!anyEntry) anyEntry = true;
-					addWeightedData(tuple, value, totalSensors);
+					Tuple2D<Double, Integer> weight = addWeightedData(tuple, value, totalSensors);
+					if (weight != null) {
+						value = weight.getFirstValue();
+						totalSensors = weight.getSecondValue();
+					}
 				}
 			}
 			if (totalSensors != 0) value = value / (double) totalSensors;
@@ -365,10 +370,11 @@ public abstract class GeoPolygon {
 		}
 	}
 	
-	private void addWeightedData(Tuple3D<String, Integer, Double> tuple, double value, int totalSensors) {
-		if (tuple.getFirstValue() == null || tuple.getSecondValue() == null || tuple.getThirdValue() == null) return; 
-		value += tuple.getThirdValue().doubleValue() * tuple.getSecondValue().doubleValue();
-		totalSensors += tuple.getSecondValue().intValue();
+	private Tuple2D<Double, Integer> addWeightedData(Tuple3D<String, Integer, Double> tuple, double value, int totalSensors) {
+		if (tuple.getFirstValue() == null || tuple.getSecondValue() == null || tuple.getThirdValue() == null) return null; 
+		return new Tuple2D<Double, Integer>(
+				value + tuple.getThirdValue().doubleValue() * tuple.getSecondValue().doubleValue(), 
+				totalSensors + tuple.getSecondValue().intValue());
 	}
 	
 	public Collection<String> getProperties() {
@@ -400,6 +406,8 @@ public abstract class GeoPolygon {
 	
 	private DateTime earliestDateTime(DateTime dt1, DateTime dt2) {
 		if ((dt1 == null && dt2 == null)) return null;
+		if (dt1 == null) return dt2;
+		if (dt2 == null) return dt1;
 		DateTime result = new DateTime(dt1.getMillis());
 		if (dt1.isBefore(dt2)) result = dt2;
 		return result;

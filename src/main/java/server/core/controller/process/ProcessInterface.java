@@ -1,4 +1,4 @@
-package server.core.controller.Process;
+package server.core.controller.process;
 
 import org.apache.kafka.streams.StreamsBuilder;
 
