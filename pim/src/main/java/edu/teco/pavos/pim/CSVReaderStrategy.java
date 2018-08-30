@@ -351,12 +351,19 @@ public class CSVReaderStrategy implements FileReaderStrategy {
 		obj.put("@iot.id", iotIDImport + data[1]);
         obj.put("phenomenonTime", data[2]);
         obj.put("result", data[3]);
-        obj.put("resultTime", nullify(data[4]));
+        
+        if (data[4].equals("null")) {
+        	obj.put("resultTime", data[2]);
+        } else {
+        	obj.put("resultTime", data[4]);
+        }
+        
         
         JSONObject dataStream = new JSONObject();
         dataStream.put("@iot.id", iotIDImport + data[5]);
         obj.put("Datastream", dataStream);
         
+        //TODO
         // Here there has to be done a change
         JSONObject featureOI = new JSONObject();
         featureOI.put("@iot.id", iotIDImport + "8828643"); // iotIDImport + data[6]
@@ -395,10 +402,6 @@ public class CSVReaderStrategy implements FileReaderStrategy {
         String json = obj.toJSONString();
         return json;
         
-    }
-    
-    private String nullify(String in) {
-    	return in.equals("null") ? null : in;
     }
 
 }

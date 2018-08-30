@@ -213,7 +213,6 @@ public class CSVReaderStrategyTest {
 			JSONParser parser = new JSONParser();
 			JSONObject obj = (JSONObject) parser.parse(json);
 			
-			assertTrue(true);
 			assertTrue(((String) obj.get("@iot.id")).equals("1"));
 			assertTrue(((String) obj.get("name")).equals("name"));
 			assertTrue(((String) obj.get("description")).equals("description"));
@@ -240,6 +239,142 @@ public class CSVReaderStrategyTest {
 			System.out.println(e.getLocalizedMessage());
 			assertTrue(false);
 		} catch (ParseException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		}
+		
+	}
+
+	@Test
+	public void getDataStreamTest() {
+		
+		CSVReaderStrategy reader = new CSVReaderStrategy("");
+		String[] data = {
+				"", "1", "name", "description", "observationType", "{\"a\":\"1\"}", "2", "3", "4"
+		};
+		
+		Method method;
+		try {
+			
+			method = CSVReaderStrategy.class.getDeclaredMethod("getDataStream", String[].class);
+			method.setAccessible(true);
+			String json = (String) method.invoke(reader, new Object[] { data });
+			JSONParser parser = new JSONParser();
+			JSONObject obj = (JSONObject) parser.parse(json);
+			
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
+			assertTrue(((String) obj.get("name")).equals("name"));
+			assertTrue(((String) obj.get("description")).equals("description"));
+			assertTrue(((String) obj.get("observationType")).equals("observationType"));
+			assertTrue(((JSONObject) obj.get("unitOfMeasurement")).toJSONString().equals("{\"a\":\"1\"}"));
+			assertTrue(((JSONObject) obj.get("Thing")).toJSONString().equals("{\"@iot.id\":\"2\"}"));
+			assertTrue(((JSONObject) obj.get("ObservedProperty")).toJSONString().equals("{\"@iot.id\":\"3\"}"));
+			assertTrue(((JSONObject) obj.get("Sensor")).toJSONString().equals("{\"@iot.id\":\"4\"}"));
+			
+		} catch (NoSuchMethodException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (SecurityException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (IllegalAccessException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (InvocationTargetException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (ParseException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		}
+		
+	}
+
+	@Test
+	public void getObservationTest() {
+		
+		CSVReaderStrategy reader = new CSVReaderStrategy("");
+		String[] data = {
+				"", "1", "phenomenonTime", "result", "resultTime", "2", "3",
+				"resultQuality", "validTime", "{\"a\":\"1\"}"
+		};
+		
+		Method method;
+		try {
+			
+			method = CSVReaderStrategy.class.getDeclaredMethod("getObservation", String[].class);
+			method.setAccessible(true);
+			String json = (String) method.invoke(reader, new Object[] { data });
+			JSONParser parser = new JSONParser();
+			JSONObject obj = (JSONObject) parser.parse(json);
+			
+			assertTrue(true);
+			assertTrue(((String) obj.get("@iot.id")).equals("1"));
+			assertTrue(((String) obj.get("phenomenonTime")).equals("phenomenonTime"));
+			assertTrue(((String) obj.get("result")).equals("result"));
+			assertTrue(((String) obj.get("resultTime")).equals("resultTime"));
+			assertTrue(((JSONObject) obj.get("Datastream")).toJSONString().equals("{\"@iot.id\":\"2\"}"));
+			//assertTrue(((JSONObject) obj.get("FeatureOfInterest")).toJSONString().equals("{\"@iot.id\":\"3\"}"));
+			assertTrue(((String) obj.get("resultQuality")).equals("resultQuality"));
+			assertTrue(((String) obj.get("validTime")).equals("validTime"));
+			assertTrue(((JSONObject) obj.get("parameters")).toJSONString().equals("{\"a\":\"1\"}"));
+			
+		} catch (NoSuchMethodException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (SecurityException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (IllegalAccessException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (InvocationTargetException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (ParseException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		}
+		
+	}
+
+	@Test
+	public void nullifyTest() {
+		
+		CSVReaderStrategy reader = new CSVReaderStrategy("");
+		String data1 = "null";
+		String data2 = "notnull";
+		
+		Method method;
+		try {
+			
+			method = CSVReaderStrategy.class.getDeclaredMethod("nullify", String.class);
+			method.setAccessible(true);
+			String reponse1 = (String) method.invoke(reader, new Object[] { data1 });
+			String reponse2 = (String) method.invoke(reader, new Object[] { data2 });
+			
+			assertTrue(reponse1 == null);
+			assertTrue(reponse2.equals("notnull"));
+			
+		} catch (NoSuchMethodException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (SecurityException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (IllegalAccessException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (IllegalArgumentException e) {
+			System.out.println(e.getLocalizedMessage());
+			assertTrue(false);
+		} catch (InvocationTargetException e) {
 			System.out.println(e.getLocalizedMessage());
 			assertTrue(false);
 		}
