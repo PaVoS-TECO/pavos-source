@@ -50,8 +50,8 @@ public class RuntimeGenerator {
 	}
 	
 	private static Point2D.Double randomLocation() {
-		double x = Math.random() * grid.MAP_BOUNDS.getX();
-		double y = Math.random() * grid.MAP_BOUNDS.getY();
+		double x = Math.random() * grid.mapBounds.getX();
+		double y = Math.random() * grid.mapBounds.getY();
 		return new Point2D.Double(x, y);
 	}
 	

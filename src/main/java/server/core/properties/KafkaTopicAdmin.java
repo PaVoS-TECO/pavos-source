@@ -12,11 +12,14 @@ import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicListing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class KafkaTopicAdmin {
 
 	private AdminClient admin;
 	private static KafkaTopicAdmin instance;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private KafkaTopicAdmin() {
 		init();
@@ -38,14 +41,14 @@ public final class KafkaTopicAdmin {
 		admin = AdminClient.create(adminp);
 	}
 
-	public boolean existsTopic(String topicName) {
+	public boolean existsTopic(String topicName) throws InterruptedException {
 		Collection<String> topicNames = new ArrayList<>();
 		topicNames.add(topicName);
 
 		return existsTopic(topicNames);
 	}
 
-	public boolean existsTopic(String topicName1, String topicName2) {
+	public boolean existsTopic(String topicName1, String topicName2) throws InterruptedException {
 		Collection<String> topicNames = new ArrayList<>();
 		topicNames.add(topicName1);
 		topicNames.add(topicName2);
@@ -53,18 +56,14 @@ public final class KafkaTopicAdmin {
 		return existsTopic(topicNames);
 	}
 
-	public boolean existsTopic(Collection<String> topicNames) {
+	public boolean existsTopic(Collection<String> topicNames) throws InterruptedException {
 		Collection<TopicListing> allListings = getExistingTopics();
-		Collection<TopicListing> listingsToCheck = new ArrayList<TopicListing>();
+		Collection<TopicListing> listingsToCheck = new ArrayList<>();
 
 		for (String topicName : topicNames) {
 			listingsToCheck.add(new TopicListing(topicName, false));
 		}
-		if (!containsAllTopicListings(allListings, listingsToCheck)) {
-			return false;
-		} else {
-			return true;
-		}
+		return containsAllTopicListings(allListings, listingsToCheck);
 	}
 	
 	private boolean containsAllTopicListings(Collection<TopicListing> allListings, Collection<TopicListing> listingsToCheck) {
@@ -76,28 +75,31 @@ public final class KafkaTopicAdmin {
 				}
 			}
 		}
-		if (num == listingsToCheck.size()) return true;
-		return false;
+		return num == listingsToCheck.size();
 	}
 	
-	private Collection<TopicListing> getExistingTopics() {
+	private Collection<TopicListing> getExistingTopics() throws InterruptedException {
 		Collection<TopicListing> topicListings = new ArrayList<>();
 		try {
 			topicListings = admin.listTopics().listings().get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("Interrupted while trying to check Kafka topics.", e);
+			throw new InterruptedException();
 		}
 		return topicListings;
 	}
 
 	public boolean deleteTopic(String topic) {
-		Collection<TopicListing> topicListings = getExistingTopics();
+		Collection<TopicListing> topicListings;
+		try {
+			topicListings = getExistingTopics();
+		} catch (InterruptedException e) {
+			return false;
+		}
 		TopicListing tl = new TopicListing(topic, false);
 		if (!topicListings.contains(tl)) return true;
 
-		Collection<String> topicsToRemove = new ArrayList<String>();
+		Collection<String> topicsToRemove = new ArrayList<>();
 		topicsToRemove.add(topic);
 		DeleteTopicsResult result = admin.deleteTopics(topicsToRemove);
 
@@ -109,7 +111,11 @@ public final class KafkaTopicAdmin {
 	}
 	
 	public boolean createTopic(String topic, int partitions, short replicationFactor) {
-		if (existsTopic(topic)) return true;
+		try {
+			if (existsTopic(topic)) return true;
+		} catch (InterruptedException e) {
+			return createTopic(topic, partitions, replicationFactor);
+		}
 		
 		NewTopic newTopic = new NewTopic(topic, partitions, replicationFactor);
 		Collection<NewTopic> newTopics = new HashSet<>();

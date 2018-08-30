@@ -150,7 +150,7 @@ public final class GeoJsonBuilder {
 		polyBuilder.append(toEntry("content") + ": [ ");
 		int count = 1;
 		for (GeoPolygon sub2Polygon : subPolygons) {
-			polyBuilder.append(toEntry(sub2Polygon.ID));
+			polyBuilder.append(toEntry(sub2Polygon.id));
 			if (count < subPolygons.size()) {
 				polyBuilder.append(COMMA);
 			}

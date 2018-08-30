@@ -49,7 +49,7 @@ public final class GeoGridManager {
 	
 	public GeoGrid getGrid(String gridID) {
 		for (GeoGrid entry : this.grids) {
-			if (entry.GRID_ID.equals(gridID)) {
+			if (entry.id.equals(gridID)) {
 				return entry;
 			}
 		}
@@ -62,7 +62,7 @@ public final class GeoGridManager {
 	
 	public boolean isGridActive(String gridID) {
 		for (GeoGrid entry : this.grids) {
-			if (entry.GRID_ID.equals(gridID)) {
+			if (entry.id.equals(gridID)) {
 				return true;
 			}
 		}
@@ -92,7 +92,7 @@ public final class GeoGridManager {
 	public ObservationData getSensorObservation(String sensorID, String gridID) 
 			throws GridNotFoundException, SensorNotFoundException, PointNotOnMapException {
 		for (GeoGrid grid : this.grids) {
-			if (grid.GRID_ID.equals(gridID)) {
+			if (grid.id.equals(gridID)) {
 				Point2D.Double point = grid.getSensorLocation(sensorID);
 				return grid.getSensorObservation(sensorID, point);
 			}

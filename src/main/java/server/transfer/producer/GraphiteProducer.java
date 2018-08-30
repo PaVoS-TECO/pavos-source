@@ -20,16 +20,26 @@ public class GraphiteProducer {
 	
 	public void produceMessage(String topic, ObservationData data) {
 		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
-		if (!kAdmin.existsTopic(topic)) {
-			kAdmin.createTopic(topic);
+		try {
+			if (!kAdmin.existsTopic(topic)) {
+				kAdmin.createTopic(topic);
+			}
+		} catch (InterruptedException e) {
+			produceMessage(topic, data);
+			return;
 		}
 		producer.send(new ProducerRecord<String, ObservationData>(topic, data));
 	}
 	
 	public void produceMessages(String topic, Collection<ObservationData> dataSet) {
 		KafkaTopicAdmin kAdmin = KafkaTopicAdmin.getInstance();
-		if (!kAdmin.existsTopic(topic)) {
-			kAdmin.createTopic(topic);
+		try {
+			if (!kAdmin.existsTopic(topic)) {
+				kAdmin.createTopic(topic);
+			}
+		} catch (InterruptedException e) {
+			produceMessages(topic, dataSet);
+			return;
 		}
 		for (ObservationData data : dataSet) {
 			producer.send(new ProducerRecord<String, ObservationData>(topic, data));
@@ -38,8 +48,7 @@ public class GraphiteProducer {
 	
 	private Properties getProducerProperties() {
 		KafkaPropertiesFileManager propManager = KafkaPropertiesFileManager.getInstance();
-		Properties props = propManager.getProducerGridProperties();
-		return props;
+		return propManager.getProducerGridProperties();
     }
 	
 	public void close() {
