@@ -21,18 +21,14 @@ public final class GeoGridManager {
 	private ScheduledExecutorService execUpdate = Executors.newSingleThreadScheduledExecutor();
 	
 	private GeoGridManager() {
-		execUpdate.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				for (GeoGrid grid : grids) {
-					grid.updateObservations();
-				}
+		execUpdate.scheduleAtFixedRate(() -> {
+			for (GeoGrid grid : grids) {
+				grid.updateObservations();
+				grid.transferSensorDataDirectly();
+				grid.updateDatabase();
+				grid.resetObservations();
 			}
-			
 		}, 0, 10, TimeUnit.SECONDS);
-		
-//		new Thread(WebServer.getInstance()).start();
 		
 	}
 	

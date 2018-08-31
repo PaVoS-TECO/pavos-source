@@ -50,16 +50,20 @@ public class WebServer {
 			getInstance();
 			shutdown = false;
 			while (!shutdown) {
-				try (Socket clientSocket = serverSocket.accept()) {
-				Thread t = new Thread(new WebWorker(clientSocket));
-				t.start();
-				} catch (Exception e) {
-					logger.error("Client-socket closed with an exception.", e);
-				}
+				processClients(serverSocket);
 			}
 			
 		} catch (Exception e) {
 			logger.error("Server-socket closed with an exception.", e);
+		}
+	}
+	
+	private static void processClients(ServerSocket serverSocket) {
+		try (Socket clientSocket = serverSocket.accept()) {
+			Thread t = new Thread(new WebWorker(clientSocket));
+			t.start();
+		} catch (Exception e) {
+			logger.error("Client-socket closed with an exception.", e);
 		}
 	}
 	

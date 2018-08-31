@@ -194,7 +194,7 @@ public abstract class GeoGrid {
 	
 	private GeoPolygon updatePolygonIfClusterMatches(String currentID, GeoPolygon input, List<GeoPolygon> polygons) {
 		GeoPolygon result = input;
-		for (GeoPolygon polygon : result .getSubPolygons()) {
+		for (GeoPolygon polygon : polygons) {
 			if (polygon.id.equals(currentID)) {
 				result = polygon;
 				break;

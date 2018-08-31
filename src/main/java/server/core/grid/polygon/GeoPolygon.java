@@ -348,20 +348,16 @@ public abstract class GeoPolygon {
 			
 			for (Tuple3D<String, Integer, Double> tuple : values) {
 				if (tuple.getFirstValue().equals(property)) {
-					if (!anyEntry) anyEntry = true;
 					Tuple2D<Double, Integer> weight = addWeightedData(tuple, value, totalSensors);
-					if (weight != null) {
+					if (weight != null && weight.getFirstValue() != null && weight.getSecondValue() != null) {
 						value = weight.getFirstValue();
 						totalSensors = weight.getSecondValue();
+						anyEntry = true;
 					}
 				}
 			}
-			if (totalSensors != 0) value = value / (double) totalSensors;
-			if (anyEntry) {
-				obs.observations.put(property, String.valueOf(value));
-			} else {
-				obs.observations.put(property, null);
-			}
+			value = (totalSensors != 0) ? value / (double) totalSensors : value;
+			obs.observations.put(property, anyEntry ? String.valueOf(value) : null);
 		}
 		if (anyEntry) {
 			obs.clusterID = this.id;
@@ -372,8 +368,7 @@ public abstract class GeoPolygon {
 	
 	private Tuple2D<Double, Integer> addWeightedData(Tuple3D<String, Integer, Double> tuple, double value, int totalSensors) {
 		if (tuple.getFirstValue() == null || tuple.getSecondValue() == null || tuple.getThirdValue() == null) return null; 
-		return new Tuple2D<Double, Integer>(
-				value + tuple.getThirdValue().doubleValue() * tuple.getSecondValue().doubleValue(), 
+		return new Tuple2D<>(value + tuple.getThirdValue().doubleValue() * tuple.getSecondValue().doubleValue(), 
 				totalSensors + tuple.getSecondValue().intValue());
 	}
 	
