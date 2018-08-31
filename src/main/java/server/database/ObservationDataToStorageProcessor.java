@@ -52,7 +52,7 @@ public class ObservationDataToStorageProcessor {
 		try {
 			counter = cli.get(observationData.clusterID);
 		} catch (TimeoutException | InterruptedException | MemcachedException e) {
-			interruptByException(e);
+			if (e.getClass().equals(InterruptedException.class)) Thread.currentThread().interrupt();
 			logger.warn("Could not get counter to clusterID " + observationData.clusterID, e);
 			return;
 		}
@@ -93,7 +93,7 @@ public class ObservationDataToStorageProcessor {
 		} catch (TimeoutException e) {
 			logger.warn("Timeout when saving ObservationData to memcached!", e);
 		} catch (InterruptedException | MemcachedException e) {
-			interruptByException(e);
+			if (e.getClass().equals(InterruptedException.class)) Thread.currentThread().interrupt();
 			logger.warn("Memcached error: " + e.getMessage(), e);
 		}
 	}
@@ -147,7 +147,7 @@ public class ObservationDataToStorageProcessor {
 		try {
 			counter = cli.get(clusterID);
 		} catch (TimeoutException | InterruptedException | MemcachedException e) {
-			interruptByException(e);
+			if (e.getClass().equals(InterruptedException.class)) Thread.currentThread().interrupt();
 			logger.warn("Could not get counter to clusterID " + clusterID, e);
 			return null;
 		}
@@ -189,7 +189,7 @@ public class ObservationDataToStorageProcessor {
 			logger.warn("Timeout when saving ObservationData to memcached!", e);
 			return null;
 		} catch (InterruptedException | MemcachedException e) {
-			interruptByException(e);
+			if (e.getClass().equals(InterruptedException.class)) Thread.currentThread().interrupt();
 			logger.warn("Memcached error: " + e.getMessage(), e);
 			return null;
 		} catch (ClassCastException e) {
@@ -230,14 +230,10 @@ public class ObservationDataToStorageProcessor {
 			HashSet<String> properties = cli.get(gridID);
 			return properties;
 		} catch (TimeoutException | InterruptedException | MemcachedException e) {
-			interruptByException(e);
+			if (e.getClass().equals(InterruptedException.class)) Thread.currentThread().interrupt();
 			logger.warn("Could not get observedProperties list", e);
 		}
 		return null;
-	}
-	
-	private void interruptByException(Exception e) {
-		if (e.getClass().equals(InterruptedException.class)) Thread.currentThread().interrupt();
 	}
 
 }
