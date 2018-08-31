@@ -145,7 +145,8 @@ public class WebWorker implements Runnable {
 		String sensor = getParameter("sensorID");
 		String reason = getParameter("reason");
 		InetAddress ip = clientSocket.getInetAddress();
-		logger.info(String.format("Reported sensor = %s, reason = %s, ip = %s", sensor, reason, ip.getHostAddress()));
+		String message = String.format("sensor = %s, reason = %s, ip = %s", sensor, reason, ip.getHostAddress());
+		logger.info("A sensor was reported: {}", message);
 	    printOut("Sensor reported successfully!", out);
 	}
 
