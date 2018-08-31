@@ -207,7 +207,7 @@ public class GridProcess implements ProcessInterface, Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Running " + THREAD_NAME);
+		logger.info("Starting thread: {}", THREAD_NAME);
 		Thread t = new Thread(() -> {
 			try {
 				apply();

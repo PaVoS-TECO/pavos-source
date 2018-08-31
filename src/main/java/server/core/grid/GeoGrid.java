@@ -79,7 +79,7 @@ public abstract class GeoGrid {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) return false;
+		if (o == null || !o.getClass().equals(this.getClass())) return false;
 		GeoGrid oGrid = (GeoGrid) o;
 		return (this.id.equals(oGrid.id));
 	}

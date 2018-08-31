@@ -29,6 +29,7 @@ import server.core.properties.KafkaPropertiesFileManager;
  */
 public class ExportMergeProcess implements ProcessInterface, Runnable {
 
+	private static final String FOI_DOUBLE_PARSE_EXCEPTION = "Could not parse FeatureOfInterest value to double.";
 	private Properties props;
 	private KafkaStreams kafkaStreams;
 	private static final String THREAD_NAME = "ExportProcess";
@@ -143,16 +144,13 @@ public class ExportMergeProcess implements ProcessInterface, Runnable {
 				(value, thing) -> {
 
 					JSONObject ds = toJson(value, "Datastream");
-					if(thing!= null) {
+					if (thing!= null) {
 						ds.put("Sensor", thing.toString());
 						value.put("Datastream", ds.toString());
-					}else {
+					} else {
 						value.put("Datastream", "NO Sensor VALUE FOUND");
 					}
 					
-
-					
-					// JSONObject jo = (JSONObject) new JSONParser().parse(value.toString());
 					return value;
 
 				});
@@ -196,14 +194,12 @@ public class ExportMergeProcess implements ProcessInterface, Runnable {
 	public String toJson(GenericRecord record, String stream, String key) {
 		JSONObject ds;
 		try {
-			ds = (JSONObject) new JSONParser().parse(record.get(stream).toString());
-
+			ds = (JSONObject) new JSONParser().parse((stream == null) ? record.toString() : record.get(stream).toString());
 			return (String) ds.get(key);
 		} catch (ParseException e) {
-			logger.warn("Could not parse FeatureOfInterest value to double.", e);
+			logger.warn(FOI_DOUBLE_PARSE_EXCEPTION, e);
 		}
 		return null;
-
 	}
 
 	/**
@@ -216,11 +212,10 @@ public class ExportMergeProcess implements ProcessInterface, Runnable {
 	public JSONObject toJson(GenericRecord record, String stream) {
 		JSONObject ds;
 		try {
-			ds = (JSONObject) new JSONParser().parse(record.get(stream).toString());
-
+			ds = (JSONObject) new JSONParser().parse((stream == null) ? record.toString() : record.get(stream).toString());
 			return ds;
 		} catch (ParseException e) {
-			logger.warn("Could not parse FeatureOfInterest value to double.", e);
+			logger.warn(FOI_DOUBLE_PARSE_EXCEPTION, e);
 		}
 		return null;
 
@@ -231,17 +226,8 @@ public class ExportMergeProcess implements ProcessInterface, Runnable {
 	 * @param record
 	 * @return
 	 */
-	public JSONObject toJson(GenericRecord record ){
-		JSONObject ds;
-		try {
-			ds = (JSONObject) new JSONParser().parse(record.toString());
-
-			return ds;
-		} catch (ParseException e) {
-			logger.warn("Could not parse FeatureOfInterest value to double.", e);
-		}
-		return null;
-
+	public JSONObject toJson(GenericRecord record){
+		return toJson(record, null);
 	}
 
 	@Override
