@@ -20,6 +20,7 @@ public final class KafkaTopicAdmin {
 	private AdminClient admin;
 	private static KafkaTopicAdmin instance;
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Collection<TopicListing> topicListings = new ArrayList<>();
 
 	private KafkaTopicAdmin() {
 		init();
@@ -41,14 +42,14 @@ public final class KafkaTopicAdmin {
 		admin = AdminClient.create(adminp);
 	}
 
-	public boolean existsTopic(String topicName) throws InterruptedException {
+	public boolean existsTopic(String topicName) {
 		Collection<String> topicNames = new ArrayList<>();
 		topicNames.add(topicName);
 
 		return existsTopic(topicNames);
 	}
 
-	public boolean existsTopic(String topicName1, String topicName2) throws InterruptedException {
+	public boolean existsTopic(String topicName1, String topicName2) {
 		Collection<String> topicNames = new ArrayList<>();
 		topicNames.add(topicName1);
 		topicNames.add(topicName2);
@@ -56,7 +57,7 @@ public final class KafkaTopicAdmin {
 		return existsTopic(topicNames);
 	}
 
-	public boolean existsTopic(Collection<String> topicNames) throws InterruptedException {
+	public boolean existsTopic(Collection<String> topicNames) {
 		Collection<TopicListing> allListings = getExistingTopics();
 		Collection<TopicListing> listingsToCheck = new ArrayList<>();
 
@@ -78,24 +79,27 @@ public final class KafkaTopicAdmin {
 		return num == listingsToCheck.size();
 	}
 	
-	private Collection<TopicListing> getExistingTopics() throws InterruptedException {
-		Collection<TopicListing> topicListings = new ArrayList<>();
+	private Collection<TopicListing> getExistingTopics() {
+		Thread t = new Thread(() -> {
+			try {
+				topicListings = admin.listTopics().listings().get();
+			} catch (InterruptedException | ExecutionException e) {
+				logger.error("Interrupted while trying to check Kafka topics.", e);
+				Thread.currentThread().interrupt();
+			}
+		});
+		t.start();
 		try {
-			topicListings = admin.listTopics().listings().get();
-		} catch (InterruptedException | ExecutionException e) {
-			logger.error("Interrupted while trying to check Kafka topics.", e);
-			throw new InterruptedException();
+			t.join();
+		} catch (InterruptedException e) {
+			logger.error("Interrupted while joining threads.", e);
+			Thread.currentThread().interrupt();
 		}
 		return topicListings;
 	}
 
 	public boolean deleteTopic(String topic) {
-		Collection<TopicListing> topicListings;
-		try {
-			topicListings = getExistingTopics();
-		} catch (InterruptedException e) {
-			return false;
-		}
+		Collection<TopicListing> topicListings = getExistingTopics();
 		TopicListing tl = new TopicListing(topic, false);
 		if (!topicListings.contains(tl)) return true;
 
@@ -111,11 +115,7 @@ public final class KafkaTopicAdmin {
 	}
 	
 	public boolean createTopic(String topic, int partitions, short replicationFactor) {
-		try {
-			if (existsTopic(topic)) return true;
-		} catch (InterruptedException e) {
-			return createTopic(topic, partitions, replicationFactor);
-		}
+		if (existsTopic(topic)) return true;
 		
 		NewTopic newTopic = new NewTopic(topic, partitions, replicationFactor);
 		Collection<NewTopic> newTopics = new HashSet<>();

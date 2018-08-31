@@ -1,12 +1,14 @@
 package server.core.controller.process;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -36,7 +38,7 @@ import server.transfer.sender.util.TimeUtil;
 
 public class GridProcess implements ProcessInterface, Runnable {
 
-	private static final String threadName = "GridProcess";
+	private static final String THREAD_NAME = "GridProcess";
 	private boolean threadBoolean = true;
 	private int roundsCounter;
 	private int timeIntervall;	
@@ -61,7 +63,7 @@ public class GridProcess implements ProcessInterface, Runnable {
 		this.props = propManager.getGridStreamProperties();
 		this.timeIntervall = timeIntervall;
 		this.inputTopic = inputTopic;
-		System.out.println("Creating " + threadName);
+		logger.info("Creating thread: {}", THREAD_NAME);
 	}
 
 	/**
@@ -82,7 +84,7 @@ public class GridProcess implements ProcessInterface, Runnable {
 	 */
 	
 	private Map<String, String> setPropetysSensoring(JSONObject json) {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		try {
 
 			ObjectMapper mapper = new ObjectMapper();
@@ -93,11 +95,11 @@ public class GridProcess implements ProcessInterface, Runnable {
 			return map;
 
 		} catch (JsonGenerationException e) {
-			e.printStackTrace();
+			logger.warn("Failed to generate json.", e);
 		} catch (JsonMappingException e) {
-			e.printStackTrace();
+			logger.warn("Failed to map json.", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn("Could not read values of json.", e);
 		}
 
 		return map;
@@ -110,9 +112,9 @@ public class GridProcess implements ProcessInterface, Runnable {
 	 * @return true if the Kafka Stream Started false otherwise
 	 */
 	public boolean kafkaStreamStart() {
-		System.out.println("Starting " + threadName);
+		logger.info("Starting thread: {}", THREAD_NAME);
 		if (thread == null) {
-			thread = new Thread(this, threadName);
+			thread = new Thread(this, THREAD_NAME);
 
 			countdownLatch = new CountDownLatch(1);
 			thread.start();
@@ -129,7 +131,7 @@ public class GridProcess implements ProcessInterface, Runnable {
 	 */
 
 	public boolean kafkaStreamClose() {
-		System.out.println("Closing " + threadName);
+		logger.info("Closing thread: {}", THREAD_NAME);
 		if (countdownLatch != null) {
 			countdownLatch.countDown();
 		}
@@ -142,11 +144,11 @@ public class GridProcess implements ProcessInterface, Runnable {
 			try {
 				thread.join();
 			} catch (InterruptedException e) {
-
-				e.printStackTrace();
+				thread.interrupt();
+				logger.warn("Interruption of thread: {}", THREAD_NAME);
 			}
 
-			System.out.println(threadName + "successfully stopped.");
+			logger.info("Stopped thread successfully: {}", THREAD_NAME);
 			return true;
 
 		}
@@ -157,102 +159,75 @@ public class GridProcess implements ProcessInterface, Runnable {
 	 * This Methode definite the Process of the Application. What Application does
 	 * specificly.
 	 * 
-	 * @param streambuilder
 	 * @return true if the Graphite Process got Successfully worked
+	 * @throws InterruptedException 
 	 */
 
-	public void apply(StreamsBuilder builder) {
+	public void apply() throws InterruptedException {
+		try (KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(props)) {
+			consumer.subscribe(Arrays.asList(inputTopic));
+			logger.info("Started consumer grid.");
+			grid = new GeoRecRectangleGrid(new Rectangle2D.Double(-WorldMapData.lngRange, -WorldMapData.latRange,
+					WorldMapData.lngRange * 2, WorldMapData.latRange * 2), 2, 2, 3);
 
-		KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(props);
-		consumer.subscribe(Arrays.asList(inputTopic));
-		System.out.println("Consumer Grid gestartet!");
-		grid = new GeoRecRectangleGrid(new Point2D.Double(WorldMapData.lngRange * 2, WorldMapData.latRange * 2), 2, 2,
-				3);
+			TimeUnit.SECONDS.sleep(1);
 
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			while (this.threadBoolean) {
+
+				final ConsumerRecords<String, GenericRecord> observations = consumer.poll(100);
+				observations.forEach(record1 -> {
+					GenericRecord value = (record1.value());
+
+					String time = TimeUtil.removeMillis((String) value.get("phenomenonTime").toString());
+					String resultValue = value.get("result").toString();
+					JSONParser parser = new JSONParser();
+					try {
+						JSONObject json = (JSONObject) parser.parse(resultValue);
+						String sensorID = record1.value().get("Datastream").toString();
+						ObservationData data = new ObservationData();
+
+						data.observationDate = time;
+						data.sensorID = sensorID;
+						data.observations = setPropetysSensoring(json);
+
+						double coord1 = Double.parseDouble(value.get("FeatureOfInterest").toString().split(",")[0]);
+						double coord2 = Double.parseDouble(value.get("FeatureOfInterest").toString().split(",")[1]);
+
+						Point2D.Double location = new Point2D.Double(coord1, coord2);
+						grid.addObservation(location, data);
+					} catch (ParseException e) {
+						logger.warn("Could not parse FeatureOfInterest value to double.", e);
+					}
+
+				});
+			}
 		}
-
-		while (this.threadBoolean) {
-
-			final ConsumerRecords<String, GenericRecord> observations = consumer.poll(100);
-			// System.out.println(observations.count());
-			observations.forEach(record1 -> {
-				GenericRecord value = (record1.value());
-
-				String time = TimeUtil.removeMillis((String) value.get("phenomenonTime").toString());
-				;
-				String resultValue = (String) value.get("result").toString();
-				JSONParser parser = new JSONParser();
-				try {
-					JSONObject json = (JSONObject) parser.parse(resultValue);
-					String sensorID = record1.value().get("Datastream").toString();
-					ObservationData data = new ObservationData();
-
-					data.observationDate = time;
-					data.sensorID = sensorID;
-					data.observations = setPropetysSensoring(json);
-
-					double coord1 = Double.parseDouble(value.get("FeatureOfInterest").toString().split(",")[0]);
-					double coord2 = Double.parseDouble(value.get("FeatureOfInterest").toString().split(",")[1]);
-
-					Point2D.Double location = new Point2D.Double(coord1, coord2);
-					System.out.println(data);
-					grid.addObservation(location, data);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			});
-		}
-
-		//grid.produceSensorDataMessages();
 
 	}
 
 	@Override
 	public void run() {
-		System.out.println("Running " + threadName);
-		// updateGrid();
+		System.out.println("Running " + THREAD_NAME);
+		Thread t = new Thread(() -> {
+			try {
+				apply();
+			} catch (InterruptedException e) {
+				logger.warn("Interruption of thread while execution: {}", THREAD_NAME);
+				Thread.currentThread().interrupt();
+			}
+		});
+		t.start();
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			thread.interrupt();
+			logger.warn("Interruption of thread while joining threads: {}", THREAD_NAME);
+		}
+	}
 
-		apply(null);
-
+	@Override
+	public void apply(StreamsBuilder builder) throws InterruptedException {
+		apply();
 	}
 	
-//	public void updateGrid() {
-//	Thread t = new Thread(new Runnable() {
-//		
-//
-//
-//		@Override
-//		public void run() {
-//			while(threadBoolean) {
-//
-//				
-//				if(grid != null) {
-//					System.out.println("rounds " +roundsCounter ++);
-//					grid.updateObservations();
-//					grid.produceSensorDataMessages();
-//					
-//					try {
-//						Thread.sleep(10000);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//			
-//		}
-//	});
-//	t.start();
-//	System.out.println("GridUpdate started");
-//	
-//}
-
-
 }

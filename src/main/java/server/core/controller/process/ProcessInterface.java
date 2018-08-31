@@ -28,6 +28,16 @@ public interface ProcessInterface {
 	 * @param builder is the used Streambuilder
 	 * 
 	 * @return true if the Process got Successfully worked
+	 * @throws InterruptedException 
 	 */
-	public void apply(StreamsBuilder builder);
+	public void apply(StreamsBuilder builder) throws InterruptedException;
+	
+	/**
+	 * This Methode definite the Process of the Application. What Application does
+	 * specificly.
+	 * 
+	 * @return true if the Process got Successfully worked
+	 * @throws InterruptedException 
+	 */
+	public void apply() throws InterruptedException;
 }
