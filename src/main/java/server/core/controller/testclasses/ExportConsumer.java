@@ -25,6 +25,7 @@ import server.core.controller.Main;
 
 public class ExportConsumer {
 	
+	private static final String JSON_PARSE_EXCEPTION = "Could not parse to JSONObject.";
 	private static Logger logger = LoggerFactory.getLogger(Main.class);
 	
     public static void main(String[] args) {
@@ -65,7 +66,7 @@ public class ExportConsumer {
 					
 					System.out.println(dataS.get("iotId"));
 				} catch (ParseException e) {
-					logger.warn("Could not parse to JSONObject.");
+					logger.warn(JSON_PARSE_EXCEPTION);
 				}
             });
         });
@@ -85,8 +86,7 @@ public class ExportConsumer {
 			ds = (JSONObject) new JSONParser().parse(record.get(Stream).toString());
 			return (String) ds.get( key);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn(JSON_PARSE_EXCEPTION);
 		}
     	return null;
     	
