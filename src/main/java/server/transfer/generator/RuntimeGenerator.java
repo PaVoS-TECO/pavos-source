@@ -2,6 +2,8 @@ package server.transfer.generator;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Random;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import server.core.grid.GeoGrid;
@@ -15,37 +17,14 @@ public class RuntimeGenerator {
 	private static GeoGrid grid = new GeoRecRectangleGrid(new Rectangle2D.Double(- WorldMapData.lngRange, - WorldMapData.latRange, WorldMapData.lngRange * 2, WorldMapData.latRange * 2),  2, 2, 3);
 	
 	public static void main(String[] args) {
-		
-		Thread t = new Thread(new Runnable() {
-
-			public void run() {
-				
-					while (true) {
-						sleep(8);
-						grid.addObservation(randomLocation(), generateRandom(randomSensor(), "temperature_celsius", 40.0));
-						grid.addObservation(randomLocation(), generateRandom(randomSensor(), "pM_10", 40.0));
-					}
-			}
-		});
-		t.start();
-		try {
-			t.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		System.exit(0);
-	}
-	
-	private static void sleep(long timeoutSeconds) {
-		try {
-			TimeUnit.SECONDS.sleep(timeoutSeconds);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+			grid.addObservation(randomLocation(), generateRandom(randomSensor(), "temperature_celsius", 40.0));
+			grid.addObservation(randomLocation(), generateRandom(randomSensor(), "pM_10", 40.0));
+		}, 0, 8, TimeUnit.SECONDS);
 	}
 	
 	private static String randomSensor() {
-		int num = (int) (Math.random() * 99999);
+		int num = new Random().nextInt(99999);
 		return "sensor" + num;
 	}
 	
