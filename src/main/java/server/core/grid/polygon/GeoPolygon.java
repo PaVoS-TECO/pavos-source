@@ -343,27 +343,33 @@ public abstract class GeoPolygon {
 		DateTime dt = selectDateTimeFromAllSources();
 		obs.observationDate = TimeUtil.getUTCDateTimeNowString();
 		for (String property : properties) {
-			double value = 0;
-			int totalSensors = 0;
-			
-			for (Tuple3D<String, Integer, Double> tuple : values) {
-				if (tuple.getFirstValue().equals(property)) {
-					Tuple2D<Double, Integer> weight = addWeightedData(tuple, value, totalSensors);
-					if (weight != null && weight.getFirstValue() != null && weight.getSecondValue() != null) {
-						value = weight.getFirstValue();
-						totalSensors = weight.getSecondValue();
-						anyEntry = true;
-					}
-				}
-			}
-			value = (totalSensors != 0) ? value / (double) totalSensors : value;
-			obs.observations.put(property, anyEntry ? String.valueOf(value) : null);
+			anyEntry = weightProperty(property, values, obs);
 		}
 		if (anyEntry) {
 			obs.clusterID = this.id;
 			obs.observationDate = TimeUtil.getUTCDateTimeString(dt.toLocalDateTime());
 			this.observationData = obs;
 		}
+	}
+	
+	private boolean weightProperty(String property, Collection<Tuple3D<String, Integer, Double>> values, ObservationData output) {
+		double value = 0;
+		int totalSensors = 0;
+		boolean anyEntry = false;
+		
+		for (Tuple3D<String, Integer, Double> tuple : values) {
+			if (tuple.getFirstValue().equals(property)) {
+				Tuple2D<Double, Integer> weight = addWeightedData(tuple, value, totalSensors);
+				if (weight != null && weight.getFirstValue() != null && weight.getSecondValue() != null) {
+					value = weight.getFirstValue();
+					totalSensors = weight.getSecondValue();
+					anyEntry = true;
+				}
+			}
+		}
+		value = (totalSensors != 0) ? value / (double) totalSensors : value;
+		output.observations.put(property, anyEntry ? String.valueOf(value) : null);
+		return anyEntry;
 	}
 	
 	private Tuple2D<Double, Integer> addWeightedData(Tuple3D<String, Integer, Double> tuple, double value, int totalSensors) {
